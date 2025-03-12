@@ -72,8 +72,7 @@ https://levende.github.io/lampa-plugins/profiles.js.
         "forKids": true //даем понять что переключать необходимо на детский вариант.
         }
       },
-
- {
+    {
         "id": "_id4",
         "title": "Ребенок",
         "icon": "/profileIcons/id4.png",
@@ -83,8 +82,7 @@ https://levende.github.io/lampa-plugins/profiles.js.
  
         }
       },
-
- {
+     {
         "id": "_id5",
         "title": "Родственники",
         "icon": "/profileIcons/id5.png",
@@ -94,7 +92,6 @@ https://levende.github.io/lampa-plugins/profiles.js.
  
         }
       }
-
     ]
   }
 
