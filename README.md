@@ -12,7 +12,7 @@
 
 2. Для загрузки плагина всем пользователям:  
 - Добавить в lampainit.js строку:  
-- Lampa.Utils.putScriptAsync(["https://ryaroslavsky.github.io/aviamovie/surs.js"], function() {})
+- Lampa.Utils.putScriptAsync(["[https://aviamovie.github.io/surs.js"], function() {})
 
 * ==== Дополнения ==== *
 
