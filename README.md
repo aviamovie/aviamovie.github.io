@@ -93,6 +93,6 @@ https://levende.github.io/lampa-plugins/profiles.js.
         }
       }
     ]
-  }
+    }
 
 
