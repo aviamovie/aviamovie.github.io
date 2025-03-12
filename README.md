@@ -41,7 +41,6 @@ https://levende.github.io/lampa-plugins/profiles.js.
       "pochta235@rambler.ru": "2024-06-15T00:00:00",
       "vasyapupkin@yandex.ru": "2024-06-15T00:00:00",
     },
-
 "params": {
     "profiles": [
       {
