@@ -57,7 +57,6 @@ https://levende.github.io/lampa-plugins/profiles.js.
         "icon": "/profileIcons/id2.png",
         "params": {
          "surs": true //— у этого профиля автоматически будет включен основной источник. Этот флаг отвечает в целом, за автоматическое переключение источника.
-
         }
       },
       {
