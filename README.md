@@ -14,7 +14,7 @@
 - Добавить в lampainit.js строку:  
 - Lampa.Utils.putScriptAsync(["[https://aviamovie.github.io/surs.js"], function() {});
 
-* ==== Дополнения ==== *
+* ==== Дополнения ====
 
  Плагин работает как автономно (с ручным выбором источника через настройки), так и совместно с плагином для добавления профилей  на один аккаунт:  
 
@@ -74,8 +74,7 @@ https://levende.github.io/lampa-plugins/profiles.js.
         "icon": "/profileIcons/id4.png",
         "params": {
          "surs": true 
-        "forKids": true //даем понять что переключать необходимо на детский вариант
- 
+        "forKids": true //даем понять что переключать необходимо на детский вариант 
         }
       },
      {
