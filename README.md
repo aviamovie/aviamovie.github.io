@@ -36,19 +36,21 @@ https://levende.github.io/lampa-plugins/profiles.js.
 Иконки профилей нужно разместить в wwwroot/profileIcons  
 
 
+```jsonc
+
   "accounts": {
     "test1": "2026-01-10T00:00:00",
-      "pochta235@rambler.ru": "2024-06-15T00:00:00",
-      "vasyapupkin@yandex.ru": "2024-06-15T00:00:00",
-    },
-"params": {
+    "pochta235@rambler.ru": "2024-06-15T00:00:00",
+    "vasyapupkin@yandex.ru": "2024-06-15T00:00:00"
+  },
+  "params": {
     "profiles": [
       {
         "id": "",
         "title": "Он",
         "icon": "/profileIcons/id1.png", // иконки для примера
         "params": {
-                  "surs": true — у этого профиля автоматически будет включен основной источник.
+          "surs": true // у этого профиля автоматически будет включен основной источник.
         }
       },
       {
@@ -56,7 +58,8 @@ https://levende.github.io/lampa-plugins/profiles.js.
         "title": "Она",
         "icon": "/profileIcons/id2.png",
         "params": {
-         "surs": true //— у этого профиля автоматически будет включен основной источник. Этот флаг отвечает в целом, за автоматическое переключение источника.
+          "surs": true // у этого профиля автоматически будет включен основной источник. 
+          // Этот флаг отвечает в целом за автоматическое переключение источника.
         }
       },
       {
@@ -64,30 +67,33 @@ https://levende.github.io/lampa-plugins/profiles.js.
         "title": "Ребенок",
         "icon": "/profileIcons/id3.png",
         "params": {
-         "surs": true //даем понять что нужно переключать источники.
-        "forKids": true //даем понять что переключать необходимо на детский вариант.
+          "surs": true, // даем понять, что нужно переключать источники.
+          "forKids": true // даем понять, что переключать необходимо на детский вариант.
         }
       },
-    {
+      {
         "id": "_id4",
         "title": "Ребенок",
         "icon": "/profileIcons/id4.png",
         "params": {
-         "surs": true 
-        "forKids": true //даем понять что переключать необходимо на детский вариант 
+          "surs": true,
+          "forKids": true // даем понять, что переключать необходимо на детский вариант.
         }
       },
-     {
+      {
         "id": "_id5",
         "title": "Родственники",
         "icon": "/profileIcons/id5.png",
         "params": {
-        "surs": true 
-        "onlyRus": true //даем понять что переключать необходимо на российские подборки 
- 
+          "surs": true,
+          "onlyRus": true // даем понять, что переключать необходимо на российские подборки.
         }
       }
     ]
-    }
+  }
+
+```
+
+
 
 
