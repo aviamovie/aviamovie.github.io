@@ -48,9 +48,7 @@ https://levende.github.io/lampa-plugins/profiles.js.
         "title": "Он",
         "icon": "/profileIcons/id1.png", // иконки для примера
         "params": {
-        
-          "surs": true — у этого профиля автоматически будет включен основной источник.
-
+                  "surs": true — у этого профиля автоматически будет включен основной источник.
         }
       },
       {
