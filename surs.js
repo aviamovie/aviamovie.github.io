@@ -399,7 +399,7 @@ function startPlugin() {
 
 
 function getCache(key) {
-    var cacheKey = 'cache_' + encodeURIComponent(key); // Уникальный ключ для кэша
+    var cacheKey = 'cache_' + encodeURIComponent(key); 
     var cachedData = getStoredSetting(cacheKey, null);
     
     if (cachedData) {
@@ -427,7 +427,7 @@ function getCache(key) {
 }
 
 function setCache(key, value) {
-    var cacheKey = 'cache_' + encodeURIComponent(key); // Уникальный ключ для кэша
+    var cacheKey = 'cache_' + encodeURIComponent(key); 
     var timestamp = Date.now();
     
     // Проверка размера кэша
@@ -816,7 +816,7 @@ function getCollectionLines() {
 
 
     shuffleArray(collectionLinesRaw);
-    collectionLinesRaw = collectionLinesRaw.slice(0, 75);
+    collectionLinesRaw = collectionLinesRaw.slice(0, 35);
 
     var finalLines = [];
     var previousHadTrue = false;
@@ -3797,14 +3797,21 @@ function addMainButton() {
 
 
 
+function krivieruki() {
+    Lampa.Utils.putScriptAsync([
+        "https://levende.github.io/lampa-plugins/lnum.js"
+    ], function() {
 
+    });
+}
 
 
 
 if (window.appready) {
     add();
     startProfileListener();
-    addMainButton()
+    addMainButton();
+  krivieruki();
     //sideButtonsMenu();
         if (!Lampa.Storage.get('surs_disableMenu')) {
            addSettingMenu();
@@ -3814,7 +3821,8 @@ if (window.appready) {
         if (e.type == 'ready') {
             add();
             startProfileListener();
-            addMainButton()
+            addMainButton();
+          krivieruki();
             //sideButtonsMenu();
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
