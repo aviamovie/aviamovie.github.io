@@ -136,37 +136,37 @@
 (function (  ) {
     'use strict';
    
+
 // Опции сортировки
 var allSortOptions = [
-    { id: 'vote_count.desc', title: 'Много голосов' },
-    { id: 'vote_average.desc', title: 'Высокий рейтинг' },
-    { id: 'first_air_date.desc', title: 'Новинки' },
-    { id: 'popularity.desc', title: 'Популярные' },
-    { id: 'revenue.desc', title: 'Интерес зрителей' }
+    { id: 'vote_count.desc', title: 'surs_vote_count_desc' },
+    { id: 'vote_average.desc', title: 'surs_vote_average_desc' },
+    { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' },
+    { id: 'popularity.desc', title: 'surs_popularity_desc' },
+    { id: 'revenue.desc', title: 'surs_revenue_desc' }
 ];
 
 // Жанры фильмов
 var allGenres = [
-    { id: 28, title: 'боевики' },
-    { id: 35, title: 'комедии' },
-    { id: 18, title: 'драмы' },
-    { id: 10749, title: 'мелодрамы' },
-    { id: 16, title: 'мультфильмы' },
-    { id: 10762, title: 'детское' },
-    { id: 12, title: 'приключения' },
-    { id: 80, title: 'криминал' },
-    { id: 9648, title: 'детективы' },
-    { id: 878, title: 'фантастика' },
-    //{ id: 10752, title: 'военные' },
-    { id: 37, title: 'вестерны' },
-    { id: 53, title: 'триллеры' },
-    { id: 10751, title: 'семейные' },
-    { id: 14, title: 'фэнтези' },
-    { id: 10764, title: 'реалити-шоу' },
-    { id: 10759, title: 'боевики и приключения' },
-    { id: 10766, title: 'мыльные оперы' },
-    { id: 10767, title: 'ток-шоу' }, 
-    ];
+    { id: 28, title: 'surs_genre_action' },
+    { id: 35, title: 'surs_genre_comedy' },
+    { id: 18, title: 'surs_genre_drama' },
+    { id: 10749, title: 'surs_genre_romance' },
+    { id: 16, title: 'surs_genre_animation' },
+    { id: 10762, title: 'surs_genre_kids' },
+    { id: 12, title: 'surs_genre_adventure' },
+    { id: 80, title: 'surs_genre_crime' },
+    { id: 9648, title: 'surs_genre_mystery' },
+    { id: 878, title: 'surs_genre_sci_fi' },
+    { id: 37, title: 'surs_genre_western' },
+    { id: 53, title: 'surs_genre_thriller' },
+    { id: 10751, title: 'surs_genre_family' },
+    { id: 14, title: 'surs_genre_fantasy' },
+    { id: 10764, title: 'surs_genre_reality' },
+    { id: 10759, title: 'surs_genre_action_adventure' },
+    { id: 10766, title: 'surs_genre_soap' },
+    { id: 10767, title: 'surs_genre_talk_show' }
+];
 
 // Стриминговые сервисы
 var allStreamingServices = [
@@ -191,8 +191,7 @@ var allStreamingServices = [
     { id: 1778, title: 'test' },
     { id: 493, title: 'BBC America' },
     { id: 88, title: 'FX' },
-    { id: 67, title: 'Showtime' },
-    
+    { id: 67, title: 'Showtime' }
 ];
 
 var allStreamingServicesRUS = [
@@ -208,22 +207,22 @@ var allStreamingServicesRUS = [
     { id: 806, title: 'СТС' },
     { id: 1191, title: 'ТНТ' },
     { id: 1119, title: 'НТВ' },
-    { id: 3031, title: 'Пятница'},
+    { id: 3031, title: 'Пятница' },
     { id: 3882, title: 'More.TV' }
 ];
 
 // Функция получения всех настроек
 function getAllStoredSettings() {
-    return Lampa.Storage.get('surs_settings') || {}; // Загружаем общий объект
+    return Lampa.Storage.get('surs_settings') || {};
 }
 
 // Функция получения настроек текущего пользователя
 function getProfileSettings() {
     var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';
     var allSettings = getAllStoredSettings();
-    
+
     if (!allSettings.hasOwnProperty(profileId)) {
-        allSettings[profileId] = {}; // Если профиля нет, создаем пустой объект
+        allSettings[profileId] = {};
         saveAllStoredSettings(allSettings);
     }
 
@@ -247,10 +246,10 @@ function setStoredSetting(key, value) {
     var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';
 
     if (!allSettings.hasOwnProperty(profileId)) {
-        allSettings[profileId] = {}; // Создаем профиль, если его нет
+        allSettings[profileId] = {};
     }
 
-    allSettings[profileId][key] = value; // Обновляем значение
+    allSettings[profileId][key] = value;
     saveAllStoredSettings(allSettings);
 }
 
@@ -262,7 +261,7 @@ function getEnabledItems(allItems, storageKeyPrefix) {
             result.push(allItems[i]);
         }
     }
-    return result; 
+    return result;
 }
 
 function getSortOptions() {
@@ -280,7 +279,6 @@ function getStreamingServices() {
 function getStreamingServicesRUS() {
     return getEnabledItems(allStreamingServicesRUS, 'streaming_rus_');
 }
-
 
 function startPlugin() {
     window.plugin_tmdb_mod_ready = true;
@@ -307,7 +305,7 @@ function startPlugin() {
             this.card.querySelector('.card__title').innerText = card.title;
             this.card.querySelector('.full-episode__num').innerText = card.unwatched || '';
             if (episode && episode.air_date) {
-                this.card.querySelector('.full-episode__name').innerText = ('s' + (episode.season_number || '?') + 'e' + (episode.episode_number || '?') + '. ') + (episode.name || Lampa.Lang.translate('noname'));
+                this.card.querySelector('.full-episode__name').innerText = ('Сезон ' + (episode.season_number || '?') + ' ') + (episode.name || Lampa.Lang.translate('surs_noname'));
                 this.card.querySelector('.full-episode__date').innerText = episode.air_date ? Lampa.Utils.parseTime(episode.air_date).full : '----';
             }
 
@@ -322,7 +320,7 @@ function startPlugin() {
 
         this.image = function () {
             var _this = this;
-            this.img_poster.onload = function () { };
+            this.img_poster.onload = function () {};
             this.img_poster.onerror = function () {
                 _this.img_poster.src = './img/img_broken.svg';
             };
@@ -364,10 +362,10 @@ function startPlugin() {
         };
 
         this.destroy = function () {
-            this.img_poster.onerror = function () { };
-            this.img_poster.onload = function () { };
-            this.img_episode.onerror = function () { };
-            this.img_episode.onload = function () { };
+            this.img_poster.onerror = function () {};
+            this.img_poster.onload = function () {};
+            this.img_episode.onerror = function () {};
+            this.img_episode.onload = function () {};
             this.img_poster.src = '';
             this.img_episode.src = '';
             remove(this.card);
@@ -381,374 +379,320 @@ function startPlugin() {
         };
     };
 
-   
-// Основной код SourceTMDB
-var SourceTMDB = function (parent) {
-    // Создаем сетевой запрос
-    this.network = new Lampa.Reguest();
-    this.discovery = false;
+    var SourceTMDB = function (parent) {
+        this.network = new Lampa.Reguest();
+        this.discovery = false;
 
-    // Главный метод
-    this.main = function (params = {}, onComplete = () => {}, onError = () => {}) {
+    this.main = function () {
         var owner = this;
-        var partsLimit = 12;
+        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var onComplete = arguments.length > 1 ? arguments[1] : undefined;
+        var onError = arguments.length > 2 ? arguments[2] : undefined;
+        var partsLimit = 19;
 
- function filterCyrillic(items) {
-    var storedValue = getStoredSetting('cirillic');
-    var isFilterEnabled = storedValue === '1' || storedValue === null || storedValue === undefined || storedValue === '';
+            function filterCyrillic(items) {
+                var storedValue = getStoredSetting('cirillic');
+                var isFilterEnabled = storedValue === '1' || storedValue === null || storedValue === undefined || storedValue === '';
 
-
-    if (!isFilterEnabled) {
-        return items;
-    }
-
-    function containsCyrillic(value) {
-        if (typeof value === 'string') {
-            return /[а-яА-ЯёЁ]/.test(value);
-        } else if (typeof value === 'object' && value !== null) {
-            var keys = Object.keys(value);
-            for (var i = 0; i < keys.length; i++) {
-                if (containsCyrillic(value[keys[i]])) {
-                    return true;
+                if (!isFilterEnabled) {
+                    return items;
                 }
-            }
-        }
-        return false;
-    }
 
-    // Разделяем элементы на те, что проходят фильтрацию, и те, что исключаются
-    var filteredItems = items.filter(function (item) {
-        return containsCyrillic(item);
-    });
-    
-    // Логируем исключённые элементы
-    var excludedItems = items.filter(function (item) {
-        return !containsCyrillic(item);
-    });
-    //console.log('Исключённые элементы (без кириллицы):', excludedItems);
-
-    return filteredItems;
-}
-
-        function applyFilters(items) {
-            items = filterCyrillic(items);
-            return items;
-        }
-
-function applyMinVotes(baseUrl) {
-    var minVotes = getStoredSetting('minVotes');
-
-
-    minVotes = parseInt(minVotes, 10);
-    if (isNaN(minVotes)) {
-        minVotes = 10;
-    }
-
-    
-    if (minVotes > 0) {
-        baseUrl += '&vote_count.gte=' + minVotes;
-    }
-
-    return baseUrl;
-}
-
-
-
-
-        function applyAgeRestriction(baseUrl) {
-            var ageRestriction = getStoredSetting('ageRestrictions');
-
-            if (ageRestriction && String(ageRestriction).trim() !== '') {
-                var certificationMap = {
-                    '0+': '0+',
-                    '6+': '6+',
-                    '12+': '12+',
-                    '16+': '16+',
-                    '18+': '18+'
-                };
-
-                if (certificationMap.hasOwnProperty(ageRestriction)) {
-                    baseUrl += '&certification_country=RU&certification=' + encodeURIComponent(certificationMap[ageRestriction]);
-                }
-            }
-
-            return baseUrl;
-        }
-        
-function excludeAsia(baseUrl) {
-    var filterLevel = getStoredSetting('withoutKeywords');
-    
-    var baseExcludedCountries = [];
-
-    if (!filterLevel || filterLevel == '1') {
-        baseExcludedCountries.push('KR', 'CN', 'TW', 'TH', 'VN', 'PH', 'IN', 'UA'); 
-    }
-
-    if (filterLevel == '2') {
-        baseExcludedCountries.push('KR', 'CN', 'TW', 'TH', 'VN', 'PH', 'IN', 'UA', 'JP'); 
-    }
-
-    baseUrl += '&without_origin_country=' + encodeURIComponent(baseExcludedCountries.join(','));
-
-    return baseUrl;
-}
-
-function applyWithoutKeywords(baseUrl) {
-    var filterLevel = getStoredSetting('withoutKeywords');
-    
-    var baseExcludedKeywords = [
-        '346488', // Гей-тематика
-        '158718', // ЛГБТ-тематика
-        '41278'   // Российская политика
-    ];
-
-    if (!filterLevel || filterLevel == '1') {
-        baseExcludedKeywords.push(
-            '13141',   // Основано на манге
-            '345822',  // Основано на 4-кома манге
-            '315535',  // Донхуа (китайская анимация)
-            '290667',  // Основано на маньхуа
-            '323477',  // Основано на манхве
-            '290609'   // Манхва
-        );
-    }
-
-    if (filterLevel == '2') {
-        baseExcludedKeywords.push(
-            '210024',  // Аниме
-            '13141',   // Основано на манге
-            '345822',  // Основано на 4-кома манге
-            '315535',  // Донхуа (китайская анимация)
-            '290667',  // Основано на маньхуа
-            '323477',  // Основано на манхве
-            '290609'   // Манхва
-        );
-    }
-
-    // Формируем окончательный URL и выводим его в консоль
-    baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
-
-    return baseUrl;
-}
-
-        function buildApiUrl(baseUrl) {
-            baseUrl = applyMinVotes(baseUrl);
-            baseUrl = applyAgeRestriction(baseUrl);
-            baseUrl = applyWithoutKeywords(baseUrl);
-            return baseUrl;
-        }
-
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
-
-function adjustSortForMovies(sort) {
-    if (sort.id === 'first_air_date.desc') {
-        sort = { id: 'release_date.desc', title: 'Новинки' };
-    }
-
-    if (sort.id === 'release_date.desc') {
-        var endDate = new Date();
-        endDate.setDate(endDate.getDate() - 25); 
-        endDate = endDate.toISOString().split('T')[0];
-
-
-        var startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1); 
-        startDate = startDate.toISOString().split('T')[0];
-
-
-        sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;
-    }
-
-    return sort;
-}
-
-function adjustSortForTVShows(sort) {
-    if (sort.id === 'first_air_date.desc') {
-        var endDate = new Date();
-        endDate.setDate(endDate.getDate() - 10);  
-        endDate = endDate.toISOString().split('T')[0]; // 
-
-        var startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1);  // 
-        startDate = startDate.toISOString().split('T')[0]; // 
-        sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;
-    }
-
-    return sort;
-}
-
-
-        // Основные подборки (первые три остаются в partsData)
-
-var partsData = [
-    function (callback) {
-        var baseUrl = 'trending/all/week';
-        baseUrl = applyAgeRestriction(baseUrl);
-
-        owner.get(baseUrl, params, function (json) {
-            if (json.results) {
-                json.results = json.results.filter(function(result) {
-                    var forbiddenCountries = ['KR', 'CN', 'JP'];
-                    return !result.origin_country || !result.origin_country.some(function(country) {
-                        return forbiddenCountries.includes(country);
-                    });
-                });
-            }
-            json.title = Lampa.Lang.translate('title_trend_week');
-            callback(json);
-        }, callback);
-    },
-    
-    
-
-
-];
-
-
-
-
-        var CustomData = [];
-
-        // Запрос для ближайших эпизодов
-        var upcomingEpisodesRequest = function (callback) {
-            callback({
-                source: 'tmdb',
-                results: Lampa.TimeTable.lately().slice(0, 20),
-                title: Lampa.Lang.translate('title_upcoming_episodes'),
-                nomore: true,
-                cardClass: function (_elem, _params) {
-                    return new Episode(_elem, _params);
-                }
-            });
-        };
-        
-//персоны
-
-        // Новая функция для получения популярных персон
-        function getPopularPersons() {
-            return function (callback) {
-                var baseUrl = 'person/popular'; // Эндпоинт для популярных персон
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        // Фильтрация, если нужно, например, по определенным критериям
-                        json.results = json.results.filter(function(result) {
-                            // Можно добавить фильтры, например, по известности или другим параметрам
-                            return true; // Пока пропускаем всех
-                        });
+                function containsCyrillic(value) {
+                    if (typeof value === 'string') {
+                        return /[а-яА-ЯёЁ]/.test(value);
+                    } else if (typeof value === 'object' && value !== null) {
+                        var keys = Object.keys(value);
+                        for (var i = 0; i < keys.length; i++) {
+                            if (containsCyrillic(value[keys[i]])) {
+                                return true;
+                            }
+                        }
                     }
-                    json.title = Lampa.Lang.translate('Популярные персоны');
-                    callback(json);
-                }, callback);
+                    return false;
+                }
+
+                var filteredItems = items.filter(function (item) {
+                    return containsCyrillic(item);
+                });
+
+                var excludedItems = items.filter(function (item) {
+                    return !containsCyrillic(item);
+                });
+
+                return filteredItems;
+            }
+
+            function applyFilters(items) {
+                items = filterCyrillic(items);
+                return items;
+            }
+
+            function applyMinVotes(baseUrl) {
+                var minVotes = getStoredSetting('minVotes');
+                minVotes = parseInt(minVotes, 10);
+                if (isNaN(minVotes)) {
+                    minVotes = 10;
+                }
+
+                if (minVotes > 0) {
+                    baseUrl += '&vote_count.gte=' + minVotes;
+                }
+
+                return baseUrl;
+            }
+
+            function applyAgeRestriction(baseUrl) {
+                var ageRestriction = getStoredSetting('ageRestrictions');
+
+                if (ageRestriction && String(ageRestriction).trim() !== '') {
+                    var certificationMap = {
+                        '0+': '0+',
+                        '6+': '6+',
+                        '12+': '12+',
+                        '16+': '16+',
+                        '18+': '18+'
+                    };
+
+                    if (certificationMap.hasOwnProperty(ageRestriction)) {
+                        baseUrl += '&certification_country=RU&certification=' + encodeURIComponent(certificationMap[ageRestriction]);
+                    }
+                }
+
+                return baseUrl;
+            }
+
+//не работает надо почистить
+            function excludeAsia(baseUrl) {
+
+               return baseUrl;
+            }
+
+            function applyWithoutKeywords(baseUrl) {
+                var filterLevel = getStoredSetting('withoutKeywords');
+                var baseExcludedKeywords = [
+                    '346488',
+                    '158718',
+                    '41278'
+                ];
+
+                if (!filterLevel || filterLevel == '1') {
+                    baseExcludedKeywords.push(
+                        '13141',
+                        '345822',
+                        '315535',
+                        '290667',
+                        '323477',
+                        '290609'
+                    );
+                }
+
+                if (filterLevel == '2') {
+                    baseExcludedKeywords.push(
+                        '210024',
+                        '13141',
+                        '345822',
+                        '315535',
+                        '290667',
+                        '323477',
+                        '290609'
+                    );
+                }
+
+                baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
+
+                return baseUrl;
+            }
+
+            function buildApiUrl(baseUrl) {
+                baseUrl = applyMinVotes(baseUrl);
+                baseUrl = applyAgeRestriction(baseUrl);
+                baseUrl = applyWithoutKeywords(baseUrl);
+                return baseUrl;
+            }
+
+            function shuffleArray(array) {
+                for (var i = array.length - 1; i > 0; i--) {
+                    var j = Math.floor(Math.random() * (i + 1));
+                    var temp = array[i];
+                    array[i] = array[j];
+                    array[j] = temp;
+                }
+            }
+
+            function adjustSortForMovies(sort) {
+                if (sort.id === 'first_air_date.desc') {
+                    sort = { id: 'release_date.desc', title: 'surs_first_air_date_desc' };
+                }
+
+                if (sort.id === 'release_date.desc') {
+                    var endDate = new Date();
+                    endDate.setDate(endDate.getDate() - 25);
+                    endDate = endDate.toISOString().split('T')[0];
+
+                    var startDate = new Date();
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    startDate = startDate.toISOString().split('T')[0];
+
+                    sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;
+                }
+
+                return sort;
+            }
+
+            function adjustSortForTVShows(sort) {
+                if (sort.id === 'first_air_date.desc') {
+                    var endDate = new Date();
+                    endDate.setDate(endDate.getDate() - 10);
+                    endDate = endDate.toISOString().split('T')[0];
+
+                    var startDate = new Date();
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    startDate = startDate.toISOString().split('T')[0];
+                    sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;
+                }
+
+                return sort;
+            }
+
+            var partsData = [
+                function (callback) {
+                    var baseUrl = 'trending/all/week';
+                    baseUrl = applyAgeRestriction(baseUrl);
+
+                    owner.get(baseUrl, params, function (json) {
+                        if (json.results) {
+                            json.results = json.results.filter(function (result) {
+                                var forbiddenCountries = ['KR', 'CN', 'JP'];
+                                return !result.origin_country || !result.origin_country.some(function (country) {
+                                    return forbiddenCountries.includes(country);
+                                });
+                            });
+                        }
+                        json.title = Lampa.Lang.translate('surs_title_trend_week');
+                        callback(json);
+                    }, callback);
+                }
+            ];
+
+            var CustomData = [];
+
+            var upcomingEpisodesRequest = function (callback) {
+                callback({
+                    source: 'tmdb',
+                    results: Lampa.TimeTable.lately().slice(0, 20),
+                    title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
+                    nomore: true,
+                    cardClass: function (_elem, _params) {
+                        return new Episode(_elem, _params);
+                    }
+                });
             };
-        }
 
+            function getPopularPersons() {
+                return function (callback) {
+                    var baseUrl = 'person/popular';
 
-        CustomData.push(getPopularPersons());
-
-
-        // Функция получения стримингов с жанрами
-function getStreamingWithGenres(serviceName, serviceId, isRussian) {
-    return function (callback) {
-        var sortOptions = getSortOptions();
-        var genres = getGenres();
-
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
-        var genre = genres[Math.floor(Math.random() * genres.length)];
-
-        var apiUrl = 'discover/tv?with_networks=' + serviceId +
-                     '&with_genres=' + genre.id +
-                     '&sort_by=' + sort.id;
-
-        if (isRussian) {
-            apiUrl = applyAgeRestriction(apiUrl);
-            apiUrl = applyWithoutKeywords(apiUrl);
-        } else {
-            apiUrl = buildApiUrl(apiUrl);
-        }
-        apiUrl = excludeAsia(apiUrl); 
-        
-        owner.get(apiUrl, params, function (json) {
-            if (json.results) {
-                json.results = applyFilters(json.results);
+                    owner.get(baseUrl, params, function (json) {
+                        if (json.results) {
+                            json.results = json.results.filter(function (result) {
+                                return true;
+                            });
+                        }
+                        json.title = Lampa.Lang.translate('surs_popular_persons');
+                        callback(json);
+                    }, callback);
+                };
             }
 
-            json.title = Lampa.Lang.translate(sort.title + ' (' + genre.title + ') на ' + serviceName);
-            callback(json);
-        }, callback);
-    };
-}
+            CustomData.push(getPopularPersons());
 
-// Функция получения стримингов без жанров
-function getStreaming(serviceName, serviceId, isRussian) {
-    return function (callback) {
-        var sortOptions = getSortOptions();
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+            function getStreamingWithGenres(serviceName, serviceId, isRussian) {
+                return function (callback) {
+                    var sortOptions = getSortOptions();
+                    var genres = getGenres();
 
-        var apiUrl = 'discover/tv?with_networks=' + serviceId +
-                     '&sort_by=' + sort.id;
+                    var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+                    var genre = genres[Math.floor(Math.random() * genres.length)];
 
-        if (isRussian) {
-            apiUrl = applyAgeRestriction(apiUrl);
-            apiUrl = applyWithoutKeywords(apiUrl);
-        } else {
-            apiUrl = buildApiUrl(apiUrl);
-        }
-        apiUrl = excludeAsia(apiUrl); 
-        
-        owner.get(apiUrl, params, function (json) {
-            if (json.results) {
-                json.results = applyFilters(json.results);
+                    var apiUrl = 'discover/tv?with_networks=' + serviceId +
+                                 '&with_genres=' + genre.id +
+                                 '&sort_by=' + sort.id;
+
+                    if (isRussian) {
+                        apiUrl = applyAgeRestriction(apiUrl);
+                        apiUrl = applyWithoutKeywords(apiUrl);
+                    } else {
+                        apiUrl = buildApiUrl(apiUrl);
+                    }
+                    apiUrl = excludeAsia(apiUrl);
+
+                    owner.get(apiUrl, params, function (json) {
+                        if (json.results) {
+                            json.results = applyFilters(json.results);
+                        }
+
+                json.title = Lampa.Lang.translate(sort.title) + ' (' + Lampa.Lang.translate(genre.title) + ') ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;
+                        callback(json);
+                    }, callback);
+                };
             }
 
-            json.title = Lampa.Lang.translate(sort.title + ' на ' + serviceName);
-            callback(json);
-        }, callback);
-    };
-}
+            function getStreaming(serviceName, serviceId, isRussian) {
+                return function (callback) {
+                    var sortOptions = getSortOptions();
+                    var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
 
-// Функция получения выбранных стриминговых сервисов
-function getSelectedStreamingServices() {
-    var includeGlobal = getStoredSetting('getStreamingServices', true);
-    var includeRussian = getStoredSetting('getStreamingServicesRUS', true);
+                    var apiUrl = 'discover/tv?with_networks=' + serviceId +
+                                 '&sort_by=' + sort.id;
 
-    var streamingServices = getStreamingServices();
-    var streamingServicesRUS = getStreamingServicesRUS();
+                    if (isRussian) {
+                        apiUrl = applyAgeRestriction(apiUrl);
+                        apiUrl = applyWithoutKeywords(apiUrl);
+                    } else {
+                        apiUrl = buildApiUrl(apiUrl);
+                    }
+                    apiUrl = excludeAsia(apiUrl);
 
-    if (includeGlobal && includeRussian) {
-        return streamingServices.concat(streamingServicesRUS);
-    } else if (includeGlobal) {
-        return streamingServices;
-    } else if (includeRussian) {
-        return streamingServicesRUS;
-    }
-    return [];
-}
+                    owner.get(apiUrl, params, function (json) {
+                        if (json.results) {
+                            json.results = applyFilters(json.results);
+                        }
 
-// Получаем актуальный список сервисов
-var selectedStreamingServices = getSelectedStreamingServices();
+json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;
+                        callback(json);
+                    }, callback);
+                };
+            }
 
-// Добавляем запросы с жанрами
-selectedStreamingServices.forEach(function (service) {
-    var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
-    CustomData.push(getStreamingWithGenres(service.title, service.id, isRussian));
-});
+            function getSelectedStreamingServices() {
+                var includeGlobal = getStoredSetting('getStreamingServices', true);
+                var includeRussian = getStoredSetting('getStreamingServicesRUS', true);
 
-// Добавляем обычные запросы без жанров
-selectedStreamingServices.forEach(function (service) {
-    var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
-    CustomData.push(getStreaming(service.title, service.id, isRussian));
-});
+                var streamingServices = getStreamingServices();
+                var streamingServicesRUS = getStreamingServicesRUS();
 
+                if (includeGlobal && includeRussian) {
+                    return streamingServices.concat(streamingServicesRUS);
+                } else if (includeGlobal) {
+                    return streamingServices;
+                } else if (includeRussian) {
+                    return streamingServicesRUS;
+                }
+                return [];
+            }
 
-        // Функция получения фильмов
+            var selectedStreamingServices = getSelectedStreamingServices();
+
+            selectedStreamingServices.forEach(function (service) {
+                var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
+                CustomData.push(getStreamingWithGenres(service.title, service.id, isRussian));
+            });
+
+            selectedStreamingServices.forEach(function (service) {
+                var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
+                CustomData.push(getStreaming(service.title, service.id, isRussian));
+            });
 
 function getMovies(genre, options) {
     options = options || {};
@@ -761,20 +705,29 @@ function getMovies(genre, options) {
         if (options.russian) {
             apiUrl += '&with_origin_country=RU';
         }
+        if (options.turkish) {
+            apiUrl += '&with_origin_country=TR';
+        }
+        if (options.ukrainian) {
+            apiUrl += '&with_origin_country=UA';
+        }
 
         if (sort.extraParams) {
             apiUrl += sort.extraParams;
         }
 
         apiUrl = buildApiUrl(apiUrl);
-        apiUrl = excludeAsia(apiUrl); 
+        apiUrl = excludeAsia(apiUrl);
 
         owner.get(apiUrl, params, function (json) {
             if (json.results) {
-                if (!options.russian) {
+                if (!options.russian && !options.turkish && !options.ukrainian) {
                     json.results = applyFilters(json.results);
                 }
-                json.title = Lampa.Lang.translate(sort.title + (options.russian ? ' - российские' : '') + ' (' + genre.title + ')');
+                var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :
+                                 options.turkish ? Lampa.Lang.translate('surs_turkish') :
+                                 options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
+                json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';
             }
             callback(json);
         }, callback);
@@ -792,9 +745,14 @@ function getTVShows(genre, options) {
         if (options.russian) {
             apiUrl += '&with_origin_country=RU';
         }
-
         if (options.korean) {
             apiUrl += '&with_origin_country=KR';
+        }
+        if (options.turkish) {
+            apiUrl += '&with_origin_country=TR';
+        }
+        if (options.ukrainian) {
+            apiUrl += '&with_origin_country=UA';
         }
 
         if (sort.extraParams) {
@@ -803,218 +761,218 @@ function getTVShows(genre, options) {
 
         apiUrl = buildApiUrl(apiUrl);
 
-
         owner.get(apiUrl, params, function (json) {
             if (json.results) {
-                if (!options.russian && !options.korean) {
+                if (!options.russian && !options.korean && !options.turkish && !options.ukrainian) {
                     json.results = applyFilters(json.results);
                 }
-                var titlePrefix = options.russian ? ' - российские' :
-                                 options.korean ? ' - южнокорейские' : '';
-                json.title = Lampa.Lang.translate(sort.title + titlePrefix + ' сериалы (' + genre.title + ')');
+                var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :
+                                 options.korean ? Lampa.Lang.translate('surs_korean') :
+                                 options.turkish ? Lampa.Lang.translate('surs_turkish') :
+                                 options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
+                json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';
             }
             callback(json);
         }, callback);
     };
 }
 
+var genres = getGenres();
 
-        // Получаем актуальный список жанров
-        var genres = getGenres();
+var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
 
-        // Настройки для фильмов
-        var includeGlobalMovies = getStoredSetting('getMoviesByGenreGlobal', true);
-        var includeRussianMovies = getStoredSetting('getMoviesByGenreRus', true);
+var includeGlobalMovies = getStoredSetting('getMoviesByGenreGlobal', true);
+var includeRussianMovies = getStoredSetting('getMoviesByGenreRus', true);
+var includeTurkishMovies = getStoredSetting('getMoviesByGenreTR', true);
+var includeUkrainianMovies = getStoredSetting('getMoviesByGenreUA', isUkrainianLanguage);
 
-        // Настройки для сериалов
-        var isGlobalTVEnabled = getStoredSetting('getTVShowsByGenreGlobal', true);
-        var isRussianTVEnabled = getStoredSetting('getTVShowsByGenreRus', true);
-        var isKoreanTVEnabled = getStoredSetting('getTVShowsByGenreKOR', true);
-
-        // Добавляем фильмы
-        genres.forEach(function (genre) {
-            if (includeGlobalMovies) {
-                CustomData.push(getMovies(genre));
-            }
-            if (includeRussianMovies) {
-                CustomData.push(getMovies(genre, { russian: true }));
-            }
-        });
-
-        // Добавляем сериалы
-        genres.forEach(function (genre) {
-            if (isGlobalTVEnabled) {
-                CustomData.push(getTVShows(genre));
-            }
-            if (isRussianTVEnabled) {
-                CustomData.push(getTVShows(genre, { russian: true }));
-            }
-            if (isKoreanTVEnabled) {
-                CustomData.push(getTVShows(genre, { korean: true }));
-            }
-        });
-        
-
-        // Лучшие фильмы и сериалы
-        function getBestContentByGenre(genre, contentType) {
-            return function (callback) {
-                var apiUrl = 'discover/' + contentType + '?with_genres=' + genre.id +
-                            '&sort_by=vote_average.desc' +
-                            '&vote_count.gte=500';
-
-                apiUrl = applyAgeRestriction(apiUrl);
-                apiUrl = applyWithoutKeywords(apiUrl);
-                apiUrl = excludeAsia(apiUrl); 
-                owner.get(apiUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = filterCyrillic(json.results);
-                    }
-
-                    json.title = Lampa.Lang.translate(contentType === 'movie'
-                        ? 'Топ фильмы (' + genre.title + ')'
-                        : 'Топ сериалы (' + genre.title + ')');
-  
-                    callback(json);
-                }, callback);
-            };
-        }
-
-        genres.forEach(function (genre) {
-            var isMoviesEnabled = getStoredSetting('getBestContentByGenreMovie', true);
-            var isTVEnabled = getStoredSetting('getBestContentByGenreTV', true);
-
-            if (isMoviesEnabled) {
-                CustomData.push(getBestContentByGenre(genre, 'movie'));
-            }
-
-            if (isTVEnabled) {
-                CustomData.push(getBestContentByGenre(genre, 'tv'));
-            }
-        });
-
-        // Подборки по годам
-        function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
-            return function (callback) {
-                var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +
-                            '&sort_by=vote_average.desc' +
-                            '&vote_count.gte=100' +
-                            '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +
-                            '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';
-
-                baseUrl = applyAgeRestriction(baseUrl);
-                baseUrl = applyWithoutKeywords(baseUrl);
-                baseUrl = excludeAsia(baseUrl); 
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = applyFilters(json.results).filter(function (content) {
-                            var dateField = type === 'movie' ? 'release_date' : 'first_air_date';
-
-                            return content[dateField] &&
-                                parseInt(content[dateField].substring(0, 4)) >= startYear &&
-                                parseInt(content[dateField].substring(0, 4)) <= endYear;
-                        });
-                    }
-
-                    json.title = Lampa.Lang.translate('Топ ' + (type === 'movie' ? 'фильмы' : 'сериалы') +
-                                ' (' + genre.title + ') за ' + startYear + '-' + endYear);
-                                
-                    callback(json);
-                }, callback);
-            };
-        }
-
-        var periods = [
-            { start: 1970, end: 1974 },
-            { start: 1975, end: 1979 },
-            { start: 1980, end: 1984 },
-            { start: 1985, end: 1989 },
-            { start: 1990, end: 1994 },
-            { start: 1995, end: 1999 },
-            { start: 2000, end: 2004 },
-            { start: 2005, end: 2009 },
-            { start: 2010, end: 2014 },
-            { start: 2015, end: 2019 },
-            { start: 2020, end: 2025 }
-        ];
-
-        function getRandomPeriod() {
-            var index = Math.floor(Math.random() * periods.length);
-            return periods[index];
-        }
+var isGlobalTVEnabled = getStoredSetting('getTVShowsByGenreGlobal', true);
+var isRussianTVEnabled = getStoredSetting('getTVShowsByGenreRus', true);
+var isKoreanTVEnabled = getStoredSetting('getTVShowsByGenreKOR', false);
+var isTurkishTVEnabled = getStoredSetting('getTVShowsByGenreTR', false);
+var isUkrainianTVEnabled = getStoredSetting('getTVShowsByGenreUA', isUkrainianLanguage);
 
 genres.forEach(function (genre) {
-    var useMovies = getStoredSetting('getBestContentByGenreAndPeriod_movie', true);
-    var useTV = getStoredSetting('getBestContentByGenreAndPeriod_tv', true);
-
-    var period1 = getRandomPeriod();
-    var period2 = getRandomPeriod();
-
-
-    while (period2.start === period1.start && period2.end === period1.end) {
-        period2 = getRandomPeriod();
+    if (includeGlobalMovies) {
+        CustomData.push(getMovies(genre));
     }
+    if (includeRussianMovies) {
+        CustomData.push(getMovies(genre, { russian: true }));
+    }
+    if (includeTurkishMovies) {
+        CustomData.push(getMovies(genre, { turkish: true }));
+    }
+    if (includeUkrainianMovies) {
+        CustomData.push(getMovies(genre, { ukrainian: true }));
+    }
+});
 
-    [period1, period2].forEach(function (period) {
-        if (useMovies) {
-            CustomData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));
-        }
-        if (useTV) {
-            CustomData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));
-        }
-    });
+genres.forEach(function (genre) {
+    if (isGlobalTVEnabled) {
+        CustomData.push(getTVShows(genre));
+    }
+    if (isRussianTVEnabled) {
+        CustomData.push(getTVShows(genre, { russian: true }));
+    }
+    if (isKoreanTVEnabled) {
+        CustomData.push(getTVShows(genre, { korean: true }));
+    }
+    if (isTurkishTVEnabled) {
+        CustomData.push(getTVShows(genre, { turkish: true }));
+    }
+    if (isUkrainianTVEnabled) {
+        CustomData.push(getTVShows(genre, { ukrainian: true }));
+    }
 });
 
 
-        function randomWideFlag() {
-            return Math.random() < 0.2;
-        }
+            function getBestContentByGenre(genre, contentType) {
+                return function (callback) {
+                    var apiUrl = 'discover/' + contentType + '?with_genres=' + genre.id +
+                                '&sort_by=vote_average.desc' +
+                                '&vote_count.gte=500';
 
+                    apiUrl = applyAgeRestriction(apiUrl);
+                    apiUrl = applyWithoutKeywords(apiUrl);
+                    apiUrl = excludeAsia(apiUrl);
 
-                function wrapWithWideFlag(requestFunc) {
-            return function (callback) {
-                requestFunc(function (json) {
-                    if (randomWideFlag()) {
-                        json.small = true;
-                        json.wide = true;
+                    owner.get(apiUrl, params, function (json) {
+                        if (json.results) {
+                            json.results = filterCyrillic(json.results);
+                        }
 
-                        if (Array.isArray(json.results)) {
-                            json.results.forEach(function (card) {
-                                card.promo = card.overview;
-                                card.promo_title = card.title || card.name;
+                        json.title = Lampa.Lang.translate(contentType === 'movie' ? 'surs_top_movies' : 'surs_top_tv') + ' (' + Lampa.Lang.translate(genre.title) + ')';
+                        callback(json);
+                    }, callback);
+                };
+            }
+
+            genres.forEach(function (genre) {
+                var isMoviesEnabled = getStoredSetting('getBestContentByGenreMovie', true);
+                var isTVEnabled = getStoredSetting('getBestContentByGenreTV', true);
+
+                if (isMoviesEnabled) {
+                    CustomData.push(getBestContentByGenre(genre, 'movie'));
+                }
+
+                if (isTVEnabled) {
+                    CustomData.push(getBestContentByGenre(genre, 'tv'));
+                }
+            });
+
+            function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
+                return function (callback) {
+                    var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +
+                                '&sort_by=vote_average.desc' +
+                                '&vote_count.gte=100' +
+                                '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +
+                                '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';
+
+                    baseUrl = applyAgeRestriction(baseUrl);
+                    baseUrl = applyWithoutKeywords(baseUrl);
+                    baseUrl = excludeAsia(baseUrl);
+
+                    owner.get(baseUrl, params, function (json) {
+                        if (json.results) {
+                            json.results = applyFilters(json.results).filter(function (content) {
+                                var dateField = type === 'movie' ? 'release_date' : 'first_air_date';
+                                return content[dateField] &&
+                                    parseInt(content[dateField].substring(0, 4)) >= startYear &&
+                                    parseInt(content[dateField].substring(0, 4)) <= endYear;
                             });
                         }
+
+                        json.title = Lampa.Lang.translate(type === 'movie' ? 'surs_top_movies' : 'surs_top_tv') +
+                                     ' (' + Lampa.Lang.translate(genre.title) + ')' +
+                                     Lampa.Lang.translate('surs_for_period') + startYear + '-' + endYear;
+                        callback(json);
+                    }, callback);
+                };
+            }
+
+            var periods = [
+                { start: 1970, end: 1974 },
+                { start: 1975, end: 1979 },
+                { start: 1980, end: 1984 },
+                { start: 1985, end: 1989 },
+                { start: 1990, end: 1994 },
+                { start: 1995, end: 1999 },
+                { start: 2000, end: 2004 },
+                { start: 2005, end: 2009 },
+                { start: 2010, end: 2014 },
+                { start: 2015, end: 2019 },
+                { start: 2020, end: 2025 }
+            ];
+
+            function getRandomPeriod() {
+                var index = Math.floor(Math.random() * periods.length);
+                return periods[index];
+            }
+
+            genres.forEach(function (genre) {
+                var useMovies = getStoredSetting('getBestContentByGenreAndPeriod_movie', true);
+                var useTV = getStoredSetting('getBestContentByGenreAndPeriod_tv', true);
+
+                var period1 = getRandomPeriod();
+                var period2 = getRandomPeriod();
+
+                while (period2.start === period1.start && period2.end === period1.end) {
+                    period2 = getRandomPeriod();
+                }
+
+                [period1, period2].forEach(function (period) {
+                    if (useMovies) {
+                        CustomData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));
                     }
-                    callback(json);
+                    if (useTV) {
+                        CustomData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));
+                    }
                 });
-            };
-        }
+            });
 
-        
-        CustomData = CustomData.map(wrapWithWideFlag);
+            function randomWideFlag() {
+                return Math.random() < 0.1;
+            }
 
+            function wrapWithWideFlag(requestFunc) {
+                return function (callback) {
+                    requestFunc(function (json) {
+                        if (randomWideFlag()) {
+                            json.small = true;
+                            json.wide = true;
 
+                            if (Array.isArray(json.results)) {
+                                json.results.forEach(function (card) {
+                                    card.promo = card.overview;
+                                    card.promo_title = card.title || card.name;
+                                });
+                            }
+                        }
+                        callback(json);
+                    });
+                };
+            }
 
-        // Перемешиваем CustomData
-        shuffleArray(CustomData);
-        // Добавляем upcomingEpisodesRequest в CustomData
-        CustomData.splice(4, 0, upcomingEpisodesRequest);
+            CustomData = CustomData.map(wrapWithWideFlag);
 
-        // Объединяем partsData и CustomData (сначала parts, потом custom)
-        var combinedData = partsData.concat(CustomData);
-        
-        Lampa.Arrays.insert(combinedData, 1, Lampa.Api.partPersons(combinedData, combinedData.length-1, 'movie'));
-                Lampa.Arrays.insert(combinedData, 1, Lampa.Api.partPersons(combinedData, combinedData.length-2, 'tv'));
+            shuffleArray(CustomData);
+            CustomData.splice(4, 0, upcomingEpisodesRequest);
 
-        // Загрузка частей данных
-        function loadPart(partLoaded, partEmpty) {
-            Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);
-        }
+            var combinedData = partsData.concat(CustomData);
 
-        loadPart(onComplete, onError);
-        return loadPart;
+            Lampa.Arrays.insert(combinedData, 1, Lampa.Api.partPersons(combinedData, combinedData.length - 1, 'movie'));
+            Lampa.Arrays.insert(combinedData, 1, Lampa.Api.partPersons(combinedData, combinedData.length - 2, 'tv'));
+
+            function loadPart(partLoaded, partEmpty) {
+                Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);
+            }
+
+            loadPart(onComplete, onError);
+            return loadPart;
+        };
     };
-};
+
+
 
     
     
@@ -2235,7 +2193,7 @@ partsData.splice(4, 0, upcomingEpisodesRequest);
 
 function add() {
     // Получаем значение из Storage
-    var sourceName = Lampa.Storage.get('surs_name') || 'AVIAMOVIE';
+    var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
 
@@ -2276,7 +2234,7 @@ function add() {
 }
 
 function startProfileListener() {
-    var sourceName = Lampa.Storage.get('surs_name') || 'AVIAMOVIE';
+    var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
 
@@ -2334,7 +2292,7 @@ function changeSource(newSource, isProfileChanged) {
 
 function softRefresh(source, isFromSourceChange) {
     Lampa.Activity.push({
-        title: 'Главная - ' + source.toUpperCase(),
+        title: Lampa.Lang.translate('title_main') + ' - ' + source.toUpperCase(),
         component: 'main',
         source: source
         
@@ -2352,47 +2310,77 @@ Lampa.Settings.listener.follow('open', function (e) {
     if (e.name === 'surs') {
         setTimeout(function () {
             var currentSource = Lampa.Storage.get('source');
-            var sourceName = Lampa.Storage.get('surs_name') || 'AVIAMOVIE';
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             var sourceNameKids = sourceName + ' KIDS';
             var sourceNameRus = sourceName + ' RUS'; // Новый источник
 
-            var paramsToHide = [
-                'surs_cirillic',
-                'surs_minVotes',
-                'surs_ageRestrictions',
-                'surs_withoutKeywords',
-                'surs_getMoviesByGenre',
-                'surs_getTVShowsByGenre',
-                'surs_streaming',
-                'surs_getBestContentByGenre',
-                'surs_getBestContentByGenreAndPeriod',
-                'surs_filter_menu',
-                'surs_best_content'
-                
+           var paramsToHide = [
+    'surs_cirillic',
+    'surs_minVotes',
+    'surs_ageRestrictions',
+    'surs_withoutKeywords',
+    'surs_getMoviesByGenre',
+    'surs_getTVShowsByGenre',
+    'surs_streaming',
+    'surs_getBestContentByGenre',
+    'surs_getBestContentByGenreAndPeriod',
+    'surs_filter_menu',
+    'surs_best_content',
+    'surs_sort_options',
+    'surs_global_streamings',
+    'surs_rus_streaming',
+    'surs_genres',
+    'surs_global_streaming'
+];
 
-            ];
+var shouldHide = (currentSource === sourceNameKids || currentSource === sourceNameRus);
 
-            var shouldHide = (currentSource === sourceNameKids || currentSource === sourceNameRus);
+// Объект с локализациями
+var translations = {
+    surs_geo_filters: {
+        ru: "Геофильтры подборок",
+        en: "Geo-filters for collections",
+        uk: "Геофільтри для підбірок"
+    },
+    surs_filters: {
+        ru: "Фильтры",
+        en: "Filters",
+        uk: "Фільтри"
+    },
+    surs_technical_settings: {
+        ru: "Технические настройки",
+        en: "Technical settings",
+        uk: "Технічні налаштування"
+    }
+};
 
-            // Скрываем или показываем параметры
-            paramsToHide.forEach(function (param) {
-                var element = $('div[data-name="' + param + '"]');
-                if (shouldHide) {
-                    element.hide();
-                } else {
-                    element.show();
-                }
-            });
+// Получаем текущий язык
+var currentLocale = Lampa.Storage.get('language') || 'ru'; // 'ru' как запасной вариант, если язык не определен
 
-            // Удаление заголовков "Настройка фильтров" и "Настройка подборкок"
-            if (shouldHide) {
-                $('div.settings-param-title span').each(function () {
-                    var text = $(this).text().trim();
-                    if (text === 'Настройка фильтров' || text === 'Настройка подборок') {
-                        $(this).closest('div.settings-param-title').remove();
-                    }
-                });
-            }
+// Скрываем или показываем параметры
+paramsToHide.forEach(function (param) {
+    var element = $('div[data-name="' + param + '"]');
+    if (shouldHide) {
+        element.hide();
+    } else {
+        element.show();
+    }
+});
+
+// Удаление заголовков с локализованными названиями
+if (shouldHide) {
+    $('div.settings-param-title span').each(function () {
+        var text = $(this).text().trim();
+        // Проверяем, соответствует ли текст одному из локализованных значений
+        if (
+            text === translations.surs_geo_filters[currentLocale] ||
+            text === translations.surs_filters[currentLocale] ||
+            text === translations.surs_technical_settings[currentLocale]
+        ) {
+            $(this).closest('div.settings-param-title').remove();
+        }
+    });
+}
 
         }, 1);
     }
@@ -2401,46 +2389,41 @@ Lampa.Settings.listener.follow('open', function (e) {
 
 
 function addSettingMenu() {
+    var currentSource = Lampa.Storage.get('source');
+    var sourceName = Lampa.Storage.get('surs_name') || Lampa.Lang.translate('surs_source_name');
+    var sourceNameKids = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_kids').split(' ')[1]; // "KIDS"
+    var sourceNameRus = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_rus').split(' ')[1]; // "RUS"
 
-            var currentSource = Lampa.Storage.get('source');
-            var sourceName = Lampa.Storage.get('surs_name') || 'AVIAMOVIE';
-            var sourceNameKids = sourceName + ' KIDS';
-            var sourceNameRus = sourceName + ' RUS'; 
-            
-            
     Lampa.SettingsApi.addComponent({
         component: 'surs',
-        name: Lampa.Lang.translate('Подборки ' + sourceName),
+        name: Lampa.Lang.translate('surs_collections') + ' ' + sourceName,
         icon: `
  <svg height="200px" width="200px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:#ffffff;} </style> <g> <path class="st0" d="M443.724,166.599c27.038-2.293,47.087-26.07,44.786-53.125c-2.292-27.038-26.078-47.087-53.115-44.795 c-27.038,2.301-47.078,26.088-44.776,53.124C392.91,148.85,416.677,168.9,443.724,166.599z"></path> <path class="st0" d="M431.752,346.544l30.541-114.485c5.068-19.305-6.466-39.075-25.78-44.144 c-19.304-5.077-39.075,6.448-44.152,25.771v-0.018L365.052,315.64l-78.755-13.276c-17.218-4.304-34.696,5.786-39.578,22.864 l-33.317,133.445c-3.82,13.342,3.913,27.28,17.274,31.1c13.37,3.81,27.298-3.923,31.128-17.283l39.392-98.638l61.286,16.155 C398.863,400.125,421.633,382.927,431.752,346.544z"></path> <path class="st0" d="M388.177,462.949l-0.121-0.01c-0.018,0-0.028,0-0.047,0L388.177,462.949z"></path> <path class="st0" d="M498.349,286.311c-10.1-2.999-20.721,2.749-23.722,12.858l-27.876,93.848 c-2.096,6.606-4.536,11.777-7.146,15.746c-3.987,5.944-8.002,9.373-13.854,12.093c-5.842,2.664-14.031,4.379-25.416,4.37 c-3.009,0.008-6.215-0.113-9.634-0.355l-54.009-3.363c-10.519-0.661-19.575,7.341-20.227,17.861 c-0.662,10.518,7.342,19.574,17.86,20.226l53.73,3.345c4.211,0.298,8.31,0.448,12.28,0.456c10.072-0.009,19.5-0.988,28.369-3.289 c13.268-3.392,25.315-10.127,34.501-19.892c9.251-9.736,15.531-21.885,19.91-35.609l0.074-0.214l28.015-94.362 C514.206,299.923,508.447,289.302,498.349,286.311z"></path> <path class="st0" d="M248.974,81.219L0,21.256v15.14v281.228l248.974-59.962V81.219z M225.123,238.87L23.851,287.355V51.536 l201.272,48.466V238.87z"></path> <polygon class="st0" points="204.989,115.189 47.991,84.937 47.991,253.953 204.989,223.692 "></polygon> </g> </g></svg>`
     });
 
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: '',
+            type: 'title'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_collections') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + sourceName,
+            description: Lampa.Lang.translate('surs_main_update') // 
+        }
+    });
 
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: '',
-        type: 'title'
-    },
-    field: {
-        name: 'Подборки от '+ sourceName,
-        description: 'После изменения настроек обновите главную страницу, нажав на её иконку в боковом меню.'
-    }
-});
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_empty1',
-        type: 'title'
-    },
-    field: {
-        name: 'Настройка интерфейса',
-        description: ''
-    }
-});
-
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_empty1',
+            type: 'title'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_settings_interface'),
+            description: ''
+        }
+    });
 
     Lampa.SettingsApi.addParam({
         component: 'surs',
@@ -2455,493 +2438,292 @@ Lampa.SettingsApi.addParam({
             default: [sourceName]
         },
         field: {
-            name: Lampa.Lang.translate('Установить в качестве источника'),
-            description: Lampa.Lang.translate('Влияет на отображение контента на главной странице')
+            name: Lampa.Lang.translate('surs_set_as_source'),
+            description: Lampa.Lang.translate('surs_source_description')
         },
         onChange: function (value) {
-            console.log('[DEBUG AVIAMOVIE] Выбранный источник:', value);
+            console.log('[DEBUG SURS] Выбранный источник:', value);
             Lampa.Storage.set('source', value);
         }
     });
 
-
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_setButtons',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Добавить подборки в боковое меню'),
-        description: Lampa.Lang.translate('Выберите, какие подборки добавить в боковое меню')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showButtonsSelectionMenu(currentController);
-    }
-});
-
-function showButtonsSelectionMenu(previousController) {
-    var items = [
-        { title: sourceName, id: 'Button_sourceName' },
-        { title: sourceNameKids, id: 'Button_sourceNameKids' },
-        { title: sourceNameRus, id: 'Button_sourceNameRus' }
-    ];
-
-    var list = items.map(function (item) {
-        var isEnabled = getStoredSetting(item.id, false); // По умолчанию выключено
-        return {
-            title: item.title,
-            id: item.id,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Выбор источников для бокового меню',
-        items: list,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_setButtons',
+            type: 'button'
         },
-        onCheck: function (selectedItem) {
-            var key = selectedItem.id;
-            var isEnabled = getStoredSetting(key, false);
-            setStoredSetting(key, !isEnabled); // Переключаем состояние
-            selectedItem.checked = !isEnabled;
-
-            // Перерисовываем меню с актуальными состояниями
-            addMenuButtons();
+        field: {
+            name: Lampa.Lang.translate('surs_add_to_menu'),
+            description: Lampa.Lang.translate('surs_menu_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showButtonsSelectionMenu(currentController);
         }
     });
-}
 
-function addMenuButton(title, action, icon, callback) {
-    var button = $('<li class="menu__item selector" data-action="' + action + '">\
-        <div class="menu__ico">' + icon + '</div>\
-        <div class="menu__text">' + title + '</div>\
-    </li>');
+    function showButtonsSelectionMenu(previousController) {
+        var items = [
+            { title: sourceName, id: 'Button_sourceName' },
+            { title: sourceNameKids, id: 'Button_sourceNameKids' },
+            { title: sourceNameRus, id: 'Button_sourceNameRus' }
+        ];
 
-    button.on('hover:enter', callback);
-    $('.menu .menu__list').eq(0).append(button);
-}
-
-// Общая иконка для всех кнопок
-var icon = '<svg xmlns="http://www.w3.org/2000/svg" width="2.2em" height="2.2em" viewBox="0 0 48 48">\
-    <circle cx="24" cy="24" r="20" fill="white"/>\
-</svg>';
-
-function addMenuButtons() {
-    // Удаляем старые кнопки
-    $('.menu__item[data-action="custom-source"]').remove(); 
-
-    // Получаем состояние кнопок из хранилища
-    var isSourceNameEnabled = getStoredSetting('Button_sourceName', false);
-    var isSourceNameKidsEnabled = getStoredSetting('Button_sourceNameKids', false);
-    var isSourceNameRusEnabled = getStoredSetting('Button_sourceNameRus', false);
-
-    // Добавляем кнопки, если соответствующий источник выбран
-    if (isSourceNameEnabled) {
-        addMenuButton(sourceName, 'custom-source', icon, function () {
-            Lampa.Activity.push({
-                source: sourceName,
-                title: sourceName,
-                component: 'main',
-                page: 1
-            });
+        var list = items.map(function (item) {
+            var isEnabled = getStoredSetting(item.id, false);
+            return {
+                title: item.title,
+                id: item.id,
+                checkbox: true,
+                checked: isEnabled
+            };
         });
-    }
 
-    if (isSourceNameKidsEnabled) {
-        addMenuButton(sourceNameKids, 'custom-source', icon, function () {
-            Lampa.Activity.push({
-                source: sourceNameKids,
-                title: sourceNameKids,
-                component: 'main',
-                page: 1
-            });
-        });
-    }
-
-    if (isSourceNameRusEnabled) {
-        addMenuButton(sourceNameRus, 'custom-source', icon, function () {
-            Lampa.Activity.push({
-                source: sourceNameRus,
-                title: sourceNameRus,
-                component: 'main',
-                page: 1
-            });
-        });
-    }
-}
-
-// Инициализируем добавление кнопок сразу после загрузки
-
-
-setTimeout(addMenuButtons, 50);
-// Подключаем слушатель изменений
-
-Lampa.Listener.follow('profile', function(event) {
-  
-  if (event.type != 'changed') {
-    return; 
-  }
-
-        addMenuButtons();
-});
-
-
-
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: '',
-        type: 'title'
-    },
-    field: {
-        name: 'Настройка фильтров',
-        description: ''
-    }
-});
-
-// Функция отображения списка выбора
-function showSelectionMenu(title, items, storagePrefix, keyField = 'id', previousController) {
-    var list = items.map(function (item) {
-        var key = item[keyField];
-        var isEnabled = getStoredSetting(storagePrefix + key, true);
-        return {
-            title: item.title,
-            id: key,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: title,
-        items: list,
-        onBack: function () {
-
-            showMainMenu(previousController);
-        },
-        onCheck: function (selectedItem) {
-            var key = storagePrefix + selectedItem.id;
-            var isEnabled = getStoredSetting(key, true);
-            setStoredSetting(key, !isEnabled);
-
-
-            selectedItem.checked = !isEnabled;
-        }
-    });
-}
-
-function showMainMenu(previousController) {
-
-    var currentController = Lampa.Controller.enabled().name;
-    previousController = previousController || currentController; // если previousController не передан, используем текущий
-
-    Lampa.Select.show({
-        title: 'Глобальный фильтр',
-        items: [
-            { title: 'Жанры', action: function () { showSelectionMenu('Выбор жанров', allGenres, 'genre_', 'id', previousController); } },
-            { title: 'Варианты сортировки', action: function () { showSelectionMenu('Выбор сортировки', allSortOptions, 'sort_', 'id', previousController); } },
-            { title: 'Стриминги', action: function () { showSelectionMenu('Выбор стримингов', allStreamingServices, 'streaming_', 'id', previousController); } },
-            { title: 'Российские стриминги', action: function () { showSelectionMenu('Выбор российских стримингов', allStreamingServicesRUS, 'streaming_rus_', 'id', previousController); } }
-        ],
-        onSelect: function (item) {
-            if (item.action) {
-                item.action();
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_select_menu_sources'),
+            items: list,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selectedItem) {
+                var key = selectedItem.id;
+                var isEnabled = getStoredSetting(key, false);
+                setStoredSetting(key, !isEnabled);
+                selectedItem.checked = !isEnabled;
+                addMenuButtons();
             }
+        });
+    }
+
+    function addMenuButton(title, action, icon, callback) {
+        var button = $('<li class="menu__item selector" data-action="' + action + '">' +
+            '<div class="menu__ico">' + icon + '</div>' +
+            '<div class="menu__text">' + title + '</div>' +
+            '</li>');
+
+        button.on('hover:enter', callback);
+        $('.menu .menu__list').eq(0).append(button);
+    }
+
+    var icon = '<svg xmlns="http://www.w3.org/2000/svg" width="2.2em" height="2.2em" viewBox="0 0 48 48">' +
+        '<circle cx="24" cy="24" r="20" fill="white"/>' +
+        '</svg>';
+
+    function addMenuButtons() {
+        $('.menu__item[data-action="custom-source"]').remove();
+
+        var isSourceNameEnabled = getStoredSetting('Button_sourceName', false);
+        var isSourceNameKidsEnabled = getStoredSetting('Button_sourceNameKids', false);
+        var isSourceNameRusEnabled = getStoredSetting('Button_sourceNameRus', false);
+
+        if (isSourceNameEnabled) {
+            addMenuButton(sourceName, 'custom-source', icon, function () {
+                Lampa.Activity.push({
+                    source: sourceName,
+                    title: sourceName,
+                    component: 'main',
+                    page: 1
+                });
+            });
+        }
+
+        if (isSourceNameKidsEnabled) {
+            addMenuButton(sourceNameKids, 'custom-source', icon, function () {
+                Lampa.Activity.push({
+                    source: sourceNameKids,
+                    title: sourceNameKids,
+                    component: 'main',
+                    page: 1
+                });
+            });
+        }
+
+        if (isSourceNameRusEnabled) {
+            addMenuButton(sourceNameRus, 'custom-source', icon, function () {
+                Lampa.Activity.push({
+                    source: sourceNameRus,
+                    title: sourceNameRus,
+                    component: 'main',
+                    page: 1
+                });
+            });
+        }
+    }
+
+    setTimeout(addMenuButtons, 50);
+
+    Lampa.Listener.follow('profile', function (event) {
+        if (event.type != 'changed') {
+            return;
+        }
+        addMenuButtons();
+    });
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: '',
+            type: 'title'
         },
-        onBack: function () {
-            // Возвращаемся в контроллер, переданный в previousController
-            Lampa.Controller.toggle(previousController);
+        field: {
+            name: Lampa.Lang.translate('surs_filters'),
+            description: ''
         }
     });
-}
 
-// Основная функция запуска
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_filter_menu',
-        type: 'button'
-    },
-    field: {
-        name: 'Глобальный фильтр',
-        description: 'Выбор жанров, вариантов сортировки и стриминговых сервисов.'
-    },
-    onChange: function () {
-        showMainMenu(); 
+    function showSelectionMenu(title, items, storagePrefix, keyField = 'id', previousController) {
+        var list = items.map(function (item) {
+            var key = item[keyField];
+            var isEnabled = getStoredSetting(storagePrefix + key, true);
+            return {
+                title: Lampa.Lang.translate(item.title), // Используем перевод для жанров и сортировки
+                id: key,
+                checkbox: true,
+                checked: isEnabled
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate(title),
+            items: list,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController);
+            },
+            onCheck: function (selectedItem) {
+                var key = storagePrefix + selectedItem.id;
+                var isEnabled = getStoredSetting(key, true);
+                setStoredSetting(key, !isEnabled);
+                selectedItem.checked = !isEnabled;
+            }
+        });
     }
-});
 
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_cirillic',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Кириллица в карточке контента'),
-        description: Lampa.Lang.translate('Фильтрует контент, оставляя только те материалы, у которых есть перевод названия или описание на киррилице.')
-    },
-    onChange: function () {
-        var previousController = Lampa.Controller.enabled().name;
-        showCirillicMenu(previousController);
-    }
-});
-
-function showCirillicMenu(previousController) {
-    var key = 'cirillic';
-    var currentValue = getStoredSetting(key, '1');
-
-    var options = [
-        { title: 'Включен', value: '1' },
-        { title: 'Выключен', value: '0' }
-
-    ];
-
-    var items = options.map(function(option) {
-        return {
-            title: option.title,
-            value: option.value,
-            checkbox: true,
-            checked: currentValue === option.value
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Фильтр кириллица',
-        items: items,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_sort_options',
+            type: 'button'
         },
-        onCheck: function (selected) {
-            setStoredSetting(key, selected.value);
-            showCirillicMenu(previousController);
+        field: {
+            name: Lampa.Lang.translate('surs_sort_types'),
+            description: Lampa.Lang.translate('surs_sort_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showSelectionMenu('surs_sort_types', allSortOptions, 'sort_', 'id', currentController);
         }
     });
-}
 
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_minVotes',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Валидация рейтинга'),
-        description: Lampa.Lang.translate('Валидация рейтинга позволяет исключить контент с случайно завышенной оценкой. Однако он может также исключить новые фильмы или те, у которых ещё нет рейтинга или мало голосов.')
-    },
-    onChange: function () {
-        var previousController = Lampa.Controller.enabled().name;
-        showMinVotesMenu(previousController);
-    }
-});
-
-function showMinVotesMenu(previousController) {
-    var key = 'minVotes';
-    var currentValue = getStoredSetting(key, '10');
-
-    var options = [
-        { title: 'Выключено', value: '0' },
-        { title: 'Стандартная', value: '10' },
-        { title: 'Усиленная', value: '50' },
-        { title: 'Максимальная', value: '150' },
-        { title: 'Фаталити', value: '300' }
-    ];
-
-    var items = options.map(function(option) {
-        return {
-            title: option.title,
-            value: option.value,
-            checkbox: true,
-            checked: currentValue === option.value
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Валидация ретинга',
-        items: items,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_genres',
+            type: 'button'
         },
-        onCheck: function (selected) {
-            setStoredSetting(key, selected.value);
-            showMinVotesMenu(previousController);
+        field: {
+            name: Lampa.Lang.translate('surs_genres'),
+            description: Lampa.Lang.translate('surs_genres_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showSelectionMenu('surs_genres', allGenres, 'genre_', 'id', currentController);
         }
     });
-}
 
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_ageRestrictions',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Возрастное ограничение'),
-        description: Lampa.Lang.translate('Формировать подборки, которые соответствуют указанному возрастному рейтингу.')
-    },
-    onChange: function () {
-        var previousController = Lampa.Controller.enabled().name;
-        showAgeRestrictionsMenu(previousController);
-    }
-});
-
-function showAgeRestrictionsMenu(previousController) {
-    var key = 'ageRestrictions';
-    var currentValue = getStoredSetting(key, '');
-
-    var options = [
-        { title: 'Для самых маленьких', value: '0+' },
-        { title: 'Для детей не старше 6 лет', value: '6+' },
-        { title: 'Для детей не старше 12 лет', value: '12+' },
-        { title: 'Без ограничений', value: '' }
-    ];
-
-    var items = options.map(function(option) {
-        return {
-            title: option.title,
-            value: option.value,
-            checkbox: true,
-            checked: currentValue === option.value
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Возрастное ограничение',
-        items: items,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_global_streaming',
+            type: 'button'
         },
-        onCheck: function (selected) {
-            setStoredSetting(key, selected.value);
-            showAgeRestrictionsMenu(previousController);
+        field: {
+            name: Lampa.Lang.translate('surs_global_streaming'),
+            description: Lampa.Lang.translate('surs_global_streaming_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showSelectionMenu('surs_global_streaming', allStreamingServices, 'streaming_', 'id', currentController);
         }
     });
-}
 
-
-
-
-
-
-
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_withoutKeywords',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Исключение азиатских жанров'),
-        description: Lampa.Lang.translate('Фильтр для исключения азиатского контента. Мягкий режим: исключает мангу, маньхву, донхуа и страны (Китай, Индия, Тайвань). Сильный режим: дополнительно исключает аниме и Японию.')
-    },
-    onChange: function () {
-        var previousController = Lampa.Controller.enabled().name;
-        showKeywordFilterMenu(previousController);
-    }
-});
-
-function showKeywordFilterMenu(previousController) {
-    var key = 'withoutKeywords';
-    var currentValue = getStoredSetting(key, '1');
-
-    var options = [
-        { title: 'Выключено', value: '0' },
-        { title: 'Мягко', value: '1' },
-        { title: 'Сильно', value: '2' }
-    ];
-
-    var items = options.map(function (option) {
-        return {
-            title: option.title,
-            value: option.value,
-            checkbox: true,
-            checked: currentValue === option.value
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Уровень фильтрации',
-        items: items,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_rus_streaming',
+            type: 'button'
         },
-        onCheck: function (selectedItem) {
-            setStoredSetting(key, selectedItem.value);
-            showKeywordFilterMenu(previousController);
+        field: {
+            name: Lampa.Lang.translate('surs_rus_streaming'),
+            description: Lampa.Lang.translate('surs_rus_streaming_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showSelectionMenu('surs_rus_streaming', allStreamingServicesRUS, 'streaming_rus_', 'id', currentController);
         }
     });
-}
 
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: '',
-        type: 'title'
-    },
-    field: {
-        name: 'Настройка подборок',
-        description: ''
-    }
-});
-//стриминги
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_streaming',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Подборки по стримингам'),
-        description: Lampa.Lang.translate('Выберите регион')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showStreamingSelectionMenu(currentController);
-    }
-});
-
-function showStreamingSelectionMenu(previousController) {
-    var items = [
-        { title: 'Глобальные', id: 'getStreamingServices' },
-        { title: 'Российские', id: 'getStreamingServicesRUS' }
-    ];
-
-    var list = items.map(function (item) {
-        var isEnabled = getStoredSetting(item.id, true);
-        return {
-            title: item.title,
-            id: item.id,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Выбор стриминговых подборок',
-        items: list,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: '',
+            type: 'title'
         },
-        onCheck: function (selectedItem) {
-            var key = selectedItem.id;
-            var isEnabled = getStoredSetting(key, true);
-            setStoredSetting(key, !isEnabled);
-            selectedItem.checked = !isEnabled;
+        field: {
+            name: Lampa.Lang.translate('surs_geo_filters'),
+            description: ''
         }
     });
-}
-// Фильмы по жанрам
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_streaming',
+            type: 'button'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_streaming'),
+            description: Lampa.Lang.translate('surs_region_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showStreamingSelectionMenu(currentController);
+        }
+    });
+
+    function showStreamingSelectionMenu(previousController) {
+        var items = [
+            { title: Lampa.Lang.translate('surs_global'), id: 'getStreamingServices' },
+            { title: Lampa.Lang.translate('surs_russian'), id: 'getStreamingServicesRUS' }
+        ];
+
+        var list = items.map(function (item) {
+            var isEnabled = getStoredSetting(item.id, true);
+            return {
+                title: item.title,
+                id: item.id,
+                checkbox: true,
+                checked: isEnabled
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_streaming'),
+            items: list,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selectedItem) {
+                var key = selectedItem.id;
+                var isEnabled = getStoredSetting(key, true);
+                setStoredSetting(key, !isEnabled);
+                selectedItem.checked = !isEnabled;
+            }
+        });
+    }
+
+
+
 Lampa.SettingsApi.addParam({
     component: 'surs',
     param: {
@@ -2949,8 +2731,8 @@ Lampa.SettingsApi.addParam({
         type: 'button'
     },
     field: {
-        name: Lampa.Lang.translate('Подборки фильмов'),
-        description: Lampa.Lang.translate('Выберите регион.')
+        name: Lampa.Lang.translate('surs_movies'),
+        description: Lampa.Lang.translate('surs_region_description')
     },
     onChange: function () {
         var currentController = Lampa.Controller.enabled().name;
@@ -2959,13 +2741,20 @@ Lampa.SettingsApi.addParam({
 });
 
 function showMoviesByGenreSelectionMenu(previousController) {
+    var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
     var items = [
-        { title: 'Глобальные', id: 'getMoviesByGenreGlobal' },
-        { title: 'Российские', id: 'getMoviesByGenreRus' }
+        { title: Lampa.Lang.translate('surs_global'), id: 'getMoviesByGenreGlobal' },
+        { title: Lampa.Lang.translate('surs_russian'), id: 'getMoviesByGenreRus' },
+        { title: Lampa.Lang.translate('surs_turkish'), id: 'getMoviesByGenreTR' }
     ];
 
+    if (isUkrainianLanguage) {
+        items.push({ title: Lampa.Lang.translate('surs_ukrainian'), id: 'getMoviesByGenreUA' });
+    }
+
     var list = items.map(function (item) {
-        var isEnabled = getStoredSetting(item.id, true);
+        var defaultValue = item.id === 'getMoviesByGenreUA' ? isUkrainianLanguage : true;
+        var isEnabled = getStoredSetting(item.id, defaultValue);
         return {
             title: item.title,
             id: item.id,
@@ -2975,21 +2764,20 @@ function showMoviesByGenreSelectionMenu(previousController) {
     });
 
     Lampa.Select.show({
-        title: 'Подборки фильмов',
+        title: Lampa.Lang.translate('surs_movies'),
         items: list,
         onBack: function () {
             Lampa.Controller.toggle(previousController || 'settings');
         },
         onCheck: function (selectedItem) {
             var key = selectedItem.id;
-            var isEnabled = getStoredSetting(key, true);
+            var defaultValue = key === 'getMoviesByGenreUA' ? isUkrainianLanguage : true;
+            var isEnabled = getStoredSetting(key, defaultValue);
             setStoredSetting(key, !isEnabled);
             selectedItem.checked = !isEnabled;
         }
     });
 }
-
-
 
 Lampa.SettingsApi.addParam({
     component: 'surs',
@@ -2998,8 +2786,8 @@ Lampa.SettingsApi.addParam({
         type: 'button'
     },
     field: {
-        name: Lampa.Lang.translate('Подборки сериалов'),
-        description: Lampa.Lang.translate('Выберите регион.')
+        name: Lampa.Lang.translate('surs_series'),
+        description: Lampa.Lang.translate('surs_region_description')
     },
     onChange: function () {
         var currentController = Lampa.Controller.enabled().name;
@@ -3008,14 +2796,21 @@ Lampa.SettingsApi.addParam({
 });
 
 function showTVShowsByGenreSelectionMenu(previousController) {
+    var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
     var items = [
-        { title: 'Глобальные', id: 'getTVShowsByGenreGlobal' },
-        { title: 'Российские', id: 'getTVShowsByGenreRus' },
-        { title: 'Южнокорейские', id: 'getTVShowsByGenreKOR' }
+        { title: Lampa.Lang.translate('surs_global'), id: 'getTVShowsByGenreGlobal' },
+        { title: Lampa.Lang.translate('surs_russian'), id: 'getTVShowsByGenreRus' },
+        { title: Lampa.Lang.translate('surs_korean'), id: 'getTVShowsByGenreKOR' },
+        { title: Lampa.Lang.translate('surs_turkish'), id: 'getTVShowsByGenreTR' }
     ];
 
+    if (isUkrainianLanguage) {
+        items.push({ title: Lampa.Lang.translate('surs_ukrainian'), id: 'getTVShowsByGenreUA' });
+    }
+
     var list = items.map(function (item) {
-        var isEnabled = getStoredSetting(item.id, true);
+        var defaultValue = (item.id === 'getTVShowsByGenreKOR') ? false : (item.id === 'getTVShowsByGenreUA' ? isUkrainianLanguage : true);
+        var isEnabled = getStoredSetting(item.id, defaultValue);
         return {
             title: item.title,
             id: item.id,
@@ -3025,543 +2820,376 @@ function showTVShowsByGenreSelectionMenu(previousController) {
     });
 
     Lampa.Select.show({
-        title: 'Подборки сериалов',
+        title: Lampa.Lang.translate('surs_series'),
         items: list,
         onBack: function () {
             Lampa.Controller.toggle(previousController || 'settings');
         },
         onCheck: function (selectedItem) {
             var key = selectedItem.id;
-            var isEnabled = getStoredSetting(key, true);
+            var defaultValue = (key === 'getTVShowsByGenreKOR') ? false : (key === 'getTVShowsByGenreUA' ? isUkrainianLanguage : true);
+            var isEnabled = getStoredSetting(key, defaultValue);
             setStoredSetting(key, !isEnabled);
             selectedItem.checked = !isEnabled;
         }
     });
 }
-
-//топ подборки
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_getBestContentByGenre',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Подборки топ фильмов и сериалов'),
-        description: Lampa.Lang.translate('Подборки лучшего контента за все время')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showBestContentByGenreSelectionMenu(currentController);
-    }
-});
-
-function showBestContentByGenreSelectionMenu(previousController) {
-    var items = [
-        { title: 'Фильмы', id: 'getBestContentByGenreMovie' },
-        { title: 'Сериалы', id: 'getBestContentByGenreTV' }
-    ];
-
-    var list = items.map(function (item) {
-        var isEnabled = getStoredSetting(item.id, true);
-        return {
-            title: item.title,
-            id: item.id,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Подборки топ контента',
-        items: list,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
-        },
-        onCheck: function (selectedItem) {
-            var key = selectedItem.id;
-            var isEnabled = getStoredSetting(key, true);
-            setStoredSetting(key, !isEnabled);
-            selectedItem.checked = !isEnabled;
-        }
-    });
-}
-
-//топ подборки за 5лет
-
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_best_content',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('Топ подборки за 5 лет'),
-        description: Lampa.Lang.translate('Подборки лучших фильмов и сериалов за случайные 5 лет')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showBestContentByPeriodSelectionMenu(currentController);
-    }
-});
-
-function showBestContentByPeriodSelectionMenu(previousController) {
-    var items = [
-        { title: 'Фильмы', id: 'getBestContentByGenreAndPeriod_movie' },
-        { title: 'Сериалы', id: 'getBestContentByGenreAndPeriod_tv' }
-    ];
-
-    var list = items.map(function (item) {
-        var isEnabled = getStoredSetting(item.id, true);
-        return {
-            title: item.title,
-            id: item.id,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: 'Топ подборки за 5 лет',
-        items: list,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
-        },
-        onCheck: function (selectedItem) {
-            var key = selectedItem.id;
-            var isEnabled = getStoredSetting(key, true);
-            setStoredSetting(key, !isEnabled);
-            selectedItem.checked = !isEnabled;
-        }
-    });
-}
-
-
-if (!Lampa.Storage.get('surs_disableCustomName')) {
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: '',
-        type: 'title'
-    },
-    field: {
-        name: 'Название',
-        description: ''
-    }
-});
-
 
     Lampa.SettingsApi.addParam({
         component: 'surs',
         param: {
-            name: 'surs_setName',
-            type: 'button',
-            default: 'Ввести название'
+            name: 'surs_getBestContentByGenre',
+            type: 'button'
         },
         field: {
-            name: Lampa.Lang.translate('Переименование подборок'),
-            description: Lampa.Lang.translate('Введите свое название вместо ' + currentSource)
+            name: Lampa.Lang.translate('surs_top_all_time'),
+            description: Lampa.Lang.translate('surs_top_content_description')
         },
         onChange: function () {
-            Lampa.Input.edit({
-                free: true,
-                title: Lampa.Lang.translate('Введите новое название'),
-                nosave: true,
-                value: '',
-            }, function(input) {
-                if (input) {
-                    Lampa.Storage.set('surs_name', input);
-                    Lampa.Noty.show(Lampa.Lang.translate('Название сохранено. Обновление...'));
-
-                    setTimeout(function() {
-                        Lampa.Controller.toggle('settings');
-                    }, 100);
-                    setTimeout(function() {
-                        var newName = Lampa.Storage.get('surs_name');
-                        softRefresh(newName, false);
-                    }, 1500);
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    Lampa.Noty.show(Lampa.Lang.translate('Название не введено.'));
-                }
-            });
+            var currentController = Lampa.Controller.enabled().name;
+            showBestContentByGenreSelectionMenu(currentController);
         }
     });
-}
-}
-//боковые кнопки
 
-function sideButtonsMenu() {
-    // Настройки плагина
-    var settings = {
-        selections: {
-            enabled: getStoredSetting('selections_enabled', true)
-        },
-        movies: {
-            genres: loadGenresSettings('movies'),
-            sort: getStoredSetting('movies_sort', 'popularity.desc'),
-            region: getStoredSetting('movies_region', 'global')
-        },
-        series: {
-            genres: loadGenresSettings('series'),
-            sort: getStoredSetting('series_sort', 'popularity.desc'),
-            region: getStoredSetting('series_region', 'global')
-        },
-        streaming: {
-            genres: loadGenresSettings('streaming'),
-            sort: getStoredSetting('streaming_sort', 'popularity.desc'),
-            region: getStoredSetting('streaming_region', 'global')
-        }
-    };
-
-    // Загрузка настроек жанров
-    function loadGenresSettings(type) {
-        var genres = {};
-        allGenres.forEach(function (genre) {
-            genres[genre.id] = getStoredSetting(type + '_genre_' + genre.id, true);
-        });
-        return genres;
-    }
-
-    // Сохранение настроек
-    function saveSettings(type) {
-        var prefix = type + '_';
-        Object.keys(settings[type].genres).forEach(function (genreId) {
-            setStoredSetting(prefix + 'genre_' + genreId, settings[type].genres[genreId]);
-        });
-        setStoredSetting(prefix + 'sort', settings[type].sort);
-        setStoredSetting(prefix + 'region', settings[type].region);
-        setStoredSetting('selections_enabled', settings.selections.enabled);
-    }
-
-    // Добавление боковой кнопки
-    function addButtons() {
-        if (settings.selections.enabled) {
-            addMenuButton(
-                'Подборки',
-                'selections',
-                '<svg xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3v18h18V3zm16 16H5V5h14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>',
-                showSelectionsMenu
-            );
-        }
-    }
-
-    // Функция добавления кнопки меню (из вашего кода)
-    function addMenuButton(title, action, icon, callback) {
-        var button = jQuery(
-            '<li class="menu__item selector" data-action="' + action + '">' +
-            '<div class="menu__ico">' + icon + '</div>' +
-            '<div class="menu__text">' + title + '</div>' +
-            '</li>'
-        );
-        button.on('hover:enter', callback);
-        jQuery('.menu .menu__list').eq(0).append(button);
-    }
-
-    // Показ главного меню подборок
-    function showSelectionsMenu() {
-        var currentController = Lampa.Controller.enabled().name;
-        Lampa.Select.show({
-            title: 'Подборки',
-            items: [
-                {
-                    title: 'Фильмы',
-                    action: function () {
-                        showContentMenu('movies', 'Фильмы', currentController);
-                    }
-                },
-                {
-                    title: 'Сериалы',
-                    action: function () {
-                        showContentMenu('series', 'Сериалы', currentController);
-                    }
-                },
-                {
-                    title: 'Стриминги',
-                    action: function () {
-                        showContentMenu('streaming', 'Стриминги', currentController);
-                    }
-                }
-            ],
-            onSelect: function (item) {
-                if (item.action) {
-                    item.action();
-                }
-            },
-            onBack: function () {
-                Lampa.Controller.toggle('menu');
-            }
-        });
-    }
-
-    // Показ меню для контента (Фильмы, Сериалы, Стриминги)
-    function showContentMenu(type, title, previousController) {
-        Lampa.Select.show({
-            title: title,
-            items: [
-                {
-                    title: 'Жанры',
-                    action: function () {
-                        showGenresMenu(type, title + ' - Жанры', previousController);
-                    }
-                },
-                {
-                    title: 'Варианты сортировки',
-                    action: function () {
-                        showSortMenu(type, title + ' - Сортировка', previousController);
-                    }
-                },
-                {
-                    title: 'Регион',
-                    action: function () {
-                        showRegionMenu(type, title + ' - Регион', previousController);
-                    }
-                },
-                {
-                    title: 'Поиск',
-                    action: function () {
-                        pushActivity(type);
-                    }
-                }
-            ],
-            onSelect: function (item) {
-                if (item.action) {
-                    item.action();
-                }
-            },
-            onBack: function () {
-                Lampa.Controller.toggle(previousController);
-            }
-        });
-    }
-
-    // Показ меню выбора жанров
-    function showGenresMenu(type, title, previousController) {
-        var list = [
-            {
-                title: 'Все',
-                id: 'all',
-                checkbox: true,
-                checked: areAllGenresSelected(type)
-            }
-        ].concat(allGenres.map(function (genre) {
-            return {
-                title: genre.title,
-                id: genre.id,
-                checkbox: true,
-                checked: settings[type].genres[genre.id]
-            };
-        }));
-
-        Lampa.Select.show({
-            title: title,
-            items: list,
-            onBack: function () {
-                showContentMenu(type, type === 'movies' ? 'Фильмы' : type === 'series' ? 'Сериалы' : 'Стриминги', previousController);
-            },
-            onCheck: function (selectedItem) {
-                if (selectedItem.id === 'all') {
-                    var newState = !areAllGenresSelected(type);
-                    allGenres.forEach(function (genre) {
-                        settings[type].genres[genre.id] = newState;
-                    });
-                    selectedItem.checked = newState;
-                    list.forEach(function (item) {
-                        if (item.id !== 'all') {
-                            item.checked = newState;
-                        }
-                    });
-                } else {
-                    settings[type].genres[selectedItem.id] = !settings[type].genres[selectedItem.id];
-                    selectedItem.checked = settings[type].genres[selectedItem.id];
-                    list[0].checked = areAllGenresSelected(type);
-                }
-                saveSettings(type);
-            }
-        });
-    }
-
-    // Проверка, выбраны ли все жанры
-    function areAllGenresSelected(type) {
-        return allGenres.every(function (genre) {
-            return settings[type].genres[genre.id];
-        });
-    }
-
-    // Показ меню выбора сортировки
-    function showSortMenu(type, title, previousController) {
-        var list = allSortOptions.map(function (sort) {
-            return {
-                title: sort.title,
-                id: sort.id,
-                checkbox: true,
-                checked: settings[type].sort === sort.id
-            };
-        });
-
-        Lampa.Select.show({
-            title: title,
-            items: list,
-            onBack: function () {
-                showContentMenu(type, type === 'movies' ? 'Фильмы' : type === 'series' ? 'Сериалы' : 'Стриминги', previousController);
-            },
-            onCheck: function (selectedItem) {
-                settings[type].sort = selectedItem.id;
-                list.forEach(function (item) {
-                    item.checked = item.id === selectedItem.id;
-                });
-                saveSettings(type);
-            }
-        });
-    }
-
-    // Показ меню выбора региона
-    function showRegionMenu(type, title, previousController) {
-        var list = [
-            {
-                title: 'Глобально',
-                id: 'global',
-                checkbox: true,
-                checked: settings[type].region === 'global'
-            },
-            {
-                title: 'Российское',
-                id: 'russian',
-                checkbox: true,
-                checked: settings[type].region === 'russian'
-            }
+    function showBestContentByGenreSelectionMenu(previousController) {
+        var items = [
+            { title: Lampa.Lang.translate('surs_movies'), id: 'getBestContentByGenreMovie' },
+            { title: Lampa.Lang.translate('surs_series'), id: 'getBestContentByGenreTV' }
         ];
 
+        var list = items.map(function (item) {
+            var isEnabled = getStoredSetting(item.id, true);
+            return {
+                title: item.title,
+                id: item.id,
+                checkbox: true,
+                checked: isEnabled
+            };
+        });
+
         Lampa.Select.show({
-            title: title,
+            title: Lampa.Lang.translate('surs_top_all_time'),
             items: list,
             onBack: function () {
-                showContentMenu(type, type === 'movies' ? 'Фильмы' : type === 'series' ? 'Сериалы' : 'Стриминги', previousController);
+                Lampa.Controller.toggle(previousController || 'settings');
             },
             onCheck: function (selectedItem) {
-                settings[type].region = selectedItem.id;
-                list.forEach(function (item) {
-                    item.checked = item.id === selectedItem.id;
+                var key = selectedItem.id;
+                var isEnabled = getStoredSetting(key, true);
+                setStoredSetting(key, !isEnabled);
+                selectedItem.checked = !isEnabled;
+            }
+        });
+    }
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_best_content',
+            type: 'button'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_top_5_years'),
+            description: Lampa.Lang.translate('surs_top_content_description')
+        },
+        onChange: function () {
+            var currentController = Lampa.Controller.enabled().name;
+            showBestContentByPeriodSelectionMenu(currentController);
+        }
+    });
+
+    function showBestContentByPeriodSelectionMenu(previousController) {
+        var items = [
+            { title: Lampa.Lang.translate('surs_movies'), id: 'getBestContentByGenreAndPeriod_movie' },
+            { title: Lampa.Lang.translate('surs_series'), id: 'getBestContentByGenreAndPeriod_tv' }
+        ];
+
+        var list = items.map(function (item) {
+            var isEnabled = getStoredSetting(item.id, true);
+            return {
+                title: item.title,
+                id: item.id,
+                checkbox: true,
+                checked: isEnabled
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_top_5_years'),
+            items: list,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selectedItem) {
+                var key = selectedItem.id;
+                var isEnabled = getStoredSetting(key, true);
+                setStoredSetting(key, !isEnabled);
+                selectedItem.checked = !isEnabled;
+            }
+        });
+    }
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: '',
+            type: 'title'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_technical_settings'),
+            description: ''
+        }
+    });
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_cirillic',
+            type: 'button'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_cyrillic'),
+            description: Lampa.Lang.translate('surs_cyrillic_description')
+        },
+        onChange: function () {
+            var previousController = Lampa.Controller.enabled().name;
+            showCirillicMenu(previousController);
+        }
+    });
+
+    function showCirillicMenu(previousController) {
+        var key = 'cirillic';
+        var currentValue = getStoredSetting(key, '1');
+
+        var options = [
+            { title: Lampa.Lang.translate('surs_cyrillic_enabled'), value: '1' },
+            { title: Lampa.Lang.translate('surs_cyrillic_disabled'), value: '0' }
+        ];
+
+        var items = options.map(function (option) {
+            return {
+                title: option.title,
+                value: option.value,
+                checkbox: true,
+                checked: currentValue === option.value
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_cyrillic'),
+            items: items,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selected) {
+                setStoredSetting(key, selected.value);
+                showCirillicMenu(previousController);
+            }
+        });
+    }
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_minVotes',
+            type: 'button'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_rating_validation'),
+            description: Lampa.Lang.translate('surs_rating_description')
+        },
+        onChange: function () {
+            var previousController = Lampa.Controller.enabled().name;
+            showMinVotesMenu(previousController);
+        }
+    });
+
+    function showMinVotesMenu(previousController) {
+        var key = 'minVotes';
+        var currentValue = getStoredSetting(key, '10');
+
+        var options = [
+            { title: Lampa.Lang.translate('surs_rating_off'), value: '0' },
+            { title: Lampa.Lang.translate('surs_rating_standard'), value: '10' },
+            { title: Lampa.Lang.translate('surs_rating_enhanced'), value: '50' },
+            { title: Lampa.Lang.translate('surs_rating_maximum'), value: '150' },
+            { title: Lampa.Lang.translate('surs_rating_fatality'), value: '300' }
+        ];
+
+        var items = options.map(function (option) {
+            return {
+                title: option.title,
+                value: option.value,
+                checkbox: true,
+                checked: currentValue === option.value
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_rating_validation'),
+            items: items,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selected) {
+                setStoredSetting(key, selected.value);
+                showMinVotesMenu(previousController);
+            }
+        });
+    }
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_ageRestrictions',
+            type: 'button'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_age_restriction'),
+            description: Lampa.Lang.translate('surs_age_description')
+        },
+        onChange: function () {
+            var previousController = Lampa.Controller.enabled().name;
+            showAgeRestrictionsMenu(previousController);
+        }
+    });
+
+    function showAgeRestrictionsMenu(previousController) {
+        var key = 'ageRestrictions';
+        var currentValue = getStoredSetting(key, '');
+
+        var options = [
+            { title: Lampa.Lang.translate('surs_age_toddlers'), value: '0+' },
+            { title: Lampa.Lang.translate('surs_age_6'), value: '6+' },
+            { title: Lampa.Lang.translate('surs_age_12'), value: '12+' },
+            { title: Lampa.Lang.translate('surs_age_none'), value: '' }
+        ];
+
+        var items = options.map(function (option) {
+            return {
+                title: option.title,
+                value: option.value,
+                checkbox: true,
+                checked: currentValue === option.value
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_age_restriction'),
+            items: items,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selected) {
+                setStoredSetting(key, selected.value);
+                showAgeRestrictionsMenu(previousController);
+            }
+        });
+    }
+
+    Lampa.SettingsApi.addParam({
+        component: 'surs',
+        param: {
+            name: 'surs_withoutKeywords',
+            type: 'button'
+        },
+        field: {
+            name: Lampa.Lang.translate('surs_exclude_asian'),
+            description: Lampa.Lang.translate('surs_exclude_asian_description')
+        },
+        onChange: function () {
+            var previousController = Lampa.Controller.enabled().name;
+            showKeywordFilterMenu(previousController);
+        }
+    });
+
+    function showKeywordFilterMenu(previousController) {
+        var key = 'withoutKeywords';
+        var currentValue = getStoredSetting(key, '1');
+
+        var options = [
+            { title: Lampa.Lang.translate('surs_exclude_off'), value: '0' },
+            { title: Lampa.Lang.translate('surs_exclude_soft'), value: '1' },
+            { title: Lampa.Lang.translate('surs_exclude_strong'), value: '2' }
+        ];
+
+        var items = options.map(function (option) {
+            return {
+                title: option.title,
+                value: option.value,
+                checkbox: true,
+                checked: currentValue === option.value
+            };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('surs_exclude_asian'),
+            items: items,
+            onBack: function () {
+                Lampa.Controller.toggle(previousController || 'settings');
+            },
+            onCheck: function (selectedItem) {
+                setStoredSetting(key, selectedItem.value);
+                showKeywordFilterMenu(previousController);
+            }
+        });
+    }
+
+    if (!Lampa.Storage.get('surs_disableCustomName')) {
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: '',
+                type: 'title'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_name'),
+                description: ''
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_setName',
+                type: 'button',
+                default: Lampa.Lang.translate('surs_enter_new_name')
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_rename_selections'),
+                description: Lampa.Lang.translate('surs_rename_description') + ' ' + currentSource
+            },
+            onChange: function () {
+                Lampa.Input.edit({
+                    free: true,
+                    title: Lampa.Lang.translate('surs_enter_new_name'),
+                    nosave: true,
+                    value: ''
+                }, function (input) {
+                    if (input) {
+                        Lampa.Storage.set('surs_name', input);
+                        Lampa.Noty.show(Lampa.Lang.translate('surs_name_saved'));
+
+                        setTimeout(function () {
+                            Lampa.Controller.toggle('settings');
+                        }, 100);
+                        setTimeout(function () {
+                            var newName = Lampa.Storage.get('surs_name');
+                            softRefresh(newName, false);
+                        }, 1500);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        Lampa.Noty.show(Lampa.Lang.translate('surs_name_not_entered'));
+                    }
                 });
-                saveSettings(type);
             }
         });
     }
-
-    // Формирование URL и запуск активности
-    function pushActivity(type) {
-        var contentType = type === 'movies' ? 'movie' : 'tv';
-        var url = 'discover/' + contentType;
-        var params = [];
-        var title = type === 'movies' ? 'Фильмы' : type === 'series' ? 'Сериалы' : 'Стриминги';
-
-        // Жанры
-        var selectedGenres = [];
-        allGenres.forEach(function (genre) {
-            if (settings[type].genres[genre.id]) {
-                selectedGenres.push(genre.id);
-            }
-        });
-        if (selectedGenres.length > 0) {
-            params.push('with_genres=' + selectedGenres.join(','));
-            title += ' (' + selectedGenres.map(function (id) {
-                return allGenres.find(function (g) { return g.id === id; }).title;
-            }).join(', ') + ')';
-        }
-
-        // Стриминги (только для type === 'streaming')
-        if (type === 'streaming') {
-            var selectedStreamings = getStreamingServices().concat(getStreamingServicesRUS()).map(function (s) {
-                return s.id;
-            });
-            if (selectedStreamings.length > 0) {
-                params.push('with_networks=' + selectedStreamings.join(','));
-                title += ' (' + selectedStreamings.map(function (id) {
-                    var service = getStreamingServices().concat(getStreamingServicesRUS()).find(function (s) { return s.id === id; });
-                    return service ? service.title : '';
-                }).join(', ') + ')';
-            }
-        }
-
-        // Сортировка
-        params.push('sort_by=' + settings[type].sort);
-        var sortTitle = allSortOptions.find(function (s) { return s.id === settings[type].sort; }).title;
-        title += ' - ' + sortTitle;
-
-        // Регион
-        params.push('region=RU');
-        params.push('language=ru-RU');
-        if (settings[type].region === 'russian') {
-            params.push('with_origin_country=RU');
-            title += ' (Российское)';
-        }
-
-        if (params.length > 0) {
-            url += '?' + params.join('&');
-        }
-
-        try {
-            Lampa.Activity.push({
-                url: url,
-                title: title,
-                component: 'category_full',
-                source: 'tmdb',
-                card_type: 'true',
-                page: 1
-            });
-        } catch (e) {
-            Lampa.Noty.show('Ошибка при загрузке контента: ' + e.message);
-        }
-    }
-
-    // Обновление кнопки меню
-    function refreshMenuButtons() {
-        jQuery('[data-action="selections"]').remove();
-        addButtons();
-    }
-
-    // Слушатель изменений хранилища
-    function initStorageListener() {
-        Lampa.Storage.listener.follow('change', function (e) {
-            if (e.name === 'selections_enabled') {
-                settings.selections.enabled = getStoredSetting('selections_enabled', true);
-                saveSettings('selections');
-                refreshMenuButtons();
-            } else if (e.name.indexOf('movies_') === 0) {
-                settings.movies.genres = loadGenresSettings('movies');
-                settings.movies.sort = getStoredSetting('movies_sort', 'popularity.desc');
-                settings.movies.region = getStoredSetting('movies_region', 'global');
-            } else if (e.name.indexOf('series_') === 0) {
-                settings.series.genres = loadGenresSettings('series');
-                settings.series.sort = getStoredSetting('series_sort', 'popularity.desc');
-                settings.series.region = getStoredSetting('series_region', 'global');
-            } else if (e.name.indexOf('streaming_') === 0) {
-                settings.streaming.genres = loadGenresSettings('streaming');
-                settings.streaming.sort = getStoredSetting('streaming_sort', 'popularity.desc');
-                settings.streaming.region = getStoredSetting('streaming_region', 'global');
-            }
-        });
-    }
-
-    // Инициализация
-    function init() {
-        addButtons();
-        initStorageListener();
-    }
-
-    // Запуск инициализации
-    init();
 }
 
-
-
-
-//фикс главной
+// Фикс главной страницы
 function addMainButton() {
     $('.menu__item[data-action="main"]').remove();
 
@@ -3572,7 +3200,7 @@ function addMainButton() {
         '<div class="menu__text">' + Lampa.Lang.translate('title_main') + '</div>' +
         '</li>');
 
-    button.on('hover:enter', function() {
+    button.on('hover:enter', function () {
         Lampa.Activity.push({
             source: Lampa.Storage.get('source'),
             title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
@@ -3585,14 +3213,489 @@ function addMainButton() {
 }
 
 
+//локализация
 
-function krivieruki() {
-    Lampa.Utils.putScriptAsync([
-        "https://levende.github.io/lampa-plugins/lnum.js"
-    ], function() {
+// Добавление переводов
+Lampa.Lang.add({
+    surs_vote_count_desc: {
+        ru: "Много голосов",
+        en: "Most Votes",
+        uk: "Багато голосів"
+    },
+    surs_vote_average_desc: {
+        ru: "Высокий рейтинг",
+        en: "High Rating",
+        uk: "Високий рейтинг"
+    },
+    surs_first_air_date_desc: {
+        ru: "Новинки",
+        en: "New Releases",
+        uk: "Новинки"
+    },
+    surs_popularity_desc: {
+        ru: "Популярные",
+        en: "Popular",
+        uk: "Популярні"
+    },
+    surs_revenue_desc: {
+        ru: "Интерес зрителей",
+        en: "Audience Interest",
+        uk: "Інтерес глядачів"
+    },
+    surs_genre_action: {
+        ru: "боевики",
+        en: "action",
+        uk: "бойовики"
+    },
+    surs_genre_comedy: {
+        ru: "комедии",
+        en: "comedies",
+        uk: "комедії"
+    },
+    surs_genre_drama: {
+        ru: "драмы",
+        en: "dramas",
+        uk: "драми"
+    },
+    surs_genre_romance: {
+        ru: "мелодрамы",
+        en: "romance",
+        uk: "мелодрами"
+    },
+    surs_genre_animation: {
+        ru: "анимация",
+        en: "animations",
+        uk: "мультфільми"
+    },
+    surs_genre_kids: {
+        ru: "детское",
+        en: "kids",
+        uk: "дитяче"
+    },
+    surs_genre_adventure: {
+        ru: "приключения",
+        en: "adventures",
+        uk: "пригоди"
+    },
+    surs_genre_crime: {
+        ru: "криминал",
+        en: "crime",
+        uk: "кримінал"
+    },
+    surs_genre_mystery: {
+        ru: "детективы",
+        en: "mysteries",
+        uk: "детективи"
+    },
+    surs_genre_sci_fi: {
+        ru: "фантастика",
+        en: "sci-fi",
+        uk: "фантастика"
+    },
+    surs_genre_western: {
+        ru: "вестерны",
+        en: "westerns",
+        uk: "вестерни"
+    },
+    surs_genre_thriller: {
+        ru: "триллеры",
+        en: "thrillers",
+        uk: "трилери"
+    },
+    surs_genre_family: {
+        ru: "семейные",
+        en: "family",
+        uk: "сімейні"
+    },
+    surs_genre_fantasy: {
+        ru: "фэнтези",
+        en: "fantasy",
+        uk: "фентезі"
+    },
+    surs_genre_reality: {
+        ru: "реалити-шоу",
+        en: "reality shows",
+        uk: "реаліті-шоу"
+    },
+    surs_genre_action_adventure: {
+        ru: "боевики и приключения",
+        en: "action & adventure",
+        uk: "бойовики та пригоди"
+    },
+    surs_genre_soap: {
+        ru: "мыльные оперы",
+        en: "soap operas",
+        uk: "мильні опери"
+    },
+    surs_genre_talk_show: {
+        ru: "ток-шоу",
+        en: "talk shows",
+        uk: "ток-шоу"
+    },
+    surs_title_trend_week: {
+        ru: "Тренды недели",
+        en: "Trending This Week",
+        uk: "Тренди тижня"
+    },
+    surs_title_upcoming_episodes: {
+        ru: "Ближайшие эпизоды",
+        en: "Upcoming Episodes",
+        uk: "Найближчі епізоди"
+    },
+    surs_popular_persons: {
+        ru: "Популярные персоны",
+        en: "Popular Persons",
+        uk: "Популярні персони"
+    },
+    surs_top_movies: {
+        ru: "Топ фильмы",
+        en: "Top Movies",
+        uk: "Топ фільми"
+    },
+    surs_top_tv: {
+        ru: "Топ сериалы",
+        en: "Top TV Shows",
+        uk: "Топ серіали"
+    },
+        surs_for_period: {
+        ru: " за ",
+        en: " for ",
+        uk: " за "
+    },
+    surs_noname: {
+        ru: "без названия",
+        en: "no name",
+        uk: "без назви"
+    },
+    surs_tv_shows: {
+        ru: "сериалы",
+        en: "TV shows",
+        uk: "серіали"
+    },
+     surs_on: {
+        ru: "на",
+        en: "on",
+        uk: "на"
+    },
+    surs_source_name: {
+        ru: "SURS",
+        en: "SURS",
+        uk: "SURS"
+    },
+    surs_source_name_kids: {
+        ru: "SURS KIDS",
+        en: "SURS KIDS",
+        uk: "SURS KIDS"
+    },
+    surs_source_name_rus: {
+        ru: "SURS RUS",
+        en: "SURS RUS",
+        uk: "SURS RUS"
+    },
+    surs_collections: {
+        ru: "Подборки",
+        en: "Collections",
+        uk: "Підбірки"
+    },
+        surs_main_update: {
+        ru: "После изменения настроек обновите главную страницу, нажав на её иконку в боковом меню",
+        en: "After changing settings, refresh the main page by clicking its icon in the side menu",
+        uk: "Після зміни налаштувань оновіть головну сторінку, натиснувши на її іконку в бічному меню"
+    },
+    surs_from: {
+        ru: "от",
+        en: "from",
+        uk: "від"
+    },
+    surs_settings_interface: {
+        ru: "Настройка интерфейса",
+        en: "Interface Settings",
+        uk: "Налаштування інтерфейсу"
+    },
+    surs_set_as_source: {
+        ru: "Установить в качестве источника",
+        en: "Set as Source",
+        uk: "Встановити як джерело"
+    },
+    surs_source_description: {
+        ru: "Влияет на отображение контента на главной странице",
+        en: "Affects content display on the main page",
+        uk: "Впливає на відображення контенту на головній сторінці"
+    },
+    surs_add_to_menu: {
+        ru: "Добавить подборки в боковое меню",
+        en: "Add collections to the side menu",
+        uk: "Додати підбірки до бічного меню"
+    },
+    surs_menu_description: {
+        ru: "Выберите, какие подборки добавить в боковое меню",
+        en: "Choose which collections to add to the side menu",
+        uk: "Виберіть, які підбірки додати до бічного меню"
+    },
+    surs_select_menu_sources: {
+        ru: "Выбор источников для бокового меню",
+        en: "Select sources for the side menu",
+        uk: "Вибір джерел для бічного меню"
+    },
+    surs_filters: {
+        ru: "Фильтры",
+        en: "Filters",
+        uk: "Фільтри"
+    },
+    surs_sort_types: {
+        ru: "Виды сортировки подборок",
+        en: "Types of selection sorting",
+        uk: "Типи сортування підбірок"
+    },
+    surs_sort_description: {
+        ru: "Выбор сортировки подборок",
+        en: "Choose sorting for collections",
+        uk: "Вибір сортування для підбірок"
+    },
+    surs_genres: {
+        ru: "Жанры",
+        en: "Genres",
+        uk: "Жанри"
+    },
+    surs_genres_description: {
+        ru: "Выбор жанров",
+        en: "Choose genres",
+        uk: "Вибір жанрів"
+    },
+    surs_global_streaming: {
+        ru: "Глобальные стриминги",
+        en: "Global streaming services",
+        uk: "Глобальні стрімінгові сервіси"
+    },
+    surs_global_streaming_description: {
+        ru: "Выбор глобальных стриминговых сервисов",
+        en: "Choose global streaming services",
+        uk: "Вибір глобальних стрімінгових сервісів"
+    },
+    surs_rus_streaming: {
+        ru: "Российские стриминги",
+        en: "Russian streaming services",
+        uk: "Російські стрімінгові сервіси"
+    },
+    surs_rus_streaming_description: {
+        ru: "Выбор российских стриминговых сервисов",
+        en: "Choose Russian streaming services",
+        uk: "Вибір російських стрімінгових сервісів"
+    },
+    surs_geo_filters: {
+        ru: "Геофильтры подборок",
+        en: "Geo-filters for collections",
+        uk: "Геофільтри для підбірок"
+    },
+    surs_streaming: {
+        ru: "Стриминги",
+        en: "Streaming services",
+        uk: "Стрімінгові сервіси"
+    },
+    surs_region_description: {
+        ru: "Выберите регион",
+        en: "Choose region",
+        uk: "Виберіть регіон"
+    },
+    surs_movies: {
+        ru: "Фильмы",
+        en: "Movies",
+        uk: "Фільми"
+    },
+    surs_series: {
+        ru: "Сериалы",
+        en: "Series",
+        uk: "Серіали"
+    },
+    surs_top_all_time: {
+        ru: "Топ за все время",
+        en: "Top of all time",
+        uk: "Топ за весь час"
+    },
+    surs_top_content_description: {
+        ru: "Фильмы, сериалы, или всё вместе",
+        en: "Movies, series, or both",
+        uk: "Фільми, серіали або все разом"
+    },
+    surs_top_5_years: {
+        ru: "Топ за 5 лет",
+        en: "Top for 5 years",
+        uk: "Топ за 5 років"
+    },
+    surs_technical_settings: {
+        ru: "Технические настройки",
+        en: "Technical settings",
+        uk: "Технічні налаштування"
+    },
+    surs_cyrillic: {
+        ru: "Кириллица в карточке",
+        en: "Cyrillic in card",
+        uk: "Кирилиця в картці"
+    },
+    surs_cyrillic_description: {
+        ru: "Фильтрует контент, оставляя только те материалы, у которых есть перевод названия или описание на кириллице",
+        en: "Filters content, keeping only materials with titles or descriptions translated into Cyrillic",
+        uk: "Фільтрує контент, залишаючи лише матеріали з перекладом назви або опису на кирилицю"
+    },
+    surs_cyrillic_enabled: {
+        ru: "Включен",
+        en: "Enabled",
+        uk: "Увімкнено"
+    },
+    surs_cyrillic_disabled: {
+        ru: "Выключен",
+        en: "Disabled",
+        uk: "Вимкнено"
+    },
+    surs_rating_validation: {
+        ru: "Валидация рейтинга",
+        en: "Rating validation",
+        uk: "Валідація рейтингу"
+    },
+    surs_rating_description: {
+        ru: "Позволяет исключить контент с случайно завышенной оценкой. Однако может также исключить новые фильмы или те, у которых ещё нет рейтинга или мало голосов",
+        en: "Excludes content with accidentally inflated ratings. May also exclude new movies or those with no rating or few votes",
+        uk: "Виключає контент із випадково завищеним рейтингом. Може також виключити нові фільми або ті, у яких ще немає рейтингу чи мало голосів"
+    },
+    surs_rating_off: {
+        ru: "Выключено",
+        en: "Off",
+        uk: "Вимкнено"
+    },
+    surs_rating_standard: {
+        ru: "Стандартная",
+        en: "Standard",
+        uk: "Стандартна"
+    },
+    surs_rating_enhanced: {
+        ru: "Усиленная",
+        en: "Enhanced",
+        uk: "Посилена"
+    },
+    surs_rating_maximum: {
+        ru: "Максимальная",
+        en: "Maximum",
+        uk: "Максимальна"
+    },
+    surs_rating_fatality: {
+        ru: "Фаталити",
+        en: "Fatality",
+        uk: "Фаталіті"
+    },
+    surs_age_restriction: {
+        ru: "Возрастное ограничение",
+        en: "Age restriction",
+        uk: "Вікове обмеження"
+    },
+    surs_age_description: {
+        ru: "Формирует подборки, которые соответствуют указанному возрастному рейтингу",
+        en: "Creates collections that match the specified age rating",
+        uk: "Формує підбірки, які відповідають вказаному віковому рейтингу"
+    },
+    surs_age_toddlers: {
+        ru: "Для самых маленьких",
+        en: "For toddlers",
+        uk: "Для найменших"
+    },
+    surs_age_6: {
+        ru: "Для детей не старше 6 лет",
+        en: "For children up to 6 years",
+        uk: "Для дітей до 6 років"
+    },
+    surs_age_12: {
+        ru: "Для детей не старше 12 лет",
+        en: "For children up to 12 years",
+        uk: "Для дітей до 12 років"
+    },
+    surs_age_none: {
+        ru: "Без ограничений",
+        en: "No restrictions",
+        uk: "Без обмежень"
+    },
+    surs_exclude_asian: {
+        ru: "Исключение азиатских жанров",
+        en: "Exclude Asian genres",
+        uk: "Виключення азійських жанрів"
+    },
+    surs_exclude_asian_description: {
+        ru: "Мягкий режим: исключает мангу, маньхву, донхуа. Сильный режим: дополнительно исключает аниме",
+        en: "Soft mode: excludes manga, manhwa, donghua. Strong mode: additionally excludes anime",
+        uk: "М’який режим: виключає мангу, манхву, донхуа. Сильний режим: додатково виключає аніме"
+    },
+    surs_exclude_off: {
+        ru: "Выключено",
+        en: "Off",
+        uk: "Вимкнено"
+    },
+    surs_exclude_soft: {
+        ru: "Мягко",
+        en: "Soft",
+        uk: "М’яко"
+    },
+    surs_exclude_strong: {
+        ru: "Сильно",
+        en: "Strong",
+        uk: "Сильно"
+    },
+    surs_name: {
+        ru: "Название",
+        en: "Name",
+        uk: "Назва"
+    },
+    surs_rename_selections: {
+        ru: "Переименование подборок",
+        en: "Rename collections",
+        uk: "Перейменування підбірок"
+    },
+    surs_rename_description: {
+        ru: "Введите свое название вместо",
+        en: "Enter your name instead of",
+        uk: "Введіть свою назву замість"
+    },
+    surs_enter_new_name: {
+        ru: "Введите новое название",
+        en: "Enter new name",
+        uk: "Введіть нову назву"
+    },
+    surs_name_saved: {
+        ru: "Название сохранено. Обновление...",
+        en: "Name saved. Updating...",
+        uk: "Назва збережена. Оновлення..."
+    },
+    surs_name_not_entered: {
+        ru: "Название не введено",
+        en: "Name not entered",
+        uk: "Назва не введена"
+    },
+    surs_global: {
+        ru: "Глобальные",
+        en: "Global",
+        uk: "Глобальні"
+    },
+    surs_russian: {
+        ru: "Российские",
+        en: "Russian",
+        uk: "Російські"
+    },
+    surs_korean: {
+        ru: "Южнокорейские",
+        en: "South Korean",
+        uk: "Південнокорейські"
+    },
+    surs_turkish: {
+    ru: "турецкие",
+    en: "Turkish",
+    uk: "турецькі"
+},
+surs_ukrainian: {
+    ru: "украинские",
+    en: "Ukrainian",
+    uk: "українські"
+},
+    
+});
 
-    });
-}
+
 
 
 
@@ -3600,8 +3703,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-  //krivieruki();
-    //sideButtonsMenu();
+
         if (!Lampa.Storage.get('surs_disableMenu')) {
            addSettingMenu();
 }
@@ -3611,8 +3713,7 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-         // krivieruki();
-            //sideButtonsMenu();
+
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
 }
