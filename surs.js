@@ -721,7 +721,7 @@ function getMovies(genre, options) {
 
         owner.get(apiUrl, params, function (json) {
             if (json.results) {
-                if (!options.russian && !options.turkish && !options.ukrainian) {
+                if (!options.russian && !options.ukrainian) {
                     json.results = applyFilters(json.results);
                 }
                 var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :
