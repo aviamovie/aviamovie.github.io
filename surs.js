@@ -705,9 +705,7 @@ function getMovies(genre, options) {
         if (options.russian) {
             apiUrl += '&with_origin_country=RU';
         }
-        if (options.turkish) {
-            apiUrl += '&with_origin_country=TR';
-        }
+        
         if (options.ukrainian) {
             apiUrl += '&with_origin_country=UA';
         }
