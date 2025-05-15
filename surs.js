@@ -723,7 +723,7 @@ function getMovies(genre, options) {
                     json.results = applyFilters(json.results);
                 }
                 var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :
-                                 options.turkish ? Lampa.Lang.translate('surs_turkish') :
+                                 
                                  options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
                 json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';
             }
@@ -781,7 +781,6 @@ var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
 
 var includeGlobalMovies = getStoredSetting('getMoviesByGenreGlobal', true);
 var includeRussianMovies = getStoredSetting('getMoviesByGenreRus', true);
-var includeTurkishMovies = getStoredSetting('getMoviesByGenreTR', true);
 var includeUkrainianMovies = getStoredSetting('getMoviesByGenreUA', isUkrainianLanguage);
 
 var isGlobalTVEnabled = getStoredSetting('getTVShowsByGenreGlobal', true);
@@ -796,9 +795,6 @@ genres.forEach(function (genre) {
     }
     if (includeRussianMovies) {
         CustomData.push(getMovies(genre, { russian: true }));
-    }
-    if (includeTurkishMovies) {
-        CustomData.push(getMovies(genre, { turkish: true }));
     }
     if (includeUkrainianMovies) {
         CustomData.push(getMovies(genre, { ukrainian: true }));
