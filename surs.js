@@ -2738,8 +2738,7 @@ function showMoviesByGenreSelectionMenu(previousController) {
     var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
     var items = [
         { title: Lampa.Lang.translate('surs_global'), id: 'getMoviesByGenreGlobal' },
-        { title: Lampa.Lang.translate('surs_russian'), id: 'getMoviesByGenreRus' },
-        { title: Lampa.Lang.translate('surs_turkish'), id: 'getMoviesByGenreTR' }
+        { title: Lampa.Lang.translate('surs_russian'), id: 'getMoviesByGenreRus' }
     ];
 
     if (isUkrainianLanguage) {
