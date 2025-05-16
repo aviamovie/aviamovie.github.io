@@ -786,7 +786,7 @@ var includeUkrainianMovies = getStoredSetting('getMoviesByGenreUA', isUkrainianL
 var isGlobalTVEnabled = getStoredSetting('getTVShowsByGenreGlobal', true);
 var isRussianTVEnabled = getStoredSetting('getTVShowsByGenreRus', true);
 var isKoreanTVEnabled = getStoredSetting('getTVShowsByGenreKOR', false);
-var isTurkishTVEnabled = getStoredSetting('getTVShowsByGenreTR', false);
+var isTurkishTVEnabled = getStoredSetting('getTVShowsByGenreTR', true);
 var isUkrainianTVEnabled = getStoredSetting('getTVShowsByGenreUA', isUkrainianLanguage);
 
 genres.forEach(function (genre) {
