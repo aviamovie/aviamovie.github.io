@@ -2333,8 +2333,8 @@ var shouldHide = (currentSource === sourceNameKids || currentSource === sourceNa
 var translations = {
     surs_geo_filters: {
         ru: "Настройки подборок",
-        en: "Settings for collections",
-        uk: "Настройки для підбірок"
+        en: "Collection settings",
+        uk: "Налаштування підбірок"
     },
     surs_filters: {
         ru: "Фильтры",
@@ -3476,9 +3476,9 @@ Lampa.Lang.add({
         uk: "Вибір російських стрімінгових сервісів"
     },
     surs_geo_filters: {
-        ru: "Геофильтры подборок",
-        en: "Geo-filters for collections",
-        uk: "Геофільтри для підбірок"
+        ru: "Настройки подборок",
+        en: "Collection settings",
+        uk: "Налаштування підбірок"
     },
     surs_streaming: {
         ru: "Стриминги",
