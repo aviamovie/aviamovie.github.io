@@ -2332,9 +2332,9 @@ var shouldHide = (currentSource === sourceNameKids || currentSource === sourceNa
 // Объект с локализациями
 var translations = {
     surs_geo_filters: {
-        ru: "Геофильтры подборок",
-        en: "Geo-filters for collections",
-        uk: "Геофільтри для підбірок"
+        ru: "Настройки подборок",
+        en: "Settings for collections",
+        uk: "Настройки для підбірок"
     },
     surs_filters: {
         ru: "Фильтры",
