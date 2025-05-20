@@ -3779,7 +3779,7 @@ surs_ukrainian: {
 
 if (window.appready) {
     add();
-    startProfileListener();
+    //startProfileListener();
     addMainButton();
 		mainButtons();
 
@@ -3790,7 +3790,7 @@ if (window.appready) {
     Lampa.Listener.follow('app', function (e) {
         if (e.type == 'ready') {
             add();
-            startProfileListener();
+            //startProfileListener();
             addMainButton();
 				    mainButtons();
             if (!Lampa.Storage.get('surs_disableMenu')) {
