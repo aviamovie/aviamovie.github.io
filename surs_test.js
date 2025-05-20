@@ -3205,7 +3205,7 @@ function addMainButton() {
     $('.menu .menu__list').eq(0).append(button);
 }
 
-    function mainButtons() {
+        function mainButtons() {
         // Массив с данными для кнопок
         var buttonsData = [
             { id: 'btn1', title: 'Кнопка 1', icon: './img/icons/bookmark.svg' },
@@ -3216,7 +3216,10 @@ function addMainButton() {
 
         // Функция для рендеринга кнопок на главной странице
         function renderMainButtons() {
-            if (Lampa.Activity.active().component !== 'main') return;
+            // Проверка на существование активности и её компонента
+            if (!Lampa.Activity.active() || !Lampa.Activity.active().component || Lampa.Activity.active().component !== 'main') {
+                return;
+            }
 
             var $render = Lampa.Activity.active().activity.render();
             var $buttonRow = $('<div class="main-buttons-row"></div>');
@@ -3267,24 +3270,24 @@ function addMainButton() {
 
         // Подписка на событие смены активности
         Lampa.Listener.follow('change', function (event) {
-            if (event.name === 'activity' && Lampa.Activity.active().component === 'main') {
+            if (event.name === 'activity' && Lampa.Activity.active() && Lampa.Activity.active().component === 'main') {
                 renderMainButtons();
             }
         });
 
         // Запуск рендеринга, если приложение уже готово
-        if (window.appready && Lampa.Activity.active().component === 'main') {
+        if (window.appready && Lampa.Activity.active() && Lampa.Activity.active().component === 'main') {
             renderMainButtons();
         } else {
             Lampa.Listener.follow('app', function (event) {
-                if (event.type === 'ready' && Lampa.Activity.active().component === 'main') {
+                if (event.type === 'ready' && Lampa.Activity.active() && Lampa.Activity.active().component === 'main') {
                     renderMainButtons();
                 }
             });
         }
     }
 
-    // Вызов функции
+
 
 
 
