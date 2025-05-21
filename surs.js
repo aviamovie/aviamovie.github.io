@@ -235,11 +235,11 @@ var allStreamingServicesRUS = [
     function setupCardHandlers() {
         // Инициализация слушателя карточек
         function initCardListener() {
-            if (window.lampa_listener_extensions) {
+            if (window.lampa_listener_surs) {
                 return;
             }
 
-            window.lampa_listener_extensions = true;
+            window.lampa_listener_surs = true;
 
             Object.defineProperty(window.Lampa.Card.prototype, 'build', {
                 get: function () {
