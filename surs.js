@@ -233,9 +233,9 @@ function customButtons() {
     ];
 }
 
-    // Функция для инициализации слушателя и обработки нажатий
+
     function setupCardHandlers() {
-        // Инициализация слушателя карточек
+
         function initCardListener() {
             if (window.lampa_listener_extensions) {
                 return;
@@ -260,7 +260,7 @@ function customButtons() {
         }
 
 
-// Обработка нажатий на карточки
+
     var buttonActions = {
         surs_main: function() {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
@@ -312,7 +312,7 @@ function customButtons() {
     };
 
 
-// Функция для обработки нажатий на карточки
+
 function addCardListener() {
     initCardListener();
     Lampa.Listener.follow('card', function (event) {
@@ -320,12 +320,12 @@ function addCardListener() {
             var cardId = event.object.data.id;
             var customButtonIds = customButtons().map(button => button.id);
             if (customButtonIds.includes(cardId)) {
-                // Устанавливаем SVG-постер для карточки
+
                 event.object.data.img = buttonPosters[cardId];
 
                 event.object.card.on('hover:enter', function(e) {
                     console.log('Нажата кнопка с ID:', cardId);
-                    // Выполняем действие, соответствующее ID кнопки
+
                     if (buttonActions[cardId]) {
                         buttonActions[cardId]();
                     } else {
