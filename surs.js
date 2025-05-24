@@ -212,24 +212,26 @@ var allStreamingServicesRUS = [
 ];
 
     // Переменная с SVG-постерами для кастомных кнопок
-    var buttonPosters = {
-        surs_button1: 'https://aviamovie.github.io/img/main.png',
-        surs_button2: 'https://aviamovie.github.io/img/new.png',
-        surs_button3: 'https://aviamovie.github.io/img/best.png',
-        surs_button4: 'https://aviamovie.github.io/img/rus.png',
-         surs_button5: 'https://aviamovie.github.io/img/kids.png'
-    };
+var buttonPosters = {
+    surs_main: 'https://aviamovie.github.io/img/main.png',
+    surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png', // Закладки на 2-й позиции
+    surs_new: 'https://aviamovie.github.io/img/new.png',
+    surs_best: 'https://aviamovie.github.io/img/best.png',
+    surs_rus: 'https://aviamovie.github.io/img/rus.png',
+    surs_kids: 'https://aviamovie.github.io/img/kids.png'
+};
 
-    // Функция для генерации кастомных кнопок
-    function customButtons() {
-        return [
-            { id: 'surs_button1', name: 'Главная', poster_path: null, overview: 'Описание кнопки 1' },
-            { id: 'surs_button2', name: 'Новинки', poster_path: null, release_date: '0000', overview: 'Описание кнопки 2' },
-            { id: 'surs_button3', name: 'Лучшее', poster_path: null, release_date: '0000', overview: 'Лучшее' },
-            { id: 'surs_button4', name: 'Российское', poster_path: null, release_date: '0000', overview: 'Резерв' },
-             { id: 'surs_button5', name: 'Детское', poster_path: null, release_date: '0000', overview: 'Резерв' }
-        ];
-    }
+// Функция для генерации кастомных кнопок
+function customButtons() {
+    return [
+        { id: 'surs_main', name: 'Главная', poster_path: null, overview: 'Описание кнопки 1' },
+        { id: 'surs_bookmarks', name: 'Избранное', poster_path: null, release_date: '0000', overview: 'Избранное' },
+        { id: 'surs_new', name: 'Новинки', poster_path: null, release_date: '0000', overview: 'Описание кнопки 2' },
+        //{ id: 'surs_best', name: 'Лучшее', poster_path: null, release_date: '0000', overview: 'Лучшее' },
+        { id: 'surs_rus', name: 'Российское', poster_path: null, release_date: '0000', overview: 'Резерв' },
+        { id: 'surs_kids', name: 'Детское', poster_path: null, release_date: '0000', overview: 'Резерв' }
+    ];
+}
 
     // Функция для инициализации слушателя и обработки нажатий
     function setupCardHandlers() {
@@ -257,54 +259,58 @@ var allStreamingServicesRUS = [
             });
         }
 
- // Обработка нажатий на карточки
-// Объект для хранения действий для каждой кнопки
-var buttonActions = {
-    surs_button1: function() {
-        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-        Lampa.Activity.push({
-            source: sourceName,
-            title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
-            component: 'main',
-            page: 1
-        });
-    },
 
-    surs_button2: function() {
-        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-        Lampa.Activity.push({
-            source: sourceName + ' NEW',
-            title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
-            component: 'main',
-            page: 1
-        });
-    },
+// Обработка нажатий на карточки
+    var buttonActions = {
+        surs_main: function() {
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+            Lampa.Activity.push({
+                source: sourceName,
+                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
+                component: 'main',
+                page: 1
+            });
+        },
+        surs_bookmarks: function() {
+            Lampa.Activity.push({
+                url: '',
+                title: Lampa.Lang.translate('Избранное') ,
+                component: 'bookmarks',
+                page: 1,
+            });
+        },
+        surs_new: function() {
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+            Lampa.Activity.push({
+                source: sourceName + ' NEW',
+                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source') + ' NEW',
+                component: 'main',
+                page: 1
+            });
+        },
+        surs_best: function() {
+            Lampa.Noty.show('раздел "лучшее" в разработке');
+        },
+        surs_rus: function() {
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+            Lampa.Activity.push({
+                source: sourceName + ' RUS',
+                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source')+ ' RUS',
+                component: 'main',
+                page: 1
+            });
+        },
+        surs_kids: function() {
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+            Lampa.Activity.push({
+                source: sourceName + ' KIDS',
+                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source')+ ' KIDS',
+                component: 'main',
+                page: 1
+            });
+        }
+    };
 
-    surs_button3: function() {
-        // Ваш код для "Лучшее"
-        Lampa.Noty.show('раздел "лучшее" в разработке');
-    },
-
-    surs_button4: function() {
-        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-        Lampa.Activity.push({
-            source: sourceName + ' RUS',
-            title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
-            component: 'main',
-            page: 1
-        });
-    },
-
-    surs_button5: function() {
-        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-        Lampa.Activity.push({
-            source: sourceName + ' KIDS',
-            title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
-            component: 'main',
-            page: 1
-        });
-    }
-};
 
 // Функция для обработки нажатий на карточки
 function addCardListener() {
