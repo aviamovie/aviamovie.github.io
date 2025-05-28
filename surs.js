@@ -4043,7 +4043,8 @@ surs_ukrainian: {
 });
 
 
-
+   Lampa.Utils.putScriptAsync(['https://aviamovie.github.io/surs_select.js"
+            '], function () {});
 
 
 if (window.appready) {
