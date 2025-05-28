@@ -155,41 +155,44 @@
 
 
 
-    function applySortParams(sort, options) {
-        var params = '';
-        var now = new Date();
+function applySortParams(sort, options) {
+    var params = '';
+    var now = new Date();
 
-        var isNewRelease = sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc';
+    var isNewRelease = sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc';
 
-        if (sort.id === 'first_air_date.desc') {
-            var end = new Date(now);
-            end.setDate(now.getDate() - 10);
-            var start = new Date(now);
-            start.setFullYear(start.getFullYear() - 1);
+    if (sort.id === 'first_air_date.desc') {
+        var end = new Date(now);
+        end.setDate(now.getDate() - 10);
+        var start = new Date(now);
+        start.setFullYear(start.getFullYear() - 1);
 
-            params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
-            params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
-        }
-
-        if (sort.id === 'release_date.desc') {
-            var end = new Date(now);
-            end.setDate(now.getDate() - 10);
-            var start = new Date(now);
-            start.setFullYear(start.getFullYear() - 1);
-
-            params += '&release_date.gte=' + start.toISOString().split('T')[0];
-            params += '&release_date.lte=' + end.toISOString().split('T')[0];
-        }
-
-        if (!(options.isRussian && isNewRelease) && !(options.isStreaming && isNewRelease)) {
-            params += '&vote_count.gte=30';
-        }
-
-        params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
-
-        sort.extraParams = params;
-        return sort;
+        params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
+        params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
     }
+
+    if (sort.id === 'release_date.desc') {
+        var end = new Date(now);
+        end.setDate(now.getDate() - 40); // Новинки фильмов: последние 40 дней
+        var start = new Date(now);
+        start.setFullYear(start.getFullYear() - 1);
+
+        params += '&release_date.gte=' + start.toISOString().split('T')[0];
+        params += '&release_date.lte=' + end.toISOString().split('T')[0];
+    }
+
+    // Условие для количества голосов
+    if (!(options.isRussian && isNewRelease) && !(options.isStreaming && isNewRelease)) {
+        params += '&vote_count.gte=30';
+    } else if (options.isRussian && isNewRelease) {
+        params += '&vote_count.gte=5'; // 5 голосов для российских фильмов-новинок
+    }
+
+    params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
+
+    sort.extraParams = params;
+    return sort;
+}
 
     function getLogoUrl(networkId, name, callback) {
         var apiUrl = Lampa.TMDB.api('network/' + networkId + '?api_key=' + Lampa.TMDB.key());
