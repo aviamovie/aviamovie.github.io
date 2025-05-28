@@ -214,7 +214,8 @@ var allStreamingServicesRUS = [
     // Переменная с SVG-постерами для кастомных кнопок
 var buttonPosters = {
     surs_main: 'https://aviamovie.github.io/img/main.png',
-    surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png', // Закладки на 2-й позиции
+    surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png', 
+    surs_select: 'https://aviamovie.github.io/img/select_new.png',
     surs_new: 'https://aviamovie.github.io/img/new.png',
     surs_best: 'https://aviamovie.github.io/img/best.png',
     surs_rus: 'https://aviamovie.github.io/img/rus.png',
@@ -224,12 +225,12 @@ var buttonPosters = {
 // Функция для генерации кастомных кнопок
 function customButtons() {
     return [
-        { id: 'surs_main', name: 'Главная', poster_path: null, overview: 'Описание кнопки 1' },
-        { id: 'surs_bookmarks', name: 'Избранное', poster_path: null, release_date: '0000', overview: 'Избранное' },
-        { id: 'surs_new', name: 'Новинки', poster_path: null, release_date: '0000', overview: 'Описание кнопки 2' },
-        //{ id: 'surs_best', name: 'Лучшее', poster_path: null, release_date: '0000', overview: 'Лучшее' },
-        { id: 'surs_rus', name: 'Российское', poster_path: null, release_date: '0000', overview: 'Резерв' },
-        { id: 'surs_kids', name: 'Детское', poster_path: null, release_date: '0000', overview: 'Резерв' }
+        { id: 'surs_main', name: 'Главная', poster_path: null, overview: '.' },
+        { id: 'surs_bookmarks', name: 'Избранное', poster_path: null, release_date: '0000', overview: '.' },
+        { id: 'surs_select', name: 'Подбоки', poster_path: null, release_date: '0000', overview: '.' },
+        { id: 'surs_new', name: 'Новинки', poster_path: null, release_date: '0000', overview: '.' },
+        { id: 'surs_rus', name: 'Российское', poster_path: null, release_date: '0000', overview: '.' },
+        { id: 'surs_kids', name: 'Детское', poster_path: null, release_date: '0000', overview: '.' }
     ];
 }
 
@@ -278,6 +279,10 @@ function customButtons() {
                 component: 'bookmarks',
                 page: 1,
             });
+        },
+        
+        surs_select: function() {
+            window.SursSelect.showSursSelectMenu = showSursSelectMenu;
         },
         surs_new: function() {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
