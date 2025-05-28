@@ -282,7 +282,9 @@ function customButtons() {
         },
         
         surs_select: function() {
-            window.SursSelect.showSursSelectMenu = showSursSelectMenu;
+if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') {
+    window.SursSelect.showSursSelectMenu();
+}
         },
         surs_new: function() {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
