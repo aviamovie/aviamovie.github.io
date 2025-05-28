@@ -136,6 +136,16 @@
 (function (  ) {
     'use strict';
    
+if (!window.SursSelect) {
+    Lampa.Utils.putScriptAsync(
+        ['https://aviamovie.github.io/surs_select.js'], 
+        function () {
+            console.log('SursSelect плагин успешно загружен.');
+        }
+    );
+} else {
+    console.log('SursSelect уже загружен.');
+}
 
 // Опции сортировки
 var allSortOptions = [
