@@ -184,8 +184,8 @@ function applySortParams(sort, options) {
     // Условие для количества голосов
     if (!(options.isRussian && isNewRelease) && !(options.isStreaming && isNewRelease)) {
         params += '&vote_count.gte=30';
-    } else if (options.isRussian && isNewRelease) {
-        params += '&vote_count.gte=2'; // 5 голосов для российских фильмов-новинок
+    } else if (options.isRussian && sort.id === 'release_date.desc') {
+        params += '&vote_count.gte=5'; // 5 голосов только для российских фильмов-новинок
     }
 
     params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
@@ -193,6 +193,7 @@ function applySortParams(sort, options) {
     sort.extraParams = params;
     return sort;
 }
+
 
     function getLogoUrl(networkId, name, callback) {
         var apiUrl = Lampa.TMDB.api('network/' + networkId + '?api_key=' + Lampa.TMDB.key());
