@@ -185,7 +185,7 @@ function applySortParams(sort, options) {
     if (!(options.isRussian && isNewRelease) && !(options.isStreaming && isNewRelease)) {
         params += '&vote_count.gte=30';
     } else if (options.isRussian && isNewRelease) {
-        params += '&vote_count.gte=5'; // 5 голосов для российских фильмов-новинок
+        params += '&vote_count.gte=2'; // 5 голосов для российских фильмов-новинок
     }
 
     params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
