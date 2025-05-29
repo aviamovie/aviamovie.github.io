@@ -136,16 +136,6 @@
 (function (  ) {
     'use strict';
    
-if (!window.SursSelect) {
-    Lampa.Utils.putScriptAsync(
-        ['https://aviamovie.github.io/surs_select.js'], 
-        function () {
-            console.log('SursSelect плагин успешно загружен.');
-        }
-    );
-} else {
-    console.log('SursSelect уже загружен.');
-}
 
 // Опции сортировки
 var allSortOptions = [
@@ -4052,6 +4042,22 @@ surs_ukrainian: {
     
 });
 
+function loadSidePlugins() {
+    setTimeout(function () {
+        if (!window.SursSelect) {
+            Lampa.Utils.putScriptAsync(
+                ['https://aviamovie.github.io/surs_select.js'],
+                function () {
+                    console.log('SursSelect плагин успешно загружен.');
+                }
+            );
+        } else {
+            console.log('SursSelect уже загружен.');
+        }
+    }, 2000);
+}
+
+
 
 
 
@@ -4060,6 +4066,7 @@ if (window.appready) {
     startProfileListener();
     addMainButton();
     setupCardHandlers();
+    loadSidePlugins();
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
            addSettingMenu();
@@ -4071,6 +4078,7 @@ if (window.appready) {
             startProfileListener();
             addMainButton();
             setupCardHandlers();
+            loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
