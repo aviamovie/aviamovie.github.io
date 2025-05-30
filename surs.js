@@ -729,7 +729,7 @@ var SourceTMDB = function (parent) {
                     title: Lampa.Lang.translate(''),
                     results: customButtons(),
                     small: true,
-                    customButton: true
+                    //customButton: true,
                     collection: true,
                     line_type: 'player-cards'
                 };                      
