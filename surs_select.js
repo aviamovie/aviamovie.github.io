@@ -236,23 +236,47 @@ function applySortParams(sort, options) {
     }
 
     function showSursSelectMenu() {
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('sursSelect_menu_title'),
-            items: [
-                { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
-                { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
-                { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' }
-            ],
-            onSelect: function (item) {
-                if (item.action === 'movies') showMovieMenu();
-                else if (item.action === 'tvshows') showTVMenu();
-                else if (item.action === 'streaming') showStreamingTypeMenu();
-            },
-            onBack: function () {
-                Lampa.Controller.toggle('content');
-            }
+    var items = [
+        { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
+        { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
+        { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' }
+    ];
+
+    // Добавим неактивный разделитель
+    items.push({
+        title: '<span style="opacity: 0.5; font-style: italic;">Сторонние плагины</span>',
+        noSelect: true
+    });
+
+    // Добавим кнопку LNUM, если плагин доступен
+    if (window.lnum_plugin === true) {
+        items.push({
+            title: 'LNUM – коллекции',
+            action: 'lnum_collections'
         });
     }
+
+    Lampa.Select.show({
+        title: Lampa.Lang.translate('sursSelect_menu_title'),
+        items: items,
+        onSelect: function (item) {
+            if (item.action === 'movies') showMovieMenu();
+            else if (item.action === 'tvshows') showTVMenu();
+            else if (item.action === 'streaming') showStreamingTypeMenu();
+            else if (item.action === 'lnum_collections') {
+                Lampa.Activity.push({
+                    url: '',
+                    title: 'LNUM collections',
+                    component: 'category',
+                    source: 'LNUM'
+                });
+            }
+        },
+        onBack: function () {
+            Lampa.Controller.toggle('content');
+        }
+    });
+}
 
     function showMovieMenu() {
         Lampa.Select.show({
