@@ -225,12 +225,12 @@ var buttonPosters = {
 // Функция для генерации кастомных кнопок
 function customButtons() {
     return [
-        { id: 'surs_main', name: 'Главная', poster_path: null, overview: '.' },
-        { id: 'surs_bookmarks', name: 'Избранное', poster_path: null, release_date: '0000', overview: '.' },
-        { id: 'surs_select', name: 'Подбоки', poster_path: null, release_date: '0000', overview: '.' },
-        { id: 'surs_new', name: 'Новинки', poster_path: null, release_date: '0000', overview: '.' },
-        { id: 'surs_rus', name: 'Российское', poster_path: null, release_date: '0000', overview: '.' },
-        { id: 'surs_kids', name: 'Детское', poster_path: null, release_date: '0000', overview: '.' }
+        { id: 'surs_main', name: 'Главная', poster_path: null, overview: '.', small: true, wide: true },
+        { id: 'surs_bookmarks', name: 'Избранное', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
+        { id: 'surs_select', name: 'Подбоки', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
+        { id: 'surs_new', name: 'Новинки', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
+        { id: 'surs_rus', name: 'Российское', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
+        { id: 'surs_kids', name: 'Детское', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true }
     ];
 }
 
@@ -327,18 +327,19 @@ function addCardListener() {
             var cardId = event.object.data.id;
             var customButtonIds = customButtons().map(button => button.id);
             if (customButtonIds.includes(cardId)) {
-
                 event.object.data.img = buttonPosters[cardId];
+                event.object.card.addClass('custom-button-card'); // Добавляем класс
+                event.object.data.small = true;
+                event.object.data.wide = true;
 
                 event.object.card.on('hover:enter', function(e) {
                     console.log('Нажата кнопка с ID:', cardId);
-
                     if (buttonActions[cardId]) {
                         buttonActions[cardId]();
                     } else {
                         console.warn('Действие для кнопки ' + cardId + ' не определено');
                     }
-                    e.stopImmediatePropagation(); // Предотвращаем стандартное поведение
+                    e.stopImmediatePropagation();
                 });
             }
         }
@@ -600,7 +601,21 @@ function buildApiUrl(baseUrl) {
         
 
 function startPlugin() {
-    window.plugin_tmdb_mod_ready = true;
+    window.plugin_surs_ready = true;
+    
+
+    Lampa.Template.add('custom_button_style', `
+        <style>
+            .custom-button-card {
+                width: 14em;
+            }
+
+
+            }
+        </style>
+    `);
+    $('body').append(Lampa.Template.get('custom_button_style', {}, true));
+    
 
     var Episode = function (data) {
         var card = data.card || data;
@@ -3561,6 +3576,8 @@ function addMainButton() {
 }
 
 
+
+
 //локализация
 
 // Добавление переводов
@@ -4089,6 +4106,6 @@ if (window.appready) {
    }
 }
 
-if (!window.plugin_tmdb_mod_ready) startPlugin();
+if (!window.plugin_surs_ready) startPlugin();
 
 })( );
