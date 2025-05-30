@@ -2,8 +2,7 @@
     'use strict';
 
     if (window.SursSelect) return;
-
-    window.SursSelect = {};
+    window.SursSelect = true;
 
     // Expanded localization for all UI strings
     Lampa.Lang.add({
