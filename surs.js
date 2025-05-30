@@ -608,7 +608,6 @@ function startPlugin() {
         <style>
             .custom-button-card {
                 width: 13.93em;
-                height: 7.5em;
             }
 
 
