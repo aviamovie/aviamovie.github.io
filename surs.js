@@ -604,18 +604,24 @@ function startPlugin() {
     window.plugin_surs_ready = true;
     
 
-    Lampa.Template.add('custom_button_style', `
-        <style>
-            .custom-button-card {
-                width: 13.93em;
+Lampa.Template.add('custom_button_style', `
+    <style>
+        .custom-button-card {
+            width: 13.93em;
+        }
+        @media screen and (max-width: 900px) {
+            .items-cards .custom-button-card {
+                width: 12em; !important;
             }
-
-
+        }
+                @media screen and (max-width: 700px) {
+            .items-cards .custom-button-card {
+                width: 9em; !important;
             }
-        </style>
-    `);
-    $('body').append(Lampa.Template.get('custom_button_style', {}, true));
-    
+        }
+    </style>
+`);
+$('body').append(Lampa.Template.get('custom_button_style', {}, true));
 
     var Episode = function (data) {
         var card = data.card || data;
