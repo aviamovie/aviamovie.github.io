@@ -97,7 +97,17 @@
             ru: "Подборки",
             en: "Collections",
             uk: "Колекції"
-        }
+        },
+        lnum_collections: {
+        en: 'LNUM – Collections',
+        ru: 'LNUM – Коллекции',
+        uk: 'LNUM – Колекції'
+    },
+        plugins_section_title: {
+        en: 'Third-party plugins',
+        ru: 'Сторонние плагины',
+        uk: 'Сторонні плагіни'
+    }
     });
 
     var allStreamingServices = [
@@ -235,23 +245,22 @@ function applySortParams(sort, options) {
         }
     }
 
-    function showSursSelectMenu() {
+function showSursSelectMenu() {
     var items = [
         { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
         { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
         { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' }
     ];
 
-    // Добавим неактивный разделитель
-    items.push({
-        title: '<span style="opacity: 0.5; font-style: italic;">Сторонние плагины</span>',
-        noSelect: true
-    });
-
-    // Добавим кнопку LNUM, если плагин доступен
+    // Добавляем блок "Сторонние плагины" только если активен lnum_plugin
     if (window.lnum_plugin === true) {
         items.push({
-            title: 'LNUM – коллекции',
+            title: '<span style="opacity: 0.5; font-style: italic;">' + Lampa.Lang.translate('plugins_section_title') + '</span>',
+            noSelect: true
+        });
+
+        items.push({
+            title: Lampa.Lang.translate('lnum_collections'),
             action: 'lnum_collections'
         });
     }
@@ -266,7 +275,7 @@ function applySortParams(sort, options) {
             else if (item.action === 'lnum_collections') {
                 Lampa.Activity.push({
                     url: '',
-                    title: 'LNUM collections',
+                    title: Lampa.Lang.translate('lnum_collections'),
                     component: 'category',
                     source: 'LNUM'
                 });
