@@ -1,8 +1,10 @@
 (function () {
     'use strict';
 
-    if (window.SursSelect) return;
-    window.SursSelect = true;
+    if (window.SursSelect && window.SursSelect.__initialized) return;
+
+    window.SursSelect = window.SursSelect || {};
+    window.SursSelect.__initialized = true;
 
     // Expanded localization for all UI strings
     Lampa.Lang.add({
