@@ -607,7 +607,8 @@ function startPlugin() {
     Lampa.Template.add('custom_button_style', `
         <style>
             .custom-button-card {
-                width: 14em;
+                width: 13.93em;
+                height: 7.5em;
             }
 
 
