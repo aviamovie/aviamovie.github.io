@@ -222,16 +222,32 @@ var buttonPosters = {
     surs_kids: 'https://aviamovie.github.io/img/kids.png'
 };
 
-// Функция для генерации кастомных кнопок
-function customButtons() {
+
+function getAllButtons() {
     return [
-        { id: 'surs_main', name: 'Главная', poster_path: null, overview: '.', small: true, wide: true },
-        { id: 'surs_bookmarks', name: 'Избранное', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
-        { id: 'surs_select', name: 'Подбоки', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
-        { id: 'surs_new', name: 'Новинки', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
-        { id: 'surs_rus', name: 'Российское', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true },
-        { id: 'surs_kids', name: 'Детское', poster_path: null, release_date: '0000', overview: '.', small: true, wide: true }
+        { id: 'surs_main', title: 'surs_main',  overview: ' '},
+        { id: 'surs_bookmarks', title: 'surs_bookmarks', overview: ' '},
+        { id: 'surs_select', title: 'surs_select', overview: ' ' },
+        { id: 'surs_new', title: 'surs_new', overview: ' ' },
+        { id: 'surs_rus', title: 'surs_rus', poster_path: null, overview: ' ' },
+        { id: 'surs_kids', title: 'surs_kids', overview: ' ' }
     ];
+}
+
+
+// Функция для получения кастомных кнопок с учётом настроек
+function customButtons() {
+    var allButtons = getAllButtons();
+    return allButtons.filter(function(button) {
+        return getStoredSetting('custom_button_' + button.id, true);
+    }).map(function(button) {
+        return {
+            id: button.id,
+            name: Lampa.Lang.translate(button.title), 
+            overview: button.overview,
+
+        };
+    });
 }
 
 
@@ -275,7 +291,7 @@ function customButtons() {
         surs_bookmarks: function() {
             Lampa.Activity.push({
                 url: '',
-                title: Lampa.Lang.translate('Избранное') ,
+                title: Lampa.Lang.translate('surs_bookmarks') ,
                 component: 'bookmarks',
                 page: 1,
             });
@@ -328,12 +344,11 @@ function addCardListener() {
             var customButtonIds = customButtons().map(button => button.id);
             if (customButtonIds.includes(cardId)) {
                 event.object.data.img = buttonPosters[cardId];
-                event.object.card.addClass('custom-button-card'); // Добавляем класс
-                event.object.data.small = true;
-                event.object.data.wide = true;
+                event.object.card.addClass('custom-button-card'); 
+
 
                 event.object.card.on('hover:enter', function(e) {
-                    console.log('Нажата кнопка с ID:', cardId);
+
                     if (buttonActions[cardId]) {
                         buttonActions[cardId]();
                     } else {
@@ -2607,6 +2622,7 @@ function startProfileListener() {
     var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
+    var sourceNameNew = sourceName + ' NEW';
 
     Lampa.Listener.follow('profile', function(event) {
     if (event.type !== 'changed') return;
@@ -2624,7 +2640,7 @@ function startProfileListener() {
 
     Lampa.Storage.listener.follow('change', function(event) {
         if (event.name === "source" && !sourceChangedByProfile) {
-            if (event.value === sourceName || event.value === sourceNameKids || event.value === sourceNameRus) {
+            if (event.value === sourceName || event.value === sourceNameKids || event.value === sourceNameRus || event.value === sourceNameNew) {
                 softRefresh(event.value, true);
             }
         }
@@ -2683,6 +2699,7 @@ Lampa.Settings.listener.follow('open', function (e) {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             var sourceNameKids = sourceName + ' KIDS';
             var sourceNameRus = sourceName + ' RUS'; // Новый источник
+               var sourceNameNew = sourceName + ' NEW'; // Новый источник
 
            var paramsToHide = [
     'surs_cirillic',
@@ -2703,7 +2720,7 @@ Lampa.Settings.listener.follow('open', function (e) {
     'surs_global_streaming'
 ];
 
-var shouldHide = (currentSource === sourceNameKids || currentSource === sourceNameRus);
+var shouldHide = (currentSource === sourceNameKids || currentSource === sourceNameRus || currentSource === sourceNameNew);
 
 // Объект с локализациями
 var translations = {
@@ -2763,6 +2780,7 @@ function addSettingMenu() {
     var sourceName = Lampa.Storage.get('surs_name') || Lampa.Lang.translate('surs_source_name');
     var sourceNameKids = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_kids').split(' ')[1]; // "KIDS"
     var sourceNameRus = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_rus').split(' ')[1]; // "RUS"
+        var sourceNameNew = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_new').split(' ')[1]; // "NEW"
 
     Lampa.SettingsApi.addComponent({
         component: 'surs',
@@ -2802,6 +2820,7 @@ function addSettingMenu() {
             type: 'select',
             values: {
                 [sourceName]: sourceName,
+                [sourceNameNew]: sourceNameNew,
                 [sourceNameKids]: sourceNameKids,
                 [sourceNameRus]: sourceNameRus
             },
@@ -2929,6 +2948,23 @@ function addSettingMenu() {
         }
         addMenuButtons();
     });
+    
+    // Добавление параметра для управления кастомными кнопками
+Lampa.SettingsApi.addParam({
+    component: 'surs',
+    param: {
+        name: 'surs_custom_buttons',
+        type: 'button'
+    },
+    field: {
+        name: Lampa.Lang.translate('surs_custom_buttons'),
+        description: Lampa.Lang.translate('surs_custom_buttons_description')
+    },
+    onChange: function () {
+        var currentController = Lampa.Controller.enabled().name;
+        showSelectionMenu('surs_custom_buttons', getAllButtons(), 'custom_button_', 'id', currentController);
+    }
+});
 
     Lampa.SettingsApi.addParam({
         component: 'surs',
@@ -3763,10 +3799,15 @@ Lampa.Lang.add({
         en: "SURS RUS",
         uk: "SURS RUS"
     },
+        surs_source_name_new: {
+        ru: "SURS NEW",
+        en: "SURS NEW",
+        uk: "SURS NEW"
+    },
     surs_collections: {
-        ru: "Подборки",
-        en: "Collections",
-        uk: "Підбірки"
+        ru: "Главная",
+        en: "Main",
+        uk: "Головна"
     },
         surs_main_update: {
         ru: "После изменения настроек обновите главную страницу, нажав на её иконку в боковом меню",
@@ -4063,7 +4104,46 @@ surs_ukrainian: {
     en: "Ukrainian",
     uk: "українські"
 },
-    
+surs_custom_buttons: {
+    ru: "Горизонтальное меню",
+    en: "Horizontal Menu",
+    uk: "Горизонтальне меню"
+},
+surs_custom_buttons_description: {
+    ru: "Выберите, какие кнопки отображать в интерфейсе",
+    en: "Choose which buttons to display in the interface",
+    uk: "Виберіть, які кнопки відображати в інтерфейсі"
+},
+surs_main: {
+    ru: "Главная",
+    en: "Main",
+    uk: "Головна"
+},
+surs_bookmarks: {
+    ru: "Избранное",
+    en: "Bookmarks",
+    uk: "Обране"
+},
+surs_select: {
+    ru: "Разделы",
+    en: "Sections",
+    uk: "Розділи"
+},
+surs_new: {
+    ru: "Новинки",
+    en: "New",
+    uk: "Новинки"
+},
+surs_rus: {
+    ru: "Русское",
+    en: "Russian",
+    uk: "Російське"
+},
+surs_kids: {
+    ru: "Детское",
+    en: "Kids",
+    uk: "Дитяче"
+}
 });
 
 function loadSidePlugins() {
