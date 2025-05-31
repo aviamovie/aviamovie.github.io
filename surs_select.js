@@ -274,7 +274,7 @@ function showSursSelectMenu() {
             else if (item.action === 'lnum_collections') {
                 Lampa.Activity.push({
                     url: '',
-                    title: Lampa.Lang.translate('lnum_collections'),
+                    title: Lampa.Lang.translate('sursSelect_lnum_collections'),
                     component: 'category',
                     source: 'LNUM'
                 });
