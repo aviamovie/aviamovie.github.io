@@ -259,7 +259,7 @@ function showSursSelectMenu() {
         separator: true
     });
         items.push({
-            title: Lampa.Lang.translate('surs_select_lnum_collections'),
+            title: Lampa.Lang.translate('sursSelect_lnum_collections'),
             action: 'lnum_collections'
         });
     }
