@@ -98,7 +98,7 @@
             en: "Collections",
             uk: "Колекції"
         },
-        surs_select_lnum_collections: {
+        sursSelect_lnum_collections: {
         en: 'LNUM – Collections',
         ru: 'LNUM – Коллекции',
         uk: 'LNUM – Колекції'
