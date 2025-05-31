@@ -98,12 +98,12 @@
             en: "Collections",
             uk: "Колекції"
         },
-        lnum_collections: {
+        surs_select_lnum_collections: {
         en: 'LNUM – Collections',
         ru: 'LNUM – Коллекции',
         uk: 'LNUM – Колекції'
     },
-        plugins_section_title: {
+        surs_select_plugins_section_title: {
         en: 'Third-party plugins',
         ru: 'Сторонние плагины',
         uk: 'Сторонні плагіни'
@@ -254,13 +254,12 @@ function showSursSelectMenu() {
 
     // Добавляем блок "Сторонние плагины" только если активен lnum_plugin
     if (window.lnum_plugin === true) {
+    items.push({
+        title: Lampa.Lang.translate('surs_select_plugins_section_title'),
+        separator: true
+    });
         items.push({
-            title: '<span style="opacity: 0.5; font-style: italic;">' + Lampa.Lang.translate('plugins_section_title') + '</span>',
-            noSelect: true
-        });
-
-        items.push({
-            title: Lampa.Lang.translate('lnum_collections'),
+            title: Lampa.Lang.translate('surs_select_lnum_collections'),
             action: 'lnum_collections'
         });
     }
