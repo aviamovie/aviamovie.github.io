@@ -1,141 +1,206 @@
-/* ==== Поддержка автора ==== */
 
-// Буду благодарен за поддержку! Мечтаю собрать на ПАЗик, чтобы построить из него автодом, отдыхать с семьей у реки.  Но и сам процес постройки, честно говоря, видится мне не менее увлекательным занятием.
-
-//Да ПАЗик, будет на японском моторе, погугли, очень интересный донор под автодом.
-
-//Кто то лодку покупает, мне стрельнул в голову автобус. Такая взрослая жизнь.
-
-//С женой уговор, заработаю на покупку на хобби, бухтеть не булет, поэтому прошу поддержать. 
-
-//Дабы отработать свой хлеб, ниже будет описание процеса установки и настройки, для удобства вынес для тебя некоторые настройки.
-
-// Любая сумма поможет, в комментарии укажи "это тебе на ПАЗик".  
-// **СБЕР:** +7 923 668 0000  
-
-
-
-
-/* ==== Информация о плагине ==== */
-
-// Плагин создает уникальные подборки фильмов и сериалов на главной странице по жанрам, стримингам, популярности, просмотрам и кассовым сборам.  
-// Обновление подборок происходит при каждом нажатии кнопки "Главная" (Home).
-
-// ======= Установка =======
-//  Если у тебя свой сервер, файл положить в wwwroot.  
-// 1. Для индивидуального использования:  
-//    - В Лампа открыть "Настройки" → "плагины".  
-//    - В разделе плагинов прописать: ВашАдрес/surs.js.  
-
-// 2. Для загрузки плагина всем пользователям:  
-//    - Добавить в lampainit.js строку:  
-//    - Lampa.Utils.putScriptAsync(["/surs.js"], function() {});
-
-
-
-// ======= Настройки =========
-//Для запрета пользователю менять название подборок, используй:
-//Lampa.Storage.set('surs_disableCustomName', true); //это скроет пункт меню с вводом собственного названия 
-
-//Для установки своего названия для всех используй:
-//Lampa.Storage.set('surs_name', 'YOURS_TITLE');
-
-//Для скрытия всего меню "подборки" используй 
-//Lampa.Storage.set('surs_disableMenu', true);
-
-/* ==== Дополнения ==== */
-
-// Плагин работает как автономно (с ручным выбором источника через настройки), так и совместно с плагином для добавления профилей  на один аккаунт:  
-
-// [Плагин профилей от Levende]
-//https://levende.github.io/lampa-plugins/profiles.js.  
-
-// - Детские и Русские профили получают отдельные подборки на главной странице, переключение происходит автоматически при смене профиля.  
-
-// - Для автоматического переключения между детским, русским и основным источником, в профиле должен быть указан параметр:  
-//   -  "surs": true — активирует автоматическое назначенте surs основным источником.
-//   - "forKids": true — переключает источник автоматически на детский.
-//  - "onlyRus": true — переключает источник автоматически на российский.
-
-
-// ====Пример конфигурации профилей ====
-
-// необходимо модифицировать init.conf для работы с profiles.js:  
-
-// Добавляет 5 профилей на один аккаунт (пароль/почта/логин).  
-// Иконки профилей нужно разместить в wwwroot/profileIcons  
-
-
-/*
-  "accounts": {
-    "test1": "2026-01-10T00:00:00",
-      "pochta235@rambler.ru": "2024-06-15T00:00:00",
-      "vasyapupkin@yandex.ru": "2024-06-15T00:00:00",
-    },
-
-"params": {
-    "profiles": [
-      {
-        "id": "",
-        "title": "Он",
-        "icon": "/profileIcons/id1.png", // иконки для примера
-        "params": {
-        
-          "surs": true — у этого профиля автоматически будет включен основной источник.
-
-        }
-      },
-      {
-        "id": "_id2",
-        "title": "Она",
-        "icon": "/profileIcons/id2.png",
-        "params": {
-         "surs": true //— у этого профиля автоматически будет включен основной источник. Этот флаг отвечает в целом, за автоматическое переключение источника.
-
-        }
-      },
-      {
-        "id": "_id3",
-        "title": "Ребенок",
-        "icon": "/profileIcons/id3.png",
-        "params": {
-         "surs": true //даем понять что нужно переключать источники.
-        "forKids": true //даем понять что переключать необходимо на детский вариант.
-        }
-      },
-
- {
-        "id": "_id4",
-        "title": "Ребенок",
-        "icon": "/profileIcons/id4.png",
-        "params": {
-         "surs": true 
-        "forKids": true //даем понять что переключать необходимо на детский вариант
- 
-        }
-      },
-
- {
-        "id": "_id5",
-        "title": "Родственники",
-        "icon": "/profileIcons/id5.png",
-        "params": {
-        "surs": true 
-        "onlyRus": true //даем понять что переключать необходимо на российские подборки 
- 
-        }
-      }
-
-    ]
-  }
-  
- //напоминаю про ПАЗик.
-*/
 
 
 (function (  ) {
     'use strict';
-   
+    
+    
+    if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(searchElement, fromIndex) {
+        var k;
+        if (this == null) {
+            throw new TypeError('"this" is null or not defined');
+        }
+        var o = Object(this);
+        var len = o.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        k = fromIndex | 0;
+        if (k < 0) {
+            k += len;
+            if (k < 0) k = 0;
+        }
+        for (; k < len; k++) {
+            if (k in o && o[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    };
+}
+    
+    if (!Array.isArray) {
+    Array.isArray = function(arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+}
+    
+   if (!Array.prototype.filter) {
+  Array.prototype.filter = function(callback, thisArg) {
+    var array = this;
+    var result = [];
+    for (var i = 0; i < array.length; i++) {
+      if (callback.call(thisArg, array[i], i, array)) {
+        result.push(array[i]);
+      }
+    }
+    return result;
+  };
+}
+
+if (!Object.assign) {
+  Object.assign = function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+}
+
+if (!Array.prototype.map) {
+  Array.prototype.map = function(callback, thisArg) {
+    var array = this;
+    var result = [];
+    for (var i = 0; i < array.length; i++) {
+      result.push(callback.call(thisArg, array[i], i, array));
+    }
+    return result;
+  };
+}
+
+if (!Array.prototype.forEach) {
+  Array.prototype.forEach = function(callback, thisArg) {
+    var array = this;
+    for (var i = 0; i < array.length; i++) {
+      callback.call(thisArg, array[i], i, array);
+    }
+  };
+}
+
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(searchElement) {
+    return this.indexOf(searchElement) !== -1;
+  };
+}
+
+if (!Date.prototype.toISOString) {
+  Date.prototype.toISOString = function() {
+    var pad = function(num) {
+      return (num < 10 ? '0' : '') + num;
+    };
+    return (
+      this.getUTCFullYear() +
+      '-' +
+      pad(this.getUTCMonth() + 1) +
+      '-' +
+      pad(this.getUTCDate()) +
+      'T' +
+      pad(this.getUTCHours()) +
+      ':' +
+      pad(this.getUTCMinutes()) +
+      ':' +
+      pad(this.getUTCSeconds()) +
+      '.' +
+      (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+      'Z'
+    );
+  };
+}
+
+if (!Array.prototype.some) {
+  Array.prototype.some = function(callback, thisArg) {
+    var array = this;
+    for (var i = 0; i < array.length; i++) {
+      if (callback.call(thisArg, array[i], i, array)) {
+        return true;
+      }
+    }
+    return false;
+  };
+}
+
+if (!Array.prototype.concat) {
+  Array.prototype.concat = function() {
+    var result = [];
+    for (var i = 0; i < this.length; i++) {
+      result.push(this[i]);
+    }
+    for (var j = 0; j < arguments.length; j++) {
+      var arg = arguments[j];
+      if (Array.isArray(arg)) {
+        for (var k = 0; k < arg.length; k++) {
+          result.push(arg[k]);
+        }
+      } else {
+        result.push(arg);
+      }
+    }
+    return result;
+  };
+}
+
+if (!Object.keys) {
+  Object.keys = function(obj) {
+    var result = [];
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        result.push(key);
+      }
+    }
+    return result;
+  };
+}
+
+// Полифил для Array.prototype.indexOf
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(searchElement, fromIndex) {
+        var k;
+        if (this == null) {
+            throw new TypeError('"this" is null or not defined');
+        }
+        var o = Object(this);
+        var len = o.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        k = fromIndex | 0;
+        if (k < 0) {
+            k += len;
+            if (k < 0) k = 0;
+        }
+        for (; k < len; k++) {
+            if (k in o && o[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    };
+}
+
+// Полифил для console
+if (!window.console) {
+    window.console = {};
+    var methods = ['log', 'warn', 'error', 'info', 'debug', 'trace'];
+    for (var i = 0; i < methods.length; i++) {
+        window.console[methods[i]] = function() {};
+    }
+}
+
+// Полифил для stopImmediatePropagation
+if (!Event.prototype.stopImmediatePropagation) {
+    Event.prototype.stopImmediatePropagation = function() {
+        this.stopPropagation();
+        this.cancelBubble = true;
+    };
+}
+
+
 
 // Опции сортировки
 var allSortOptions = [
@@ -336,19 +401,20 @@ if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'functi
 
 
 
+
+// Остальные ваши полифилы остаются без изменений...
+
 function addCardListener() {
     initCardListener();
     Lampa.Listener.follow('card', function (event) {
         if (event.type === 'build') {
             var cardId = event.object.data.id;
-            var customButtonIds = customButtons().map(button => button.id);
-            if (customButtonIds.includes(cardId)) {
+            var customButtonIds = customButtons().map(function(button) { return button.id; }); // Изменено для избежания стрелочной функции
+            if (customButtonIds.indexOf(cardId) !== -1) {
                 event.object.data.img = buttonPosters[cardId];
-                event.object.card.addClass('custom-button-card'); 
-
+                event.object.card.addClass('custom-button-card');
 
                 event.object.card.on('hover:enter', function(e) {
-
                     if (buttonActions[cardId]) {
                         buttonActions[cardId]();
                     } else {
@@ -361,8 +427,9 @@ function addCardListener() {
     });
 }
 
-        addCardListener();
+addCardListener();
     }
+
     
 
 // Функция получения всех настроек
@@ -614,29 +681,34 @@ function buildApiUrl(baseUrl) {
             };
         }
         
+        
 
 function startPlugin() {
     window.plugin_surs_ready = true;
     
 
-Lampa.Template.add('custom_button_style', `
-    <style>
-        .custom-button-card {
-            width: 13.93em;
-        }
-        @media screen and (max-width: 900px) {
-            .items-cards .custom-button-card {
-                width: 12em; !important;
-            }
-        }
-                @media screen and (max-width: 700px) {
-            .items-cards .custom-button-card {
-                width: 9em; !important;
-            }
-        }
-    </style>
-`);
+
+Lampa.Template.add('custom_button_style', '\
+    <style>\
+        .custom-button-card {\
+            width: 13.93em;\
+        }\
+        @media screen and (max-width: 900px) {\
+            .items-cards .custom-button-card {\
+                width: 12em !important;\
+            }\
+        }\
+        @media screen and (max-width: 700px) {\
+            .items-cards .custom-button-card {\
+                width: 9em !important;\
+            }\
+        }\
+    </style>\
+');
+
+
 $('body').append(Lampa.Template.get('custom_button_style', {}, true));
+
 
     var Episode = function (data) {
         var card = data.card || data;
@@ -734,7 +806,14 @@ $('body').append(Lampa.Template.get('custom_button_style', {}, true));
         };
     };
     
-
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
 
 
 var SourceTMDB = function (parent) {
@@ -747,17 +826,6 @@ var SourceTMDB = function (parent) {
         var onComplete = arguments.length > 1 ? arguments[1] : undefined;
         var onError = arguments.length > 2 ? arguments[2] : undefined;
         var partsLimit = 12;
-
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
-
-
 
         var partsData = [
             function (callback) {
@@ -898,12 +966,16 @@ var SourceTMDB = function (parent) {
         var selectedStreamingServices = getSelectedStreamingServices();
 
         selectedStreamingServices.forEach(function (service) {
-            var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
+   var isRussian = getStreamingServicesRUS().some(function(rusService) {
+  return rusService.id === service.id;
+});
             CustomData.push(getStreamingWithGenres(service.title, service.id, isRussian));
         });
 
         selectedStreamingServices.forEach(function (service) {
-            var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
+   var isRussian = getStreamingServicesRUS().some(function(rusService) {
+  return rusService.id === service.id;
+});
             CustomData.push(getStreaming(service.title, service.id, isRussian));
         });
 
@@ -1357,12 +1429,16 @@ var SourceTMDBnew = function (parent) {
         var selectedStreamingServices = getSelectedStreamingServices();
 
         selectedStreamingServices.forEach(function (service) {
-            var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
+               var isRussian = getStreamingServicesRUS().some(function(rusService) {
+  return rusService.id === service.id;
+});
             CustomData.push(getStreamingWithGenres(service.title, service.id, isRussian));
         });
 
         selectedStreamingServices.forEach(function (service) {
-            var isRussian = getStreamingServicesRUS().some(rusService => rusService.id === service.id);
+   var isRussian = getStreamingServicesRUS().some(function(rusService) {
+  return rusService.id === service.id;
+});
             CustomData.push(getStreaming(service.title, service.id, isRussian));
         });
 
@@ -1467,31 +1543,6 @@ var SourceTMDBkids = function (parent) {
         ];
         
 
-// Фильтрация кириллица
-
-function filterCyrillic(items) {
-    function containsCyrillic(value) {
-        if (typeof value === 'string') {
-            return /[а-яА-ЯёЁ]/.test(value);
-        } else if (typeof value === 'object' && value !== null) {
-            for (const val of Object.values(value)) {
-                if (containsCyrillic(val)) {
-                    return true;  
-                }
-            }
-        }
-        return false;
-    }
-
-    return items.filter(function (item) {
-        return containsCyrillic(item);
-    });
-}
-
-function applyFilters(items) {
-    return filterCyrillic(items);
-}
-
 
 // Функции формирования url с доп параметрами
 
@@ -1531,40 +1582,7 @@ function applyWithoutKeywords(baseUrl) {
 }
 
 
-function buildApiUrl(baseUrl) {
-    baseUrl = applyMinVotes(baseUrl);
-    baseUrl = applyAgeRestriction(baseUrl);
-    baseUrl = applyWithoutKeywords(baseUrl);
-    return baseUrl;
-}
 
-
-        // Перемешивание массива
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
-        
-function adjustSortForMovies(sort) {
-    if (sort.key === 'first_air_date.desc') {
-        sort = { key: 'release_date.desc', title: 'Новинки' };
-    }
-
-    if (sort.key === 'release_date.desc') {
-        var endDate = new Date().toISOString().split('T')[0]; // Сегодняшняя дата
-        var startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1); // Берем релизы за последний год
-        startDate = startDate.toISOString().split('T')[0];
-
-        sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;
-    }
-
-    return sort;
-}
 
 var buttonsData = [
                  function (callback) {
@@ -1656,7 +1674,8 @@ selectedStreamingServices.forEach(function (service) {
 
 //Подборки по фильмам
 
-function getMovies(genre, options = {}) {
+function getMovies(genre, options) {
+  options = options || {};
     return function (callback) {
         var sort = adjustSortForMovies(sortOptions[Math.floor(Math.random() * sortOptions.length)]);
         var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;
@@ -1669,7 +1688,7 @@ function getMovies(genre, options = {}) {
             var today = new Date().toISOString().split('T')[0];
             apiUrl += '&release_date.lte=' + today;
             if (options.russian) {
-                apiUrl += '&region=RU';
+               apiUrl += '&region=RU';
             }
         }
 
@@ -1698,7 +1717,8 @@ genres.forEach(function (genre) {
     partsData.push(getMovies(genre, { russian: true })); 
 });
 
-function getTVShows(genre, options = {}) {
+function getTVShows(genre, options) {
+options = options || {};
     return function (callback) {
         var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
         var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.key;
@@ -1731,6 +1751,7 @@ genres.forEach(function (genre) {
 });
 
 function getAnimatedMovies(options) {
+options = options || {};
     return function (callback) {
         var genreIds = ['16', '10751']; // 16 - анимация (мультфильм), 10751 - семейный (детское)
 
@@ -2079,7 +2100,9 @@ function getNickelodeonContent() {
             if (movieResults !== null && tvResults !== null) {
                 var combinedResults = movieResults.concat(tvResults); 
                 combinedResults = filterCyrillic(combinedResults); 
-                combinedResults.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+combinedResults.sort(function(a, b) {
+  return (b.vote_average || 0) - (a.vote_average || 0);
+});
 
                 var json = {
                     results: combinedResults,
@@ -2111,28 +2134,7 @@ function getNickelodeonContent() {
 partsData.push(getNickelodeonContent());
 
 
-function randomWideFlag() {
-    return Math.random() < 0.2; 
-}
 
-function wrapWithWideFlag(requestFunc) {
-    return function (callback) {
-        requestFunc(function (json) {
-            if (randomWideFlag()) {
-                json.small = true;
-                json.wide = true;
-
-                if (Array.isArray(json.results)) { 
-                    json.results.forEach(function (card) {
-                        card.promo = card.overview;
-                        card.promo_title = card.title || card.name;
-                    });
-                }
-            }
-            callback(json);
-        });
-    };
-}
 
 
 partsData = partsData.map(wrapWithWideFlag);
@@ -2230,30 +2232,8 @@ var SourceTMDBrus = function (parent) {
 
 // Фильтрация кириллица
 
-function filterCyrillic(items) {
-    function containsCyrillic(value) {
-        if (typeof value === 'string') {
-            return /[а-яА-ЯёЁ]/.test(value);
-        } else if (typeof value === 'object' && value !== null) {
-            for (const val of Object.values(value)) {
-                if (containsCyrillic(val)) {
-                    return true;  
-                }
-            }
-        }
-        return false;
-    }
-
-    return items.filter(function (item) {
-        return containsCyrillic(item);
-    });
-}
 
 
-function applyFilters(items) {
-    items = filterCyrillic(items); 
-    return items;
-}
 
 
 function applyMinVotes(baseUrl) {
@@ -2285,34 +2265,7 @@ function buildApiUrl(baseUrl) {
     baseUrl = applyWithoutKeywords(baseUrl);
     return baseUrl;
 }
-
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
         
-function adjustSortForMovies(sort) {
-    if (sort.key === 'first_air_date.desc') {
-        sort = { key: 'release_date.desc', title: 'Новинки' };
-    }
-
-    if (sort.key === 'release_date.desc') {
-        var endDate = new Date().toISOString().split('T')[0]; 
-        var startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1); 
-        startDate = startDate.toISOString().split('T')[0];
-
-        sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;
-    }
-
-    return sort;
-}
-
-
 var buttonsData = [
                  function (callback) {
                 var json = {
@@ -2406,7 +2359,7 @@ function getMovies(genre) {
         var sort = adjustSortForMovies(sortOptions[Math.floor(Math.random() * sortOptions.length)]);
         var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;
 
-        apiUrl += '&with_original_language=ru&region=RU'; // Всегда запрашиваем только российские фильмы
+apiUrl += '&with_original_language=ru&region=RU';
 
         if (sort.key === 'release_date.desc') {
             var today = new Date().toISOString().split('T')[0];
@@ -2521,30 +2474,6 @@ genres.forEach(function (genre) {
 });
 
 
-function randomWideFlag() {
-    return Math.random() < 0.2; 
-}
-
-function wrapWithWideFlag(requestFunc) {
-    return function (callback) {
-        requestFunc(function (json) {
-            if (randomWideFlag()) {
-                json.small = true;
-                json.wide = true;
-
-                if (Array.isArray(json.results)) { 
-                    json.results.forEach(function (card) {
-                        card.promo = card.overview;
-                        card.promo_title = card.title || card.name;
-                    });
-                }
-            }
-            callback(json);
-        });
-    };
-}
-
-
 partsData = partsData.map(wrapWithWideFlag);
 
 shuffleArray(partsData); // Перемешиваем массив
@@ -2567,55 +2496,102 @@ partsData.splice(4, 0, upcomingEpisodesRequest);
 
 
 function add() {
+    // Проверка наличия Lampa API
+    if (typeof Lampa === 'undefined' || !Lampa.Storage || !Lampa.Api || !Lampa.Params) {
+        console.error('Lampa API is not available');
+        return;
+    }
+
+    // Проверка наличия Lampa.Api.sources.tmdb
+    if (!Lampa.Api.sources || !Lampa.Api.sources.tmdb) {
+        console.error('Lampa.Api.sources.tmdb is not defined');
+        return;
+    }
+
     // Получаем значение из Storage
     var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
     var sourceNameNew = sourceName + ' NEW';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
 
-    // Создаем источники
-    var tmdb_mod = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
-    var tmdb_mod_new = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
-    var tmdb_mod_kids = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
-    var tmdb_mod_rus = Object.assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+    // Функция для копирования свойств объекта (замена Object.assign для ES5)
+    function assign(target) {
+        for (var i = 1; i < arguments.length; i++) {
+            var source = arguments[i];
+            if (source) {
+                for (var key in source) {
+                    if (Object.prototype.hasOwnProperty.call(source, key)) {
+                        target[key] = source[key];
+                    }
+                }
+            }
+        }
+        return target;
+    }
 
+    // Создаем источники
+    var tmdb_mod = assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
+    var tmdb_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
+    var tmdb_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
+    var tmdb_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+
+    // Проверка на успешное создание источников
+    if (!tmdb_mod || !tmdb_mod_new || !tmdb_mod_kids || !tmdb_mod_rus) {
+        console.error('Failed to create one or more TMDB sources');
+        return;
+    }
+
+    // Присваиваем источники напрямую (для совместимости с IE8)
     Lampa.Api.sources.tmdb_mod = tmdb_mod;
     Lampa.Api.sources.tmdb_mod_new = tmdb_mod_new;
     Lampa.Api.sources.tmdb_mod_kids = tmdb_mod_kids;
     Lampa.Api.sources.tmdb_mod_rus = tmdb_mod_rus;
 
-    // Динамически определяем источники
-    Object.defineProperty(Lampa.Api.sources, sourceName, {
-        get: function() {
-            return tmdb_mod;
-        }
-    });
-    
-    Object.defineProperty(Lampa.Api.sources, sourceNameNew, {
-        get: function() {
-            return tmdb_mod_new;
-        }
-    });
+    // Динамическое определение источников с использованием Object.defineProperty (для IE9+)
+    try {
+        Object.defineProperty(Lampa.Api.sources, sourceName, {
+            get: function() {
+                return tmdb_mod;
+            }
+        });
+        Object.defineProperty(Lampa.Api.sources, sourceNameNew, {
+            get: function() {
+                return tmdb_mod_new;
+            }
+        });
+        Object.defineProperty(Lampa.Api.sources, sourceNameKids, {
+            get: function() {
+                return tmdb_mod_kids;
+            }
+        });
+        Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
+            get: function() {
+                return tmdb_mod_rus;
+            }
+        });
+    } catch (e) {
+        console.warn('Object.defineProperty not supported, using direct assignment: ', e);
+        // Запасной вариант для IE8
+        Lampa.Api.sources[sourceName] = tmdb_mod;
+        Lampa.Api.sources[sourceNameNew] = tmdb_mod_new;
+        Lampa.Api.sources[sourceNameKids] = tmdb_mod_kids;
+        Lampa.Api.sources[sourceNameRus] = tmdb_mod_rus;
+    }
 
-    Object.defineProperty(Lampa.Api.sources, sourceNameKids, {
-        get: function() {
-            return tmdb_mod_kids;
-        }
-    });
+    // Обновление параметров меню
+    var newSourceOptions = {};
+    newSourceOptions[sourceName] = sourceName;
+    newSourceOptions[sourceNameNew] = sourceNameNew;
+    newSourceOptions[sourceNameKids] = sourceNameKids;
+    newSourceOptions[sourceNameRus] = sourceNameRus;
 
-    Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
-        get: function() {
-            return tmdb_mod_rus;
-        }
-    });
+    var mergedOptions = assign({}, Lampa.Params.values['source'], newSourceOptions);
 
-    // Добавляем источники в меню
-    Lampa.Params.select('source', Object.assign({}, Lampa.Params.values['source'], {
-        [sourceName]: sourceName,
-        [sourceNameNew]: sourceNameNew,
-        [sourceNameKids]: sourceNameKids,
-        [sourceNameRus]: sourceNameRus
-    }), 'tmdb');
+    try {
+        Lampa.Params.select('source', mergedOptions, 'tmdb');
+    } catch (e) {
+        console.error('Error updating Lampa.Params.select: ', e);
+    }
 }
 
 function startProfileListener() {
@@ -2776,771 +2752,32 @@ if (shouldHide) {
 
 
 function addSettingMenu() {
-    var currentSource = Lampa.Storage.get('source');
-    var sourceName = Lampa.Storage.get('surs_name') || Lampa.Lang.translate('surs_source_name');
-    var sourceNameKids = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_kids').split(' ')[1]; // "KIDS"
-    var sourceNameRus = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_rus').split(' ')[1]; // "RUS"
-        var sourceNameNew = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_new').split(' ')[1]; // "NEW"
-
-    Lampa.SettingsApi.addComponent({
-        component: 'surs',
-        name: Lampa.Lang.translate('surs_collections') + ' ' + sourceName,
-        icon: `
- <svg height="200px" width="200px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:#ffffff;} </style> <g> <path class="st0" d="M443.724,166.599c27.038-2.293,47.087-26.07,44.786-53.125c-2.292-27.038-26.078-47.087-53.115-44.795 c-27.038,2.301-47.078,26.088-44.776,53.124C392.91,148.85,416.677,168.9,443.724,166.599z"></path> <path class="st0" d="M431.752,346.544l30.541-114.485c5.068-19.305-6.466-39.075-25.78-44.144 c-19.304-5.077-39.075,6.448-44.152,25.771v-0.018L365.052,315.64l-78.755-13.276c-17.218-4.304-34.696,5.786-39.578,22.864 l-33.317,133.445c-3.82,13.342,3.913,27.28,17.274,31.1c13.37,3.81,27.298-3.923,31.128-17.283l39.392-98.638l61.286,16.155 C398.863,400.125,421.633,382.927,431.752,346.544z"></path> <path class="st0" d="M388.177,462.949l-0.121-0.01c-0.018,0-0.028,0-0.047,0L388.177,462.949z"></path> <path class="st0" d="M498.349,286.311c-10.1-2.999-20.721,2.749-23.722,12.858l-27.876,93.848 c-2.096,6.606-4.536,11.777-7.146,15.746c-3.987,5.944-8.002,9.373-13.854,12.093c-5.842,2.664-14.031,4.379-25.416,4.37 c-3.009,0.008-6.215-0.113-9.634-0.355l-54.009-3.363c-10.519-0.661-19.575,7.341-20.227,17.861 c-0.662,10.518,7.342,19.574,17.86,20.226l53.73,3.345c4.211,0.298,8.31,0.448,12.28,0.456c10.072-0.009,19.5-0.988,28.369-3.289 c13.268-3.392,25.315-10.127,34.501-19.892c9.251-9.736,15.531-21.885,19.91-35.609l0.074-0.214l28.015-94.362 C514.206,299.923,508.447,289.302,498.349,286.311z"></path> <path class="st0" d="M248.974,81.219L0,21.256v15.14v281.228l248.974-59.962V81.219z M225.123,238.87L23.851,287.355V51.536 l201.272,48.466V238.87z"></path> <polygon class="st0" points="204.989,115.189 47.991,84.937 47.991,253.953 204.989,223.692 "></polygon> </g> </g></svg>`
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: '',
-            type: 'title'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_collections') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + sourceName,
-            description: Lampa.Lang.translate('surs_main_update') // 
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_empty1',
-            type: 'title'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_settings_interface'),
-            description: ''
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_setSource',
-            type: 'select',
-            values: {
-                [sourceName]: sourceName,
-                [sourceNameNew]: sourceNameNew,
-                [sourceNameKids]: sourceNameKids,
-                [sourceNameRus]: sourceNameRus
-            },
-            default: [sourceName]
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_set_as_source'),
-            description: Lampa.Lang.translate('surs_source_description')
-        },
-        onChange: function (value) {
-            console.log('[DEBUG SURS] Выбранный источник:', value);
-            Lampa.Storage.set('source', value);
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_setButtons',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_add_to_menu'),
-            description: Lampa.Lang.translate('surs_menu_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showButtonsSelectionMenu(currentController);
-        }
-    });
-
-    function showButtonsSelectionMenu(previousController) {
-        var items = [
-            { title: sourceName, id: 'Button_sourceName' },
-            { title: sourceNameKids, id: 'Button_sourceNameKids' },
-            { title: sourceNameRus, id: 'Button_sourceNameRus' }
-        ];
-
-        var list = items.map(function (item) {
-            var isEnabled = getStoredSetting(item.id, false);
-            return {
-                title: item.title,
-                id: item.id,
-                checkbox: true,
-                checked: isEnabled
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_select_menu_sources'),
-            items: list,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selectedItem) {
-                var key = selectedItem.id;
-                var isEnabled = getStoredSetting(key, false);
-                setStoredSetting(key, !isEnabled);
-                selectedItem.checked = !isEnabled;
-                addMenuButtons();
-            }
-        });
+    // Проверка наличия Lampa API
+    if (typeof Lampa === 'undefined' || !Lampa.Storage || !Lampa.SettingsApi || !Lampa.Lang || !Lampa.Select || !Lampa.Activity || !Lampa.Controller || !Lampa.Listener || !Lampa.Input || !Lampa.Noty) {
+        console.error('Lampa API is not available');
+        return;
     }
 
-    function addMenuButton(title, action, icon, callback) {
-        var button = $('<li class="menu__item selector" data-action="' + action + '">' +
-            '<div class="menu__ico">' + icon + '</div>' +
-            '<div class="menu__text">' + title + '</div>' +
-            '</li>');
+    try {
+        var currentSource = Lampa.Storage.get('source');
+        var sourceName = Lampa.Storage.get('surs_name') || Lampa.Lang.translate('surs_source_name');
+        var sourceNameKids = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_kids').split(' ')[1];
+        var sourceNameRus = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_rus').split(' ')[1];
+        var sourceNameNew = sourceName + ' ' + Lampa.Lang.translate('surs_source_name_new').split(' ')[1];
 
-        button.on('hover:enter', callback);
-        $('.menu .menu__list').eq(0).append(button);
-    }
+        // Создание объекта для значений выбора источника
+        var sourceValues = {};
+        sourceValues[sourceName] = sourceName;
+        sourceValues[sourceNameNew] = sourceNameNew;
+        sourceValues[sourceNameKids] = sourceNameKids;
+        sourceValues[sourceNameRus] = sourceNameRus;
 
-    var icon = '<svg xmlns="http://www.w3.org/2000/svg" width="2.2em" height="2.2em" viewBox="0 0 48 48">' +
-        '<circle cx="24" cy="24" r="20" fill="white"/>' +
-        '</svg>';
-
-    function addMenuButtons() {
-        $('.menu__item[data-action="custom-source"]').remove();
-
-        var isSourceNameEnabled = getStoredSetting('Button_sourceName', false);
-        var isSourceNameKidsEnabled = getStoredSetting('Button_sourceNameKids', false);
-        var isSourceNameRusEnabled = getStoredSetting('Button_sourceNameRus', false);
-
-        if (isSourceNameEnabled) {
-            addMenuButton(sourceName, 'custom-source', icon, function () {
-                Lampa.Activity.push({
-                    source: sourceName,
-                    title: sourceName,
-                    component: 'main',
-                    page: 1
-                });
-            });
-        }
-
-        if (isSourceNameKidsEnabled) {
-            addMenuButton(sourceNameKids, 'custom-source', icon, function () {
-                Lampa.Activity.push({
-                    source: sourceNameKids,
-                    title: sourceNameKids,
-                    component: 'main',
-                    page: 1
-                });
-            });
-        }
-
-        if (isSourceNameRusEnabled) {
-            addMenuButton(sourceNameRus, 'custom-source', icon, function () {
-                Lampa.Activity.push({
-                    source: sourceNameRus,
-                    title: sourceNameRus,
-                    component: 'main',
-                    page: 1
-                });
-            });
-        }
-    }
-
-    setTimeout(addMenuButtons, 50);
-
-    Lampa.Listener.follow('profile', function (event) {
-        if (event.type != 'changed') {
-            return;
-        }
-        addMenuButtons();
-    });
-    
-    // Добавление параметра для управления кастомными кнопками
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_custom_buttons',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('surs_custom_buttons'),
-        description: Lampa.Lang.translate('surs_custom_buttons_description')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showSelectionMenu('surs_custom_buttons', getAllButtons(), 'custom_button_', 'id', currentController);
-    }
-});
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: '',
-            type: 'title'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_filters'),
-            description: ''
-        }
-    });
-
-    function showSelectionMenu(title, items, storagePrefix, keyField = 'id', previousController) {
-        var list = items.map(function (item) {
-            var key = item[keyField];
-            var isEnabled = getStoredSetting(storagePrefix + key, true);
-            return {
-                title: Lampa.Lang.translate(item.title), // Используем перевод для жанров и сортировки
-                id: key,
-                checkbox: true,
-                checked: isEnabled
-            };
+        Lampa.SettingsApi.addComponent({
+            component: 'surs',
+            name: Lampa.Lang.translate('surs_collections') + ' ' + sourceName,
+            icon: '<svg height="200px" width="200px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{fill:#ffffff;} </style> <g> <path class="st0" d="M443.724,166.599c27.038-2.293,47.087-26.07,44.786-53.125c-2.292-27.038-26.078-47.087-53.115-44.795 c-27.038,2.301-47.078,26.088-44.776,53.124C392.91,148.85,416.677,168.9,443.724,166.599z"></path> <path class="st0" d="M431.752,346.544l30.541-114.485c5.068-19.305-6.466-39.075-25.78-44.144 c-19.304-5.077-39.075,6.448-44.152,25.771v-0.018L365.052,315.64l-78.755-13.276c-17.218-4.304-34.696,5.786-39.578,22.864 l-33.317,133.445c-3.82,13.342,3.913,27.28,17.274,31.1c13.37,3.81,27.298-3.923,31.128-17.283l39.392-98.638l61.286,16.155 C398.863,400.125,421.633,382.927,431.752,346.544z"></path> <path class="st0" d="M388.177,462.949l-0.121-0.01c-0.018,0-0.028,0-0.047,0L388.177,462.949z"></path> <path class="st0" d="M498.349,286.311c-10.1-2.999-20.721,2.749-23.722,12.858l-27.876,93.848 c-2.096,6.606-4.536,11.777-7.146,15.746c-3.987,5.944-8.002,9.373-13.854,12.093c-5.842,2.664-14.031,4.379-25.416,4.37 c-3.009,0.008-6.215-0.113-9.634-0.355l-54.009-3.363c-10.519-0.661-19.575,7.341-20.227,17.861 c-0.662,10.518,7.342,19.574,17.86,20.226l53.73,3.345c4.211,0.298,8.31,0.448,12.28,0.456c10.072-0.009,19.5-0.988,28.369-3.289 c13.268-3.392,25.315-10.127,34.501-19.892c9.251-9.736,15.531-21.885,19.91-35.609l0.074-0.214l28.015-94.362 C514.206,299.923,508.447,289.302,498.349,286.311z"></path> <path class="st0" d="M248.974,81.219L0,21.256v15.14v281.228l248.974-59.962V81.219z M225.123,238.87L23.851,287.355V51.536 l201.272,48.466V238.87z"></path> <polygon class="st0" points="204.989,115.189 47.991,84.937 47.991,253.953 204.989,223.692 "></polygon> </g> </g></svg>'
         });
 
-        Lampa.Select.show({
-            title: Lampa.Lang.translate(title),
-            items: list,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController);
-            },
-            onCheck: function (selectedItem) {
-                var key = storagePrefix + selectedItem.id;
-                var isEnabled = getStoredSetting(key, true);
-                setStoredSetting(key, !isEnabled);
-                selectedItem.checked = !isEnabled;
-            }
-        });
-    }
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_sort_options',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_sort_types'),
-            description: Lampa.Lang.translate('surs_sort_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showSelectionMenu('surs_sort_types', allSortOptions, 'sort_', 'id', currentController);
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_genres',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_genres'),
-            description: Lampa.Lang.translate('surs_genres_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showSelectionMenu('surs_genres', allGenres, 'genre_', 'id', currentController);
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_global_streaming',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_global_streaming'),
-            description: Lampa.Lang.translate('surs_global_streaming_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showSelectionMenu('surs_global_streaming', allStreamingServices, 'streaming_', 'id', currentController);
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_rus_streaming',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_rus_streaming'),
-            description: Lampa.Lang.translate('surs_rus_streaming_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showSelectionMenu('surs_rus_streaming', allStreamingServicesRUS, 'streaming_rus_', 'id', currentController);
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: '',
-            type: 'title'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_geo_filters'),
-            description: ''
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_streaming',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_streaming'),
-            description: Lampa.Lang.translate('surs_region_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showStreamingSelectionMenu(currentController);
-        }
-    });
-
-    function showStreamingSelectionMenu(previousController) {
-        var items = [
-            { title: Lampa.Lang.translate('surs_global'), id: 'getStreamingServices' },
-            { title: Lampa.Lang.translate('surs_russian'), id: 'getStreamingServicesRUS' }
-        ];
-
-        var list = items.map(function (item) {
-            var isEnabled = getStoredSetting(item.id, true);
-            return {
-                title: item.title,
-                id: item.id,
-                checkbox: true,
-                checked: isEnabled
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_streaming'),
-            items: list,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selectedItem) {
-                var key = selectedItem.id;
-                var isEnabled = getStoredSetting(key, true);
-                setStoredSetting(key, !isEnabled);
-                selectedItem.checked = !isEnabled;
-            }
-        });
-    }
-
-
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_getMoviesByGenre',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('surs_movies'),
-        description: Lampa.Lang.translate('surs_region_description')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showMoviesByGenreSelectionMenu(currentController);
-    }
-});
-
-function showMoviesByGenreSelectionMenu(previousController) {
-    var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
-    var items = [
-        { title: Lampa.Lang.translate('surs_global'), id: 'getMoviesByGenreGlobal' },
-        { title: Lampa.Lang.translate('surs_russian'), id: 'getMoviesByGenreRus' }
-    ];
-
-    if (isUkrainianLanguage) {
-        items.push({ title: Lampa.Lang.translate('surs_ukrainian'), id: 'getMoviesByGenreUA' });
-    }
-
-    var list = items.map(function (item) {
-        var defaultValue = item.id === 'getMoviesByGenreUA' ? isUkrainianLanguage : true;
-        var isEnabled = getStoredSetting(item.id, defaultValue);
-        return {
-            title: item.title,
-            id: item.id,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: Lampa.Lang.translate('surs_movies'),
-        items: list,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
-        },
-        onCheck: function (selectedItem) {
-            var key = selectedItem.id;
-            var defaultValue = key === 'getMoviesByGenreUA' ? isUkrainianLanguage : true;
-            var isEnabled = getStoredSetting(key, defaultValue);
-            setStoredSetting(key, !isEnabled);
-            selectedItem.checked = !isEnabled;
-        }
-    });
-}
-
-Lampa.SettingsApi.addParam({
-    component: 'surs',
-    param: {
-        name: 'surs_getTVShowsByGenre',
-        type: 'button'
-    },
-    field: {
-        name: Lampa.Lang.translate('surs_series'),
-        description: Lampa.Lang.translate('surs_region_description')
-    },
-    onChange: function () {
-        var currentController = Lampa.Controller.enabled().name;
-        showTVShowsByGenreSelectionMenu(currentController);
-    }
-});
-
-function showTVShowsByGenreSelectionMenu(previousController) {
-    var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
-    var items = [
-        { title: Lampa.Lang.translate('surs_global'), id: 'getTVShowsByGenreGlobal' },
-        { title: Lampa.Lang.translate('surs_russian'), id: 'getTVShowsByGenreRus' },
-        { title: Lampa.Lang.translate('surs_korean'), id: 'getTVShowsByGenreKOR' },
-        { title: Lampa.Lang.translate('surs_turkish'), id: 'getTVShowsByGenreTR' }
-    ];
-
-    if (isUkrainianLanguage) {
-        items.push({ title: Lampa.Lang.translate('surs_ukrainian'), id: 'getTVShowsByGenreUA' });
-    }
-
-    var list = items.map(function (item) {
-        var defaultValue = (item.id === 'getTVShowsByGenreKOR') ? false : (item.id === 'getTVShowsByGenreUA' ? isUkrainianLanguage : true);
-        var isEnabled = getStoredSetting(item.id, defaultValue);
-        return {
-            title: item.title,
-            id: item.id,
-            checkbox: true,
-            checked: isEnabled
-        };
-    });
-
-    Lampa.Select.show({
-        title: Lampa.Lang.translate('surs_series'),
-        items: list,
-        onBack: function () {
-            Lampa.Controller.toggle(previousController || 'settings');
-        },
-        onCheck: function (selectedItem) {
-            var key = selectedItem.id;
-            var defaultValue = (key === 'getTVShowsByGenreKOR') ? false : (key === 'getTVShowsByGenreUA' ? isUkrainianLanguage : true);
-            var isEnabled = getStoredSetting(key, defaultValue);
-            setStoredSetting(key, !isEnabled);
-            selectedItem.checked = !isEnabled;
-        }
-    });
-}
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_getBestContentByGenre',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_top_all_time'),
-            description: Lampa.Lang.translate('surs_top_content_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showBestContentByGenreSelectionMenu(currentController);
-        }
-    });
-
-    function showBestContentByGenreSelectionMenu(previousController) {
-        var items = [
-            { title: Lampa.Lang.translate('surs_movies'), id: 'getBestContentByGenreMovie' },
-            { title: Lampa.Lang.translate('surs_series'), id: 'getBestContentByGenreTV' }
-        ];
-
-        var list = items.map(function (item) {
-            var isEnabled = getStoredSetting(item.id, true);
-            return {
-                title: item.title,
-                id: item.id,
-                checkbox: true,
-                checked: isEnabled
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_top_all_time'),
-            items: list,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selectedItem) {
-                var key = selectedItem.id;
-                var isEnabled = getStoredSetting(key, true);
-                setStoredSetting(key, !isEnabled);
-                selectedItem.checked = !isEnabled;
-            }
-        });
-    }
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_best_content',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_top_5_years'),
-            description: Lampa.Lang.translate('surs_top_content_description')
-        },
-        onChange: function () {
-            var currentController = Lampa.Controller.enabled().name;
-            showBestContentByPeriodSelectionMenu(currentController);
-        }
-    });
-
-    function showBestContentByPeriodSelectionMenu(previousController) {
-        var items = [
-            { title: Lampa.Lang.translate('surs_movies'), id: 'getBestContentByGenreAndPeriod_movie' },
-            { title: Lampa.Lang.translate('surs_series'), id: 'getBestContentByGenreAndPeriod_tv' }
-        ];
-
-        var list = items.map(function (item) {
-            var isEnabled = getStoredSetting(item.id, true);
-            return {
-                title: item.title,
-                id: item.id,
-                checkbox: true,
-                checked: isEnabled
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_top_5_years'),
-            items: list,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selectedItem) {
-                var key = selectedItem.id;
-                var isEnabled = getStoredSetting(key, true);
-                setStoredSetting(key, !isEnabled);
-                selectedItem.checked = !isEnabled;
-            }
-        });
-    }
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: '',
-            type: 'title'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_technical_settings'),
-            description: ''
-        }
-    });
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_cirillic',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_cyrillic'),
-            description: Lampa.Lang.translate('surs_cyrillic_description')
-        },
-        onChange: function () {
-            var previousController = Lampa.Controller.enabled().name;
-            showCirillicMenu(previousController);
-        }
-    });
-
-    function showCirillicMenu(previousController) {
-        var key = 'cirillic';
-        var currentValue = getStoredSetting(key, '1');
-
-        var options = [
-            { title: Lampa.Lang.translate('surs_cyrillic_enabled'), value: '1' },
-            { title: Lampa.Lang.translate('surs_cyrillic_disabled'), value: '0' }
-        ];
-
-        var items = options.map(function (option) {
-            return {
-                title: option.title,
-                value: option.value,
-                checkbox: true,
-                checked: currentValue === option.value
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_cyrillic'),
-            items: items,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selected) {
-                setStoredSetting(key, selected.value);
-                showCirillicMenu(previousController);
-            }
-        });
-    }
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_minVotes',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_rating_validation'),
-            description: Lampa.Lang.translate('surs_rating_description')
-        },
-        onChange: function () {
-            var previousController = Lampa.Controller.enabled().name;
-            showMinVotesMenu(previousController);
-        }
-    });
-
-    function showMinVotesMenu(previousController) {
-        var key = 'minVotes';
-        var currentValue = getStoredSetting(key, '10');
-
-        var options = [
-            { title: Lampa.Lang.translate('surs_rating_off'), value: '0' },
-            { title: Lampa.Lang.translate('surs_rating_standard'), value: '10' },
-            { title: Lampa.Lang.translate('surs_rating_enhanced'), value: '50' },
-            { title: Lampa.Lang.translate('surs_rating_maximum'), value: '150' },
-            { title: Lampa.Lang.translate('surs_rating_fatality'), value: '300' }
-        ];
-
-        var items = options.map(function (option) {
-            return {
-                title: option.title,
-                value: option.value,
-                checkbox: true,
-                checked: currentValue === option.value
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_rating_validation'),
-            items: items,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selected) {
-                setStoredSetting(key, selected.value);
-                showMinVotesMenu(previousController);
-            }
-        });
-    }
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_ageRestrictions',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_age_restriction'),
-            description: Lampa.Lang.translate('surs_age_description')
-        },
-        onChange: function () {
-            var previousController = Lampa.Controller.enabled().name;
-            showAgeRestrictionsMenu(previousController);
-        }
-    });
-
-    function showAgeRestrictionsMenu(previousController) {
-        var key = 'ageRestrictions';
-        var currentValue = getStoredSetting(key, '');
-
-        var options = [
-            { title: Lampa.Lang.translate('surs_age_toddlers'), value: '0+' },
-            { title: Lampa.Lang.translate('surs_age_6'), value: '6+' },
-            { title: Lampa.Lang.translate('surs_age_12'), value: '12+' },
-            { title: Lampa.Lang.translate('surs_age_none'), value: '' }
-        ];
-
-        var items = options.map(function (option) {
-            return {
-                title: option.title,
-                value: option.value,
-                checkbox: true,
-                checked: currentValue === option.value
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_age_restriction'),
-            items: items,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selected) {
-                setStoredSetting(key, selected.value);
-                showAgeRestrictionsMenu(previousController);
-            }
-        });
-    }
-
-    Lampa.SettingsApi.addParam({
-        component: 'surs',
-        param: {
-            name: 'surs_withoutKeywords',
-            type: 'button'
-        },
-        field: {
-            name: Lampa.Lang.translate('surs_exclude_asian'),
-            description: Lampa.Lang.translate('surs_exclude_asian_description')
-        },
-        onChange: function () {
-            var previousController = Lampa.Controller.enabled().name;
-            showKeywordFilterMenu(previousController);
-        }
-    });
-
-    function showKeywordFilterMenu(previousController) {
-        var key = 'withoutKeywords';
-        var currentValue = getStoredSetting(key, '1');
-
-        var options = [
-            { title: Lampa.Lang.translate('surs_exclude_off'), value: '0' },
-            { title: Lampa.Lang.translate('surs_exclude_soft'), value: '1' },
-            { title: Lampa.Lang.translate('surs_exclude_strong'), value: '2' }
-        ];
-
-        var items = options.map(function (option) {
-            return {
-                title: option.title,
-                value: option.value,
-                checkbox: true,
-                checked: currentValue === option.value
-            };
-        });
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('surs_exclude_asian'),
-            items: items,
-            onBack: function () {
-                Lampa.Controller.toggle(previousController || 'settings');
-            },
-            onCheck: function (selectedItem) {
-                setStoredSetting(key, selectedItem.value);
-                showKeywordFilterMenu(previousController);
-            }
-        });
-    }
-
-    if (!Lampa.Storage.get('surs_disableCustomName')) {
         Lampa.SettingsApi.addParam({
             component: 'surs',
             param: {
@@ -3548,7 +2785,19 @@ function showTVShowsByGenreSelectionMenu(previousController) {
                 type: 'title'
             },
             field: {
-                name: Lampa.Lang.translate('surs_name'),
+                name: Lampa.Lang.translate('surs_collections') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + sourceName,
+                description: Lampa.Lang.translate('surs_main_update')
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_empty1',
+                type: 'title'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_settings_interface'),
                 description: ''
             }
         });
@@ -3556,65 +2805,1096 @@ function showTVShowsByGenreSelectionMenu(previousController) {
         Lampa.SettingsApi.addParam({
             component: 'surs',
             param: {
-                name: 'surs_setName',
-                type: 'button',
-                default: Lampa.Lang.translate('surs_enter_new_name')
+                name: 'surs_setSource',
+                type: 'select',
+                values: sourceValues,
+                default: sourceName
             },
             field: {
-                name: Lampa.Lang.translate('surs_rename_selections'),
-                description: Lampa.Lang.translate('surs_rename_description') + ' ' + currentSource
+                name: Lampa.Lang.translate('surs_set_as_source'),
+                description: Lampa.Lang.translate('surs_source_description')
             },
-            onChange: function () {
-                Lampa.Input.edit({
-                    free: true,
-                    title: Lampa.Lang.translate('surs_enter_new_name'),
-                    nosave: true,
-                    value: ''
-                }, function (input) {
-                    if (input) {
-                        Lampa.Storage.set('surs_name', input);
-                        Lampa.Noty.show(Lampa.Lang.translate('surs_name_saved'));
-
-                        setTimeout(function () {
-                            Lampa.Controller.toggle('settings');
-                        }, 100);
-                        setTimeout(function () {
-                            var newName = Lampa.Storage.get('surs_name');
-                            softRefresh(newName, false);
-                        }, 1500);
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 2000);
-                    } else {
-                        Lampa.Noty.show(Lampa.Lang.translate('surs_name_not_entered'));
-                    }
-                });
+            onChange: function(value) {
+                try {
+                    console.log('[DEBUG SURS] Выбранный источник:', value);
+                    Lampa.Storage.set('source', value);
+                } catch (e) {
+                    console.error('Error in setSource onChange:', e);
+                }
             }
         });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_setButtons',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_add_to_menu'),
+                description: Lampa.Lang.translate('surs_menu_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showButtonsSelectionMenu(currentController);
+                } catch (e) {
+                    console.error('Error in setButtons onChange:', e);
+                }
+            }
+        });
+
+        function showButtonsSelectionMenu(previousController) {
+            try {
+                var items = [
+                    { title: sourceName, id: 'Button_sourceName' },
+                    { title: sourceNameKids, id: 'Button_sourceNameKids' },
+                    { title: sourceNameRus, id: 'Button_sourceNameRus' }
+                ];
+
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var isEnabled = getStoredSetting(item.id, false);
+                    list.push({
+                        title: item.title,
+                        id: item.id,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_select_menu_sources'),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = selectedItem.id;
+                            var isEnabled = getStoredSetting(key, false);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                            addMenuButtons();
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showButtonsSelectionMenu:', e);
+            }
+        }
+
+        function addMenuButton(title, action, icon, callback) {
+            try {
+                var button = $('<li class="menu__item selector" data-action="' + action + '">' +
+                    '<div class="menu__ico">' + icon + '</div>' +
+                    '<div class="menu__text">' + title + '</div>' +
+                    '</li>');
+
+                button.on('hover:enter', callback);
+                $('.menu .menu__list').eq(0).append(button);
+            } catch (e) {
+                console.error('Error in addMenuButton:', e);
+            }
+        }
+
+        var icon = '<svg xmlns="http://www.w3.org/2000/svg" width="2.2em" height="2.2em" viewBox="0 0 48 48">' +
+            '<circle cx="24" cy="24" r="20" fill="white"/>' +
+            '</svg>';
+
+        function addMenuButtons() {
+            try {
+                $('.menu__item[data-action="custom-source"]').remove();
+
+                var isSourceNameEnabled = getStoredSetting('Button_sourceName', false);
+                var isSourceNameKidsEnabled = getStoredSetting('Button_sourceNameKids', false);
+                var isSourceNameRusEnabled = getStoredSetting('Button_sourceNameRus', false);
+
+                if (isSourceNameEnabled) {
+                    addMenuButton(sourceName, 'custom-source', icon, function() {
+                        try {
+                            Lampa.Activity.push({
+                                source: sourceName,
+                                title: sourceName,
+                                component: 'main',
+                                page: 1
+                            });
+                        } catch (e) {
+                            console.error('Error in sourceName button callback:', e);
+                        }
+                    });
+                }
+
+                if (isSourceNameKidsEnabled) {
+                    addMenuButton(sourceNameKids, 'custom-source', icon, function() {
+                        try {
+                            Lampa.Activity.push({
+                                source: sourceNameKids,
+                                title: sourceNameKids,
+                                component: 'main',
+                                page: 1
+                            });
+                        } catch (e) {
+                            console.error('Error in sourceNameKids button callback:', e);
+                        }
+                    });
+                }
+
+                if (isSourceNameRusEnabled) {
+                    addMenuButton(sourceNameRus, 'custom-source', icon, function() {
+                        try {
+                            Lampa.Activity.push({
+                                source: sourceNameRus,
+                                title: sourceNameRus,
+                                component: 'main',
+                                page: 1
+                            });
+                        } catch (e) {
+                            console.error('Error in sourceNameRus button callback:', e);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Error in addMenuButtons:', e);
+            }
+        }
+
+        setTimeout(addMenuButtons, 100);
+
+        Lampa.Listener.follow('profile', function(event) {
+            try {
+                if (event.type !== 'changed') {
+                    return;
+                }
+                addMenuButtons();
+            } catch (e) {
+                console.error('Error in profile listener:', e);
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_custom_buttons',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_custom_buttons'),
+                description: Lampa.Lang.translate('surs_custom_buttons_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showSelectionMenu('surs_custom_buttons', getAllButtons(), 'custom_button_', 'id', currentController);
+                } catch (e) {
+                    console.error('Error in custom_buttons onChange:', e);
+                }
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: '',
+                type: 'title'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_filters'),
+                description: ''
+            }
+        });
+
+        function showSelectionMenu(title, items, storagePrefix, keyField, previousController) {
+            try {
+                keyField = typeof keyField === 'undefined' ? 'id' : keyField;
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var key = item[keyField];
+                    var isEnabled = getStoredSetting(storagePrefix + key, true);
+                    list.push({
+                        title: Lampa.Lang.translate(item.title),
+                        id: key,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate(title),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController);
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = storagePrefix + selectedItem.id;
+                            var isEnabled = getStoredSetting(key, true);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showSelectionMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_sort_options',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_sort_types'),
+                description: Lampa.Lang.translate('surs_sort_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showSelectionMenu('surs_sort_types', allSortOptions, 'sort_', 'id', currentController);
+                } catch (e) {
+                    console.error('Error in sort_options onChange:', e);
+                }
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_genres',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_genres'),
+                description: Lampa.Lang.translate('surs_genres_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showSelectionMenu('surs_genres', allGenres, 'genre_', 'id', currentController);
+                } catch (e) {
+                    console.error('Error in genres onChange:', e);
+                }
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_global_streaming',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_global_streaming'),
+                description: Lampa.Lang.translate('surs_global_streaming_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showSelectionMenu('surs_global_streaming', allStreamingServices, 'streaming_', 'id', currentController);
+                } catch (e) {
+                    console.error('Error in global_streaming onChange:', e);
+                }
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_rus_streaming',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_rus_streaming'),
+                description: Lampa.Lang.translate('surs_rus_streaming_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showSelectionMenu('surs_rus_streaming', allStreamingServicesRUS, 'streaming_rus_', 'id', currentController);
+                } catch (e) {
+                    console.error('Error in rus_streaming onChange:', e);
+                }
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: '',
+                type: 'title'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_geo_filters'),
+                description: ''
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_streaming',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_streaming'),
+                description: Lampa.Lang.translate('surs_region_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showStreamingSelectionMenu(currentController);
+                } catch (e) {
+                    console.error('Error in streaming onChange:', e);
+                }
+            }
+        });
+
+        function showStreamingSelectionMenu(previousController) {
+            try {
+                var items = [
+                    { title: Lampa.Lang.translate('surs_global'), id: 'getStreamingServices' },
+                    { title: Lampa.Lang.translate('surs_russian'), id: 'getStreamingServicesRUS' }
+                ];
+
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var isEnabled = getStoredSetting(item.id, true);
+                    list.push({
+                        title: item.title,
+                        id: item.id,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_streaming'),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = selectedItem.id;
+                            var isEnabled = getStoredSetting(key, true);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showStreamingSelectionMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_getMoviesByGenre',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_movies'),
+                description: Lampa.Lang.translate('surs_region_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showMoviesByGenreSelectionMenu(currentController);
+                } catch (e) {
+                    console.error('Error in getMoviesByGenre onChange:', e);
+                }
+            }
+        });
+
+        function showMoviesByGenreSelectionMenu(previousController) {
+            try {
+                var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
+                var items = [
+                    { title: Lampa.Lang.translate('surs_global'), id: 'getMoviesByGenreGlobal' },
+                    { title: Lampa.Lang.translate('surs_russian'), id: 'getMoviesByGenreRus' }
+                ];
+
+                if (isUkrainianLanguage) {
+                    items.push({ title: Lampa.Lang.translate('surs_ukrainian'), id: 'getMoviesByGenreUA' });
+                }
+
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var defaultValue = item.id === 'getMoviesByGenreUA' ? isUkrainianLanguage : true;
+                    var isEnabled = getStoredSetting(item.id, defaultValue);
+                    list.push({
+                        title: item.title,
+                        id: item.id,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_movies'),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = selectedItem.id;
+                            var defaultValue = key === 'getMoviesByGenreUA' ? isUkrainianLanguage : true;
+                            var isEnabled = getStoredSetting(key, defaultValue);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showMoviesByGenreSelectionMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_getTVShowsByGenre',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_series'),
+                description: Lampa.Lang.translate('surs_region_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showTVShowsByGenreSelectionMenu(currentController);
+                } catch (e) {
+                    console.error('Error in getTVShowsByGenre onChange:', e);
+                }
+            }
+        });
+
+        function showTVShowsByGenreSelectionMenu(previousController) {
+            try {
+                var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
+                var items = [
+                    { title: Lampa.Lang.translate('surs_global'), id: 'getTVShowsByGenreGlobal' },
+                    { title: Lampa.Lang.translate('surs_russian'), id: 'getTVShowsByGenreRus' },
+                    { title: Lampa.Lang.translate('surs_korean'), id: 'getTVShowsByGenreKOR' },
+                    { title: Lampa.Lang.translate('surs_turkish'), id: 'getTVShowsByGenreTR' }
+                ];
+
+                if (isUkrainianLanguage) {
+                    items.push({ title: Lampa.Lang.translate('surs_ukrainian'), id: 'getTVShowsByGenreUA' });
+                }
+
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var defaultValue = (item.id === 'getTVShowsByGenreKOR') ? false : (item.id === 'getTVShowsByGenreUA' ? isUkrainianLanguage : true);
+                    var isEnabled = getStoredSetting(item.id, defaultValue);
+                    list.push({
+                        title: item.title,
+                        id: item.id,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_series'),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = selectedItem.id;
+                            var defaultValue = (key === 'getTVShowsByGenreKOR') ? false : (key === 'getTVShowsByGenreUA' ? isUkrainianLanguage : true);
+                            var isEnabled = getStoredSetting(key, defaultValue);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showTVShowsByGenreSelectionMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_getBestContentByGenre',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_top_all_time'),
+                description: Lampa.Lang.translate('surs_top_content_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showBestContentByGenreSelectionMenu(currentController);
+                } catch (e) {
+                    console.error('Error in getBestContentByGenre onChange:', e);
+                }
+            }
+        });
+
+        function showBestContentByGenreSelectionMenu(previousController) {
+            try {
+                var items = [
+                    { title: Lampa.Lang.translate('surs_movies'), id: 'getBestContentByGenreMovie' },
+                    { title: Lampa.Lang.translate('surs_series'), id: 'getBestContentByGenreTV' }
+                ];
+
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var isEnabled = getStoredSetting(item.id, true);
+                    list.push({
+                        title: item.title,
+                        id: item.id,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_top_all_time'),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = selectedItem.id;
+                            var isEnabled = getStoredSetting(key, true);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showBestContentByGenreSelectionMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_best_content',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_top_5_years'),
+                description: Lampa.Lang.translate('surs_top_content_description')
+            },
+            onChange: function() {
+                try {
+                    var currentController = Lampa.Controller.enabled().name;
+                    showBestContentByPeriodSelectionMenu(currentController);
+                } catch (e) {
+                    console.error('Error in best_content onChange:', e);
+                }
+            }
+        });
+
+        function showBestContentByPeriodSelectionMenu(previousController) {
+            try {
+                var items = [
+                    { title: Lampa.Lang.translate('surs_movies'), id: 'getBestContentByGenreAndPeriod_movie' },
+                    { title: Lampa.Lang.translate('surs_series'), id: 'getBestContentByGenreAndPeriod_tv' }
+                ];
+
+                var list = [];
+                for (var i = 0; i < items.length; i++) {
+                    var item = items[i];
+                    var isEnabled = getStoredSetting(item.id, true);
+                    list.push({
+                        title: item.title,
+                        id: item.id,
+                        checkbox: true,
+                        checked: isEnabled
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_top_5_years'),
+                    items: list,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            var key = selectedItem.id;
+                            var isEnabled = getStoredSetting(key, true);
+                            setStoredSetting(key, !isEnabled);
+                            selectedItem.checked = !isEnabled;
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showBestContentByPeriodSelectionMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: '',
+                type: 'title'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_technical_settings'),
+                description: ''
+            }
+        });
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_cirillic',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_cyrillic'),
+                description: Lampa.Lang.translate('surs_cyrillic_description')
+            },
+            onChange: function() {
+                try {
+                    var previousController = Lampa.Controller.enabled().name;
+                    showCirillicMenu(previousController);
+                } catch (e) {
+                    console.error('Error in cirillic onChange:', e);
+                }
+            }
+        });
+
+        function showCirillicMenu(previousController) {
+            try {
+                var key = 'cirillic';
+                var currentValue = getStoredSetting(key, '1');
+
+                var options = [
+                    { title: Lampa.Lang.translate('surs_cyrillic_enabled'), value: '1' },
+                    { title: Lampa.Lang.translate('surs_cyrillic_disabled'), value: '0' }
+                ];
+
+                var items = [];
+                for (var i = 0; i < options.length; i++) {
+                    var option = options[i];
+                    items.push({
+                        title: option.title,
+                        value: option.value,
+                        checkbox: true,
+                        checked: currentValue === option.value
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_cyrillic'),
+                    items: items,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selected) {
+                        try {
+                            setStoredSetting(key, selected.value);
+                            showCirillicMenu(previousController);
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showCirillicMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_minVotes',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_rating_validation'),
+                description: Lampa.Lang.translate('surs_rating_description')
+            },
+            onChange: function() {
+                try {
+                    var previousController = Lampa.Controller.enabled().name;
+                    showMinVotesMenu(previousController);
+                } catch (e) {
+                    console.error('Error in minVotes onChange:', e);
+                }
+            }
+        });
+
+        function showMinVotesMenu(previousController) {
+            try {
+                var key = 'minVotes';
+                var currentValue = getStoredSetting(key, '10');
+
+                var options = [
+                    { title: Lampa.Lang.translate('surs_rating_off'), value: '0' },
+                    { title: Lampa.Lang.translate('surs_rating_standard'), value: '10' },
+                    { title: Lampa.Lang.translate('surs_rating_enhanced'), value: '50' },
+                    { title: Lampa.Lang.translate('surs_rating_maximum'), value: '150' },
+                    { title: Lampa.Lang.translate('surs_rating_fatality'), value: '300' }
+                ];
+
+                var items = [];
+                for (var i = 0; i < options.length; i++) {
+                    var option = options[i];
+                    items.push({
+                        title: option.title,
+                        value: option.value,
+                        checkbox: true,
+                        checked: currentValue === option.value
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_rating_validation'),
+                    items: items,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selected) {
+                        try {
+                            setStoredSetting(key, selected.value);
+                            showMinVotesMenu(previousController);
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showMinVotesMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_ageRestrictions',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_age_restriction'),
+                description: Lampa.Lang.translate('surs_age_description')
+            },
+            onChange: function() {
+                try {
+                    var previousController = Lampa.Controller.enabled().name;
+                    showAgeRestrictionsMenu(previousController);
+                } catch (e) {
+                    console.error('Error in ageRestrictions onChange:', e);
+                }
+            }
+        });
+
+        function showAgeRestrictionsMenu(previousController) {
+            try {
+                var key = 'ageRestrictions';
+                var currentValue = getStoredSetting(key, '');
+
+                var options = [
+                    { title: Lampa.Lang.translate('surs_age_toddlers'), value: '0+' },
+                    { title: Lampa.Lang.translate('surs_age_6'), value: '6+' },
+                    { title: Lampa.Lang.translate('surs_age_12'), value: '12+' },
+                    { title: Lampa.Lang.translate('surs_age_none'), value: '' }
+                ];
+
+                var items = [];
+                for (var i = 0; i < options.length; i++) {
+                    var option = options[i];
+                    items.push({
+                        title: option.title,
+                        value: option.value,
+                        checkbox: true,
+                        checked: currentValue === option.value
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_age_restriction'),
+                    items: items,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selected) {
+                        try {
+                            setStoredSetting(key, selected.value);
+                            showAgeRestrictionsMenu(previousController);
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showAgeRestrictionsMenu:', e);
+            }
+        }
+
+        Lampa.SettingsApi.addParam({
+            component: 'surs',
+            param: {
+                name: 'surs_withoutKeywords',
+                type: 'button'
+            },
+            field: {
+                name: Lampa.Lang.translate('surs_exclude_asian'),
+                description: Lampa.Lang.translate('surs_exclude_asian_description')
+            },
+            onChange: function() {
+                try {
+                    var previousController = Lampa.Controller.enabled().name;
+                    showKeywordFilterMenu(previousController);
+                } catch (e) {
+                    console.error('Error in withoutKeywords onChange:', e);
+                }
+            }
+        });
+
+        function showKeywordFilterMenu(previousController) {
+            try {
+                var key = 'without_keywords';
+                var currentValue = getStoredSetting(key, '1');
+
+                var options = [
+                    { title: Lampa.Lang.translate('surs_exclude_off'), value: '0' },
+                    { title: Lampa.Lang.translate('surs_exclude_soft'), value: '1' },
+                    { title: Lampa.Lang.translate('surs_exclude_strong'), value: '2' }
+                ];
+
+                var items = [];
+                for (var i = 0; i < options.length; i++) {
+                    var option = options[i];
+                    items.push({
+                        title: option.title,
+                        value: option.value,
+                        checkbox: true,
+                        checked: currentValue === option.value
+                    });
+                }
+
+                Lampa.Select.show({
+                    title: Lampa.Lang.translate('surs_exclude_asian'),
+                    items: items,
+                    onBack: function() {
+                        try {
+                            Lampa.Controller.toggle(previousController || 'settings');
+                        } catch (e) {
+                            console.error('Error in onBack:', e);
+                        }
+                    },
+                    onCheck: function(selectedItem) {
+                        try {
+                            setStoredSetting(key, selectedItem.value);
+                            showKeywordFilterMenu(previousController);
+                        } catch (e) {
+                            console.error('Error in onCheck:', e);
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error in showKeywordFilterMenu:', e);
+            }
+        }
+
+        if (!Lampa.Storage.get('surs_disableCustomName')) {
+            Lampa.SettingsApi.addParam({
+                component: 'surs',
+                param: {
+                    name: '',
+                    type: 'title'
+                },
+                field: {
+                    name: Lampa.Lang.translate('surs_name'),
+                    description: ''
+                }
+            });
+
+            Lampa.SettingsApi.addParam({
+                component: 'surs',
+                param: {
+                    name: 'surs_setName',
+                    type: 'button',
+                    defaultValue: Lampa.Lang.translate('surs_enter_new_name')
+                },
+                field: {
+                    name: Lampa.Lang.translate('surs_rename_selections'),
+                    description: Lampa.Lang.translate('surs_rename_description') + ' ' + currentSource
+                },
+                onChange: function() {
+                    try {
+                        Lampa.Input.edit({
+                            free: true,
+                            title: Lampa.Lang.translate('surs_enter_new_name'),
+                            nosave: true,
+                            value: ''
+                        }, function(input) {
+                            try {
+                                if (input.value) {
+                                    Lampa.Storage.set('surs_name', input.value);
+                                    Lampa.Noty.show(Lampa.Lang.translate('surs_name_saved'));
+
+                                    setTimeout(function() {
+                                        try {
+                                            Lampa.Controller.toggle('settings');
+                                        } catch (e) {
+                                            console.error('Error toggling settings:', e);
+                                        }
+                                    }, 200);
+
+                                    setTimeout(function() {
+                                        try {
+                                            var newName = Lampa.Storage.get('surs_name');
+                                            softRefresh(newName, false);
+                                        } catch (e) {
+                                            console.error('Error in softRefresh:', e);
+                                        }
+                                    }, 2000);
+
+                                    setTimeout(function() {
+                                        try {
+                                            window.location.reload();
+                                        } catch (e) {
+                                            console.error('Error reloading:', e);
+                                        }
+                                    }, 3000);
+                                } else {
+                                    Lampa.Noty.show(Lampa.Lang.translate('surs_name_not_entered'));
+                                }
+                            } catch (e) {
+                                console.error('Error in input callback:', e);
+                            }
+                        });
+                    } catch (e) {
+                        console.error('Error in setName onChange:', e);
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Error in addSettingMenu:', e);
     }
 }
 
 // Фикс главной страницы
 function addMainButton() {
-    $('.menu__item[data-action="main"]').remove();
+    // Проверка наличия Lampa API
+    if (typeof Lampa === 'undefined' || !Lampa.Storage || !Lampa.Lang || !Lampa.Activity) {
+        console.error('Lampa API is not available');
+        return;
+    }
 
-    var homeIcon = '<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"><path fill="currentColor" d="M475.425,200.225L262.092,4.669c-6.951-6.359-17.641-6.204-24.397,0.35L36.213,200.574c-3.449,3.348-5.399,7.953-5.399,12.758v280.889c0,9.819,7.958,17.778,17.778,17.778h148.148c9.819,0,17.778-7.959,17.778-17.778v-130.37h82.963v130.37c0,9.819,7.958,17.778,17.778,17.778h148.148c9.819,0,17.778-7.953,17.778-17.778V213.333C481.185,208.349,479.099,203.597,475.425,200.225z M445.629,476.444H333.037v-130.37c0-9.819-7.959-17.778-17.778-17.778H196.741c-9.819,0-17.778,7.959-17.778,17.778v130.37H66.37V220.853L250.424,42.216l195.206,178.939V476.444z"></path></svg>';
+    try {
+        // Найти существующую кнопку
+        var mainButton = $('.menu__item[data-action="main"]');
+        var menuList = $('.menu .menu__list').eq(0);
 
-    var button = $('<li class="menu__item selector" data-action="custom-main">' +
-        '<div class="menu__ico">' + homeIcon + '</div>' +
-        '<div class="menu__text">' + Lampa.Lang.translate('title_main') + '</div>' +
-        '</li>');
+        // Проверка наличия списка меню
+        if (!menuList.length) {
+            console.error('Menu list not found');
+            return;
+        }
 
-    button.on('hover:enter', function () {
-        Lampa.Activity.push({
-            source: Lampa.Storage.get('source'),
-            title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
-            component: 'main',
-            page: 1
+        // Создание новой кнопки
+        var homeIcon = '<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"><path fill="currentColor" d="M475.425,200.225L262.092,4.669c-6.951-6.359-17.641-6.204-24.397,0.35L36.213,200.574c-3.449,3.348-5.399,7.953-5.399,12.758v280.889c0,9.819,7.958,17.778,17.778,17.778h148.148c9.819,0,17.778-7.959,17.778-17.778v-130.37h82.963v130.37c0,9.819,7.958,17.778,17.778,17.778h148.148c9.819,0,17.778-7.953,17.778-17.778V213.333C481.185,208.349,479.099,203.597,475.425,200.225z M445.629,476.444H333.037v-130.37c0-9.819-7.959-17.778-17.778-17.778H196.741c-9.819,0-17.778,7.959-17.778,17.778v130.37H66.37V220.853L250.424,42.216l195.206,178.939V476.444z"></path></svg>';
+
+        var button = $('<li class="menu__item selector" data-action="custom-main">' +
+            '<div class="menu__ico">' + homeIcon + '</div>' +
+            '<div class="menu__text">' + Lampa.Lang.translate('title_main') + '</div>' +
+            '</li>');
+
+        // Добавление обработчика события
+        button.on('hover:enter', function() {
+            try {
+                Lampa.Activity.push({
+                    source: Lampa.Storage.get('source'),
+                    title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
+                    component: 'main',
+                    page: 1
+                });
+            } catch (e) {
+                console.error('Error in button hover:enter:', e);
+            }
         });
-    });
 
-    $('.menu .menu__list').eq(0).append(button);
+
+        if (mainButton.length) {
+            mainButton.before(button);
+            mainButton.remove();
+        } else {
+
+            menuList.append(button);
+        }
+    } catch (e) {
+        console.error('Error in addMainButton:', e);
+    }
 }
 
 
