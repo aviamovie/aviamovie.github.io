@@ -503,9 +503,15 @@ function getStreamingServicesRUS() {
 
 // Глобальные функции фильтрации
 
-// Фильтрация элементов, содержащих кириллицу
 function filterCyrillic(items) {
-    var storedValue = getStoredSetting('cirillic');
+    var language = Lampa.Storage.get('language');
+    // Если язык не русский и не украинский, возвращаем все элементы без фильтрации
+    if (language !== 'ru' && language !== 'uk') {
+        return items;
+    }
+
+    // Применяем настройки для русского и украинского языка
+    var storedValue = Lampa.Storage.get('cirillic');
     var isFilterEnabled = storedValue === '1' || storedValue === null || storedValue === undefined || storedValue === '';
 
     if (!isFilterEnabled) {
@@ -514,7 +520,7 @@ function filterCyrillic(items) {
 
     function containsCyrillic(value) {
         if (typeof value === 'string') {
-            return /[а-яА-ЯёЁ]/.test(value);
+            return /[а-яА-ЯёЁїЇіІєЄґҐ]/.test(value); // Добавлены украинские символы
         } else if (typeof value === 'object' && value !== null) {
             var keys = Object.keys(value);
             for (var i = 0; i < keys.length; i++) {
@@ -526,12 +532,8 @@ function filterCyrillic(items) {
         return false;
     }
 
-    var filteredItems = items.filter(function (item) {
+    var filteredItems = items.filter(function(item) {
         return containsCyrillic(item);
-    });
-
-    var excludedItems = items.filter(function (item) {
-        return !containsCyrillic(item);
     });
 
     return filteredItems;
