@@ -4434,6 +4434,11 @@ surs_kids: {
     ru: "Детское",
     en: "Kids",
     uk: "Дитяче"
+},
+surs_history: {
+    ru: "История",
+    en: "History",
+    uk: "Історія"
 }
 });
 
