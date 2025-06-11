@@ -368,7 +368,8 @@ function customButtons() {
                 url: '',
                 title: Lampa.Lang.translate('surs_history') ,
                 component: 'favorite',
-                page: 1,
+                type: 'history',
+                page: 2,
             });
         },
         
