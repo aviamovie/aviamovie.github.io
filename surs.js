@@ -366,8 +366,8 @@ function customButtons() {
         surs_history: function() {
             Lampa.Activity.push({
                 url: '',
-                title: Lampa.Lang.translate('surs_bookmarks') ,
-                component: 'history',
+                title: Lampa.Lang.translate('surs_history') ,
+                component: 'favorite',
                 page: 1,
             });
         },
