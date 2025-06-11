@@ -369,7 +369,7 @@ function customButtons() {
                 title: Lampa.Lang.translate('surs_history') ,
                 component: 'favorite',
                 type: 'history',
-                page: 2,
+                page: 1,
             });
         },
         
@@ -440,7 +440,22 @@ function addCardListener() {
 addCardListener();
     }
 
+   Lampa.Template.add('custom_button_style', '\
+    <style>\
+        .custom-button-card {\
+            width: 10em;\
+        }\
     
+        @media screen and (max-width: 700px) {\
+            .items-cards .custom-button-card {\
+                width: 8em !important;\
+            }\
+        }\
+    </style>\
+');
+
+
+$('body').append(Lampa.Template.get('custom_button_style', {}, true)); 
 
 // Функция получения всех настроек
 function getAllStoredSettings() {
@@ -698,28 +713,6 @@ function buildApiUrl(baseUrl) {
 function startPlugin() {
     window.plugin_surs_ready = true;
     
-
-
-Lampa.Template.add('custom_button_style', '\
-    <style>\
-        .custom-button-card {\
-            width: 11em;\
-        }\
-        @media screen and (max-width: 900px) {\
-            .items-cards .custom-button-card {\
-                width: 11em !important;\
-            }\
-        }\
-        @media screen and (max-width: 700px) {\
-            .items-cards .custom-button-card {\
-                width: 9em !important;\
-            }\
-        }\
-    </style>\
-');
-
-
-$('body').append(Lampa.Template.get('custom_button_style', {}, true));
 
 
     var Episode = function (data) {
