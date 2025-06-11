@@ -1583,7 +1583,12 @@ function applyWithoutKeywords(baseUrl) {
     return baseUrl;
 }
 
-
+function buildApiUrl(baseUrl) {
+    baseUrl = applyMinVotes(baseUrl);
+    baseUrl = applyAgeRestriction(baseUrl);
+    baseUrl = applyWithoutKeywords(baseUrl);
+    return baseUrl;
+}
 
 
 var buttonsData = [
