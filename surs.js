@@ -445,7 +445,7 @@ addCardListener();
        .custom-button-card {
     width: 12.25em;
     }
-    .card--small .card__view { margin-bottom: -1.25em; }
+    .card--small .card__view { margin-bottom: -1em; }
 
         @media screen and (max-width: 700px) {
             .items-cards .custom-button-card {
