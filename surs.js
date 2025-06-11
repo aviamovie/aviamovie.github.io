@@ -280,6 +280,7 @@ var allStreamingServicesRUS = [
 var buttonPosters = {
     surs_main: 'https://aviamovie.github.io/img/main.png',
     surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png', 
+    surs_bookmarks: 'https://aviamovie.github.io/img/history.png', 
     surs_select: 'https://aviamovie.github.io/img/select_new.png',
     surs_new: 'https://aviamovie.github.io/img/new.png',
     surs_best: 'https://aviamovie.github.io/img/best.png',
@@ -292,6 +293,7 @@ function getAllButtons() {
     return [
         { id: 'surs_main', title: 'surs_main',  overview: ' '},
         { id: 'surs_bookmarks', title: 'surs_bookmarks', overview: ' '},
+        { id: 'surs_history', title: 'surs_history', overview: ' '},
         { id: 'surs_select', title: 'surs_select', overview: ' ' },
         { id: 'surs_new', title: 'surs_new', overview: ' ' },
         { id: 'surs_rus', title: 'surs_rus', poster_path: null, overview: ' ' },
@@ -358,6 +360,14 @@ function customButtons() {
                 url: '',
                 title: Lampa.Lang.translate('surs_bookmarks') ,
                 component: 'bookmarks',
+                page: 1,
+            });
+        },
+        surs_history: function() {
+            Lampa.Activity.push({
+                url: '',
+                title: Lampa.Lang.translate('surs_bookmarks') ,
+                component: 'history',
                 page: 1,
             });
         },
