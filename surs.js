@@ -280,7 +280,7 @@ var allStreamingServicesRUS = [
 var buttonPosters = {
     surs_main: 'https://aviamovie.github.io/img/main.png',
     surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png', 
-    surs_bookmarks: 'https://aviamovie.github.io/img/history.png', 
+    surs_history: 'https://aviamovie.github.io/img/history.png', 
     surs_select: 'https://aviamovie.github.io/img/select_new.png',
     surs_new: 'https://aviamovie.github.io/img/new.png',
     surs_best: 'https://aviamovie.github.io/img/best.png',
