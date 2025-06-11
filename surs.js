@@ -703,11 +703,11 @@ function startPlugin() {
 Lampa.Template.add('custom_button_style', '\
     <style>\
         .custom-button-card {\
-            width: 9.93em;\
+            width: 11em;\
         }\
         @media screen and (max-width: 900px) {\
             .items-cards .custom-button-card {\
-                width: 12em !important;\
+                width: 11em !important;\
             }\
         }\
         @media screen and (max-width: 700px) {\
