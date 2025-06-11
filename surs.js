@@ -412,14 +412,13 @@ if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'functi
 
 
 
-// Остальные ваши полифилы остаются без изменений...
 
 function addCardListener() {
     initCardListener();
     Lampa.Listener.follow('card', function (event) {
         if (event.type === 'build') {
             var cardId = event.object.data.id;
-            var customButtonIds = customButtons().map(function(button) { return button.id; }); // Изменено для избежания стрелочной функции
+            var customButtonIds = customButtons().map(function(button) { return button.id; }); 
             if (customButtonIds.indexOf(cardId) !== -1) {
                 event.object.data.img = buttonPosters[cardId];
                 event.object.card.addClass('custom-button-card');
@@ -703,7 +702,7 @@ function startPlugin() {
 Lampa.Template.add('custom_button_style', '\
     <style>\
         .custom-button-card {\
-            width: 13.93em;\
+            width: 9.93em;\
         }\
         @media screen and (max-width: 900px) {\
             .items-cards .custom-button-card {\
