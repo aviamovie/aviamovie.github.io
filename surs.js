@@ -440,22 +440,6 @@ function addCardListener() {
 addCardListener();
     }
 
-   Lampa.Template.add('custom_button_style', '\
-    <style>\
-        .custom-button-card {\
-            width: 10em;\
-        }\
-    
-        @media screen and (max-width: 700px) {\
-            .items-cards .custom-button-card {\
-                width: 8em !important;\
-            }\
-        }\
-    </style>\
-');
-
-
-$('body').append(Lampa.Template.get('custom_button_style', {}, true)); 
 
 // Функция получения всех настроек
 function getAllStoredSettings() {
