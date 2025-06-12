@@ -350,7 +350,7 @@ function customButtons() {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             Lampa.Activity.push({
                 source: Lampa.Storage.get('source'),
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,
+                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
                 component: 'main',
                 page: 1
             });
