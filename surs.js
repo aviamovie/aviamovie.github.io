@@ -349,8 +349,8 @@ function customButtons() {
         surs_main: function() {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             Lampa.Activity.push({
-                source: sourceName,
-                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
+                source: Lampa.Storage.get('source'),
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,
                 component: 'main',
                 page: 1
             });
@@ -382,7 +382,7 @@ if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'functi
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             Lampa.Activity.push({
                 source: sourceName + ' NEW',
-                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source') + ' NEW',
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',
                 component: 'main',
                 page: 1
             });
@@ -394,7 +394,7 @@ if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'functi
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             Lampa.Activity.push({
                 source: sourceName + ' RUS',
-                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source')+ ' RUS',
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',
                 component: 'main',
                 page: 1
             });
@@ -403,7 +403,7 @@ if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'functi
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             Lampa.Activity.push({
                 source: sourceName + ' KIDS',
-                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source')+ ' KIDS',
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',
                 component: 'main',
                 page: 1
             });
