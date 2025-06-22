@@ -838,7 +838,7 @@ var SourceTMDB = function (parent) {
                 var json = {
                     title: Lampa.Lang.translate(''),
                     results: customButtons(),
-                    small: true,
+                    //small: true,
                     //customButton: true,
                     collection: true,
                     line_type: 'player-cards'
