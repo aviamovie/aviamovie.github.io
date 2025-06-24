@@ -29,9 +29,9 @@
             uk: "Популярні"
         },
         sursSelect_revenue_desc: {
-            ru: "Интерес зрителей",
-            en: "Audience Interest",
-            uk: "Інтерес глядачів"
+            ru: "Кассовые сборы",
+            en: "Box Office",
+            uk: "Касові збори"
         },
         sursSelect_menu_title: {
             ru: "Разделы",
@@ -99,15 +99,15 @@
             uk: "Колекції"
         },
         sursSelect_lnum_collections: {
-        en: 'LNUM – Collections',
-        ru: 'LNUM – Коллекции',
-        uk: 'LNUM – Колекції'
-    },
+            en: 'LNUM - Collections',
+            ru: 'LNUM - Коллекции',
+            uk: 'LNUM - Колекції'
+        },
         surs_select_plugins_section_title: {
-        en: 'Third-party plugins',
-        ru: 'Сторонние плагины',
-        uk: 'Сторонні плагіни'
-    }
+            en: 'Third-party plugins',
+            ru: 'Сторонние плагины',
+            uk: 'Сторонні плагіни'
+        }
     });
 
     var allStreamingServices = [
@@ -154,61 +154,79 @@
         { id: 'first_air_date.desc', title: 'sursSelect_first_air_date_desc', extraParams: '' },
         { id: 'vote_average.desc', title: 'sursSelect_vote_average_desc', extraParams: '' },
         { id: 'popularity.desc', title: 'sursSelect_popularity_desc', extraParams: '' },
+        { id: 'vote_count.desc', title: 'sursSelect_vote_count_desc', extraParams: '' }
     ];
 
     var sortOptionsMovie = [
         { id: 'release_date.desc', title: 'sursSelect_first_air_date_desc', extraParams: '' },
         { id: 'vote_average.desc', title: 'sursSelect_vote_average_desc', extraParams: '' },
         { id: 'popularity.desc', title: 'sursSelect_popularity_desc', extraParams: '' },
+        { id: 'revenue.desc', title: 'sursSelect_revenue_desc', extraParams: '' }
     ];
 
     var baseExcludedKeywords = ['346488', '158718', '41278', '196034', '272265', '13141', '345822', '315535', '290667', '323477', '290609'];
 
-
-
-function applySortParams(sort, options) {
-    var params = '';
-    var now = new Date();
-
-    var isNewRelease = sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc';
-
-    if (sort.id === 'first_air_date.desc') {
-        var end = new Date(now);
-        end.setDate(now.getDate() - 10);
-        var start = new Date(now);
-        start.setFullYear(start.getFullYear() - 1);
-
-        params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
-        params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
+    function getSortTitle(sortId) {
+        switch (sortId) {
+            case 'release_date.desc':
+            case 'first_air_date.desc':
+                return Lampa.Lang.translate('sursSelect_first_air_date_desc');
+            case 'vote_average.desc':
+                return Lampa.Lang.translate('sursSelect_vote_average_desc');
+            case 'popularity.desc':
+                return Lampa.Lang.translate('sursSelect_popularity_desc');
+            case 'revenue.desc':
+                return Lampa.Lang.translate('sursSelect_revenue_desc');
+            case 'vote_count.desc':
+                return Lampa.Lang.translate('sursSelect_vote_count_desc');
+            default:
+                return '';
+        }
     }
 
-    if (sort.id === 'release_date.desc') {
-        var end = new Date(now);
-        end.setDate(now.getDate() - 40); // Новинки фильмов: последние 40 дней
-        var start = new Date(now);
-        start.setFullYear(start.getFullYear() - 1);
+    function applySortParams(sort, options) {
+        var params = '';
+        var now = new Date();
 
-        params += '&release_date.gte=' + start.toISOString().split('T')[0];
-        params += '&release_date.lte=' + end.toISOString().split('T')[0];
+        var isNewRelease = sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc';
+
+        if (sort.id === 'first_air_date.desc') {
+            var end = new Date(now);
+            end.setDate(now.getDate() - 10);
+            var start = new Date(now);
+            start.setFullYear(start.getFullYear() - 1);
+
+            params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
+            params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
+        }
+
+        if (sort.id === 'release_date.desc') {
+            var end = new Date(now);
+            end.setDate(now.getDate() - 40);
+            var start = new Date(now);
+            start.setFullYear(start.getFullYear() - 1);
+
+            params += '&release_date.gte=' + start.toISOString().split('T')[0];
+            params += '&release_date.lte=' + end.toISOString().split('T')[0];
+        }
+
+        if (isNewRelease && !options.isRussian && !options.isStreaming) {
+            params += '&vote_count.gte=50';
+        } else if (options.isRussian && isNewRelease) {
+            params += '&vote_count.gte=5';
+        } else if (!isNewRelease) {
+            params += '&vote_count.gte=30';
+        }
+
+        if (sort.id === 'vote_count.desc') {
+            params += '&vote_average.gte=5';
+        }
+
+        params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
+
+        sort.extraParams = params;
+        return sort;
     }
-
-    // Условие для количества голосов
-    if (isNewRelease && !options.isRussian && !options.isStreaming) {
-        // Для новинок (все фильмы) устанавливаем минимум 30 голосов
-        params += '&vote_count.gte=50';
-    } else if (options.isRussian && isNewRelease) {
-        // Для российских новинок - 5 голосов
-        params += '&vote_count.gte=5';
-    } else if (!isNewRelease) {
-        // Для всех остальных случаев (не новинки) - 30 голосов
-        params += '&vote_count.gte=30';
-    }
-
-    params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
-
-    sort.extraParams = params;
-    return sort;
-}
 
     function getLogoUrl(networkId, name, callback) {
         var apiUrl = Lampa.TMDB.api('network/' + networkId + '?api_key=' + Lampa.TMDB.key());
@@ -249,46 +267,45 @@ function applySortParams(sort, options) {
         }
     }
 
-function showSursSelectMenu() {
-    var items = [
-        { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
-        { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
-        { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' }
-    ];
+    function showSursSelectMenu() {
+        var items = [
+            { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
+            { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
+            { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' }
+        ];
 
-    // Добавляем блок "Сторонние плагины" только если активен lnum_plugin
-    if (window.lnum_plugin === true) {
-    items.push({
-        title: Lampa.Lang.translate('surs_select_plugins_section_title'),
-        separator: true
-    });
-        items.push({
-            title: Lampa.Lang.translate('sursSelect_lnum_collections'),
-            action: 'lnum_collections'
+        if (window.lnum_plugin === true) {
+            items.push({
+                title: Lampa.Lang.translate('surs_select_plugins_section_title'),
+                separator: true
+            });
+            items.push({
+                title: Lampa.Lang.translate('sursSelect_lnum_collections'),
+                action: 'lnum_collections'
+            });
+        }
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('sursSelect_menu_title'),
+            items: items,
+            onSelect: function (item) {
+                if (item.action === 'movies') showMovieMenu();
+                else if (item.action === 'tvshows') showTVMenu();
+                else if (item.action === 'streaming') showStreamingTypeMenu();
+                else if (item.action === 'lnum_collections') {
+                    Lampa.Activity.push({
+                        url: '',
+                        title: Lampa.Lang.translate('sursSelect_lnum_collections'),
+                        component: 'category',
+                        source: 'LNUM'
+                    });
+                }
+            },
+            onBack: function () {
+                Lampa.Controller.toggle('content');
+            }
         });
     }
-
-    Lampa.Select.show({
-        title: Lampa.Lang.translate('sursSelect_menu_title'),
-        items: items,
-        onSelect: function (item) {
-            if (item.action === 'movies') showMovieMenu();
-            else if (item.action === 'tvshows') showTVMenu();
-            else if (item.action === 'streaming') showStreamingTypeMenu();
-            else if (item.action === 'lnum_collections') {
-                Lampa.Activity.push({
-                    url: '',
-                    title: Lampa.Lang.translate('sursSelect_lnum_collections'),
-                    component: 'category',
-                    source: 'LNUM'
-                });
-            }
-        },
-        onBack: function () {
-            Lampa.Controller.toggle('content');
-        }
-    });
-}
 
     function showMovieMenu() {
         Lampa.Select.show({
@@ -375,10 +392,12 @@ function showSursSelectMenu() {
             onSelect: function (sortItem) {
                 var sort = sortItem.sort;
                 var url = service.url + sort.extraParams;
+                var sortTitle = getSortTitle(sort.id);
+                var finalTitle = service.title + ' (' + Lampa.Lang.translate('sursSelect_sorting') + ': ' + sortTitle + ')';
 
                 Lampa.Activity.push({
                     url: url,
-                    title: service.title,
+                    title: finalTitle,
                     component: 'category_full',
                     card_type: 'true',
                     page: 1,
@@ -386,7 +405,11 @@ function showSursSelectMenu() {
                 });
             },
             onBack: function () {
-                showSursSelectMenu();
+                if (service.url.includes('with_networks=')) {
+                    showStreamingTypeMenu();
+                } else {
+                    showSursSelectMenu();
+                }
             }
         });
     }
