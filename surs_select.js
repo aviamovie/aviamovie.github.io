@@ -102,7 +102,7 @@
             var end = new Date(now);
             end.setDate(now.getDate() - 10);
             var start = new Date(now);
-            start.setFullYear(start.getFullYear() - 1);
+            start.setFullYear(start.getFullYear() - 2);
             params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
             params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
         }
@@ -111,16 +111,16 @@
             var end = new Date(now);
             end.setDate(now.getDate() - 40);
             var start = new Date(now);
-            start.setFullYear(start.getFullYear() - 1);
+            start.setFullYear(start.getFullYear() - 2);
             params += '&release_date.gte=' + start.toISOString().split('T')[0];
             params += '&release_date.lte=' + end.toISOString().split('T')[0];
         }
 
         if (options.isKids && isHighRating) {
             // Для детского контента с сортировкой по рейтингу устанавливаем минимум 130 голосов
-            params += '&vote_count.gte=130';
+            params += '&vote_count.gte=90';
         } else if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
-            params += '&vote_count.gte=50';
+            params += '&vote_count.gte=25';
         } else if (options.isRussian && isNewRelease) {
             params += '&vote_count.gte=5';
         } else if (!isNewRelease && !options.isKids) {
