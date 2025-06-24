@@ -96,6 +96,7 @@
         var params = '';
         var now = new Date();
         var isNewRelease = sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc';
+        var isHighRating = sort.id === 'vote_average.desc';
 
         if (sort.id === 'first_air_date.desc') {
             var end = new Date(now);
@@ -115,14 +116,17 @@
             params += '&release_date.lte=' + end.toISOString().split('T')[0];
         }
 
-        if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
+        if (options.isKids && isHighRating) {
+            // Для детского контента с сортировкой по рейтингу устанавливаем минимум 130 голосов
+            params += '&vote_count.gte=130';
+        } else if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
             params += '&vote_count.gte=50';
         } else if (options.isRussian && isNewRelease) {
             params += '&vote_count.gte=5';
         } else if (!isNewRelease && !options.isKids) {
             params += '&vote_count.gte=30';
         } else if (options.isKids) {
-            params += '&vote_count.gte=5';
+            params += '&vote_count.gte=10';
         }
 
         if (sort.id === 'vote_count.desc') {
@@ -144,11 +148,11 @@
             success: function (data) {
                 var imgUrl = data && data.logo_path 
                     ? Lampa.TMDB.image('t/p/w154' + data.logo_path) 
-                    : 'https://via.placeholder.com/120x120.png?text=' + encodeURIComponent(name.charAt(0));
+                    : '';
                 callback(imgUrl);
             },
             error: function () {
-                callback('https://via.placeholder.com/120x120.png?text=' + encodeURIComponent(name.charAt(0)));
+                callback('');
             }
         });
     }
@@ -156,9 +160,7 @@
     function createLogoHtml(networkId, name) {
         return '<div style="display: flex; align-items: center; padding: 0.5em 0">' +
             '<div style="width: 2.75em; height: 1em; margin-right: 1em;">' +
-            '<img src="https://via.placeholder.com/120x120.png?text=' + encodeURIComponent(name.charAt(0)) + '" ' +
-            'style="width: 100%; height: 100%; object-fit: contain; filter: grayscale(100%);" ' +
-            'class="logo-' + (networkId || 'none') + '">' +
+            (networkId ? '<img src="" style="width: 100%; height: 100%; object-fit: contain; filter: grayscale(100%);" class="logo-' + networkId + '">' : '') +
             '</div>' +
             '<div style="font-size: 1.3em; display: flex; align-items: center;">' + name + '</div>' +
             '</div>';
@@ -167,7 +169,9 @@
     function updateLogo(networkId, name) {
         if (networkId) {
             getLogoUrl(networkId, name, function (url) {
-                $('.logo-' + networkId).attr('src', url);
+                if (url) {
+                    $('.logo-' + networkId).attr('src', url);
+                }
             });
         }
     }
