@@ -126,7 +126,7 @@
         } else if (!isNewRelease && !options.isKids) {
             params += '&vote_count.gte=30';
         } else if (options.isKids) {
-            params += '&vote_count.gte=10';
+            params += '&vote_count.gte=2';
         }
 
         if (sort.id === 'vote_count.desc') {
