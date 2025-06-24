@@ -54,9 +54,14 @@
             uk: "Стрімінг"
         },
         sursSelect_animation: {
-            ru: "Анимация",
+            ru: "Мультфильмы",
             en: "Animation",
-            uk: "Анімація"
+            uk: "Мультфільми"
+        },
+        sursSelect_animation_series: {
+            ru: "Мультсериалы",
+            en: "Animated Series",
+            uk: "Мультсеріали"
         },
         sursSelect_all_movies: {
             ru: "Все фильмы",
@@ -113,23 +118,13 @@
             ru: 'Сторонние плагины',
             uk: 'Сторонні плагіни'
         },
-        sursSelect_animation_movies: {
-            en: 'Animated Movies',
-            ru: 'Мультфильмы',
-            uk: 'Мультфільми'
-        },
-        sursSelect_animation_series: {
-            en: 'Animated Series',
-            ru: 'Мультсериалы',
-            uk: 'Мультсеріали'
-        },
         sursSelect_animation_new: {
             en: 'New Releases',
             ru: 'Новинки',
             uk: 'Новинки'
         },
         sursSelect_animation_best: {
-            en: 'Best Rated',
+            en: 'Top Rated',
             ru: 'Лучшие',
             uk: 'Найкращі'
         },
@@ -143,8 +138,8 @@
             ru: 'Кассовые',
             uk: 'Касові'
         },
-        sursSelect_animation_rated: {
-            en: 'Top Rated',
+        sursSelect_animation_votes: {
+            en: 'Most Votes',
             ru: 'Рейтинговые',
             uk: 'Рейтингові'
         }
@@ -202,6 +197,20 @@
         { id: 'popularity.desc', title: 'sursSelect_popularity_desc', extraParams: '' },
     ];
 
+    var sortOptionsAnimation = [
+        { id: 'release_date.desc', title: 'sursSelect_first_air_date_desc', extraParams: '' },
+        { id: 'vote_average.desc', title: 'sursSelect_vote_average_desc', extraParams: '' },
+        { id: 'popularity.desc', title: 'sursSelect_popularity_desc', extraParams: '' },
+        { id: 'revenue.desc', title: 'sursSelect_revenue_desc', extraParams: '' }
+    ];
+
+    var sortOptionsAnimationSeries = [
+        { id: 'first_air_date.desc', title: 'sursSelect_first_air_date_desc', extraParams: '' },
+        { id: 'vote_average.desc', title: 'sursSelect_vote_average_desc', extraParams: '' },
+        { id: 'popularity.desc', title: 'sursSelect_popularity_desc', extraParams: '' },
+        { id: 'vote_count.desc', title: 'sursSelect_animation_votes', extraParams: '' }
+    ];
+
     var baseExcludedKeywords = ['346488', '158718', '41278', '196034', '272265', '13141', '345822', '315535', '290667', '323477', '290609'];
 
     function applySortParams(sort, options) {
@@ -234,6 +243,35 @@
             params += '&vote_count.gte=30';
         } else if (options.isRussian && sort.id === 'release_date.desc') {
             params += '&vote_count.gte=5';
+        }
+
+        params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
+
+        sort.extraParams = params;
+        return sort;
+    }
+
+    function applyAnimationSortParams(sort, isSeries) {
+        var params = '';
+        var now = new Date();
+
+        if (sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc') {
+            var end = new Date(now);
+            end.setDate(now.getDate() - 30);
+            var start = new Date(now);
+            start.setFullYear(start.getFullYear() - (isSeries ? 5 : 1));
+
+            if (isSeries) {
+                params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
+                params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
+            } else {
+                params += '&release_date.gte=' + start.toISOString().split('T')[0];
+                params += '&release_date.lte=' + end.toISOString().split('T')[0];
+            }
+        }
+
+        if (sort.id === 'vote_average.desc') {
+            params += '&vote_count.gte=' + (isSeries ? '10' : '125');
         }
 
         params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
@@ -286,7 +324,8 @@
             { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
             { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
             { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' },
-            { title: Lampa.Lang.translate('sursSelect_animation'), action: 'animation' }
+            { title: Lampa.Lang.translate('sursSelect_animation'), action: 'animation' },
+            { title: Lampa.Lang.translate('sursSelect_animation_series'), action: 'animation_series' }
         ];
 
         if (window.lnum_plugin === true) {
@@ -308,6 +347,7 @@
                 else if (item.action === 'tvshows') showTVMenu();
                 else if (item.action === 'streaming') showStreamingTypeMenu();
                 else if (item.action === 'animation') showAnimationMenu();
+                else if (item.action === 'animation_series') showAnimationSeriesMenu();
                 else if (item.action === 'lnum_collections') {
                     Lampa.Activity.push({
                         url: '',
@@ -331,7 +371,7 @@
                 { title: Lampa.Lang.translate('sursSelect_russian_movies'), url: 'discover/movie?&with_original_language=ru' }
             ],
             onSelect: function (item) {
-                showSortList(item);
+                showSortList(item, false);
             },
             onBack: showSursSelectMenu
         });
@@ -345,10 +385,26 @@
                 { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' }
             ],
             onSelect: function (item) {
-                showSortList(item);
+                showSortList(item, true);
             },
             onBack: showSursSelectMenu
         });
+    }
+
+    function showAnimationMenu() {
+        var item = {
+            url: 'discover/movie?with_genres=16,10751&with_original_language=ru|uk|en|be',
+            title: Lampa.Lang.translate('sursSelect_animation')
+        };
+        showAnimationSortList(item, false);
+    }
+
+    function showAnimationSeriesMenu() {
+        var item = {
+            url: 'discover/tv?with_genres=16,10751&certification_country=RU&certification.lte=12+',
+            title: Lampa.Lang.translate('sursSelect_animation_series')
+        };
+        showAnimationSortList(item, true);
     }
 
     function showStreamingTypeMenu() {
@@ -381,16 +437,15 @@
             title: Lampa.Lang.translate('sursSelect_service_selection'),
             items: items,
             onSelect: function (item) {
-                showSortList({ url: 'discover/tv?with_networks=' + item.service.id, title: item.service.title });
+                showSortList({ url: 'discover/tv?with_networks=' + item.service.id, title: item.service.title }, true);
             },
             onBack: showStreamingTypeMenu
         });
     }
 
-    function showSortList(service) {
+    function showSortList(service, isTV) {
         var sortItems = [];
-        var isMovie = service.url.startsWith('discover/movie');
-        var currentSortOptions = isMovie ? sortOptionsMovie : sortOptionsTV;
+        var currentSortOptions = isTV ? sortOptionsTV : sortOptionsMovie;
 
         for (var i = 0; i < currentSortOptions.length; i++) {
             sortItems.push({
@@ -411,7 +466,54 @@
 
                 Lampa.Activity.push({
                     url: url,
-                    title: service.title,
+                    title: service.title + (sortItem.title ? ' • ' + sortItem.title : ''),
+                    component: 'category_full',
+                    card_type: 'true',
+                    page: 1,
+                    sort_by: sort.id
+                });
+            },
+            onBack: function () {
+                if (isTV) showTVMenu();
+                else showMovieMenu();
+            }
+        });
+    }
+
+    function showAnimationSortList(service, isSeries) {
+        var sortItems = [];
+        var currentSortOptions = isSeries ? sortOptionsAnimationSeries : sortOptionsAnimation;
+
+        for (var i = 0; i < currentSortOptions.length; i++) {
+            sortItems.push({
+                title: Lampa.Lang.translate(currentSortOptions[i].title),
+                sort: applyAnimationSortParams(currentSortOptions[i], isSeries)
+            });
+        }
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate(isSeries ? 'sursSelect_animation_series' : 'sursSelect_animation'),
+            items: sortItems,
+            onSelect: function (sortItem) {
+                var sort = sortItem.sort;
+                var url = service.url + sort.extraParams + '&sort_by=' + sort.id;
+
+                var title = service.title;
+                if (sort.id === 'release_date.desc' || sort.id === 'first_air_date.desc') {
+                    title += ' • ' + Lampa.Lang.translate('sursSelect_animation_new');
+                } else if (sort.id === 'vote_average.desc') {
+                    title += ' • ' + Lampa.Lang.translate('sursSelect_animation_best');
+                } else if (sort.id === 'popularity.desc') {
+                    title += ' • ' + Lampa.Lang.translate('sursSelect_animation_popular');
+                } else if (sort.id === 'revenue.desc') {
+                    title += ' • ' + Lampa.Lang.translate('sursSelect_animation_revenue');
+                } else if (sort.id === 'vote_count.desc') {
+                    title += ' • ' + Lampa.Lang.translate('sursSelect_animation_votes');
+                }
+
+                Lampa.Activity.push({
+                    url: url,
+                    title: title,
                     component: 'category_full',
                     card_type: 'true',
                     page: 1,
@@ -421,163 +523,6 @@
             onBack: function () {
                 showSursSelectMenu();
             }
-        });
-    }
-
-    function showAnimationMenu() {
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('sursSelect_animation'),
-            items: [
-                { title: Lampa.Lang.translate('sursSelect_animation_movies'), action: 'animation_movies' },
-                { title: Lampa.Lang.translate('sursSelect_animation_series'), action: 'animation_series' }
-            ],
-            onSelect: function (item) {
-                if (item.action === 'animation_movies') showAnimationMoviesSort();
-                else if (item.action === 'animation_series') showAnimationSeriesSort();
-            },
-            onBack: showSursSelectMenu
-        });
-    }
-
-    function showAnimationMoviesSort() {
-        var today = new Date();
-        var minDate = new Date();
-        minDate.setDate(today.getDate() - 30);
-        var maxDate = new Date();
-        maxDate.setFullYear(today.getFullYear() - 1);
-        
-        function formatDate(date) {
-            var year = date.getFullYear();
-            var month = (date.getMonth() + 1).toString().padStart(2, '0');
-            var day = date.getDate().toString().padStart(2, '0');
-            return year + '-' + month + '-' + day;
-        }
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('sursSelect_animation_movies'),
-            items: [
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_new'),
-                    value: 'release_date.desc',
-                    special: 'new'
-                },
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_best'),
-                    value: 'vote_average.desc',
-                    special: 'best'
-                },
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_popular'),
-                    value: 'popularity.desc'
-                },
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_revenue'),
-                    value: 'revenue.desc'
-                }
-            ],
-            onSelect: function(item) {
-                var baseUrl = "discover/movie?with_genres=10751,16&sort_by=" + item.value + "&with_original_language=ru|uk|en|be";
-                var title = Lampa.Lang.translate('sursSelect_animation_movies');
-                
-                if(item.special === 'new') {
-                    baseUrl += "&release_date.lte=" + formatDate(minDate) + 
-                               "&release_date.gte=" + formatDate(maxDate) +
-                               "&vote_count.gte=5";
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_new');
-                }
-                else if(item.special === 'best') {
-                    baseUrl += "&vote_count.gte=125";
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_best');
-                }
-                else if(item.value === 'popularity.desc') {
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_popular');
-                }
-                else if(item.value === 'revenue.desc') {
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_revenue');
-                }
-                
-                Lampa.Activity.push({
-                    url: baseUrl,
-                    title: title,
-                    component: "category_full",
-                    source: "tmdb",
-                    genres: 16,
-                    sort: "now",
-                    card_type: "true",
-                    page: 1
-                });
-            },
-            onBack: showAnimationMenu
-        });
-    }
-
-    function showAnimationSeriesSort() {
-        var today = new Date();
-        var minDate = new Date();
-        minDate.setDate(today.getDate() - 30);
-        var maxDate = new Date();
-        maxDate.setFullYear(today.getFullYear() - 5);
-        
-        function formatDate(date) {
-            var year = date.getFullYear();
-            var month = (date.getMonth() + 1).toString().padStart(2, '0');
-            var day = date.getDate().toString().padStart(2, '0');
-            return year + '-' + month + '-' + day;
-        }
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('sursSelect_animation_series'),
-            items: [
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_new'),
-                    value: 'first_air_date.desc',
-                    special: 'new'
-                },
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_best'),
-                    value: 'vote_average.desc',
-                    special: 'best'
-                },
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_popular'),
-                    value: 'popularity.desc'
-                },
-                {
-                    title: Lampa.Lang.translate('sursSelect_animation_rated'),
-                    value: 'vote_count.desc'
-                }
-            ],
-            onSelect: function(item) {
-                var baseUrl = "discover/tv?with_genres=10751,16&sort_by=" + item.value + 
-                             "&certification_country=RU&certification.lte=12+";
-                var title = Lampa.Lang.translate('sursSelect_animation_series');
-                
-                if(item.special === 'new') {
-                    baseUrl += "&first_air_date.lte=" + formatDate(minDate) + 
-                               "&first_air_date.gte=" + formatDate(maxDate) +
-                               "&vote_count.gte=10";
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_new');
-                }
-                else if(item.special === 'best') {
-                    baseUrl += "&vote_count.gte=10";
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_best');
-                }
-                else if(item.value === 'popularity.desc') {
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_popular');
-                }
-                else if(item.value === 'vote_count.desc') {
-                    title += " • " + Lampa.Lang.translate('sursSelect_animation_rated');
-                }
-                
-                Lampa.Activity.push({
-                    url: baseUrl,
-                    title: title,
-                    component: "category_full",
-                    card_type: "true",
-                    page: 1
-                });
-            },
-            onBack: showAnimationMenu
         });
     }
 
