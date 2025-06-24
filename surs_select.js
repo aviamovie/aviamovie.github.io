@@ -375,43 +375,14 @@
         kidsMenuItem.on('hover:enter', showKidsMenu);
         $('.menu .menu__list').eq(0).append(kidsMenuItem);
     }
-function menueSort() {
-    // Ждем пока меню будет полностью загружено
-    setTimeout(function() {
-        var menuList = document.querySelectorAll('.menu .menu__list')[0];
-        if (!menuList) return;
 
-        var items = menuList.querySelectorAll('.menu__item');
-        var streamingItem, tvItem, kidsItem;
-
-        // Находим нужные элементы
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            if (item.getAttribute('data-action') === 'streaming') {
-                streamingItem = item;
-            } else if (item.getAttribute('data-action') === 'tv') {
-                tvItem = item;
-            } else if (item.getAttribute('data-action') === 'kids') {
-                kidsItem = item;
-            }
-        }
-
-        // Перемещаем элементы в нужном порядке
-        if (tvItem && streamingItem) {
-            menuList.insertBefore(streamingItem, tvItem.nextSibling);
-        }
-        if (streamingItem && kidsItem) {
-            menuList.insertBefore(kidsItem, streamingItem.nextSibling);
-        }
-    }, 4000); // Небольшая задержка для гарантированной загрузки меню
-}
     // Запуск плагина
     if (window.appready) {
         initPlugin();
-        menueSort();
+
     } else {
         Lampa.Listener.follow('app', function (e) {
-            if (e.type === 'ready') initPlugin(); menueSort();
+            if (e.type === 'ready') initPlugin();
         });
     }
 
