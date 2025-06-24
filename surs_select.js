@@ -118,7 +118,7 @@
 
         if (options.isKids && isHighRating) {
             // Для детского контента с сортировкой по рейтингу устанавливаем минимум 130 голосов
-            params += '&vote_count.gte=130';
+            params += '&vote_count.gte=70';
         } else if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
             params += '&vote_count.gte=50';
         } else if (options.isRussian && isNewRelease) {
