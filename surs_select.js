@@ -394,7 +394,7 @@
                 }
             } else {
 
-                setTimeout(addMenuItems, 500);
+                setTimeout(addMenuItems, 25500);
             }
         }
 
