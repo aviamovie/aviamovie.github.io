@@ -393,7 +393,7 @@
                 var sort = sortItem.sort;
                 var url = service.url + sort.extraParams;
                 var sortTitle = getSortTitle(sort.id);
-                var finalTitle = service.title + ' ' + '- ' + sortTitle + '';
+                var finalTitle = service.title + ' (' + Lampa.Lang.translate('sursSelect_sorting') + ': ' + sortTitle + ')';
 
                 Lampa.Activity.push({
                     url: url,
