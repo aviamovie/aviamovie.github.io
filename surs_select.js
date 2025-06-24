@@ -403,7 +403,7 @@ function menueSort() {
         if (streamingItem && kidsItem) {
             menuList.insertBefore(kidsItem, streamingItem.nextSibling);
         }
-    }, 300); // Небольшая задержка для гарантированной загрузки меню
+    }, 2300); // Небольшая задержка для гарантированной загрузки меню
 }
     // Запуск плагина
     if (window.appready) {
