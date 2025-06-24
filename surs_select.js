@@ -349,27 +349,50 @@
         });
     }
 
-    function showServiceList(serviceList) {
-        var items = [];
+function showSortList(service) {
+    var sortItems = [];
+    var isMovie = service.url.startsWith('discover/movie');
+    var currentSortOptions = isMovie ? sortOptionsMovie : sortOptionsTV;
 
-        for (var i = 0; i < serviceList.length; i++) {
-            items.push({
-                title: '<div class="settings-folder" style="padding:0!important">' + createLogoHtml(serviceList[i].id, serviceList[i].title) + '</div>',
-                service: serviceList[i]
-            });
-
-            updateLogo(serviceList[i].id, serviceList[i].title);
-        }
-
-        Lampa.Select.show({
-            title: Lampa.Lang.translate('sursSelect_service_selection'),
-            items: items,
-            onSelect: function (item) {
-                showSortList({ url: 'discover/tv?with_networks=' + item.service.id, title: item.service.title });
-            },
-            onBack: showStreamingTypeMenu
+    for (var i = 0; i < currentSortOptions.length; i++) {
+        sortItems.push({
+            title: Lampa.Lang.translate(currentSortOptions[i].title),
+            sort: applySortParams(currentSortOptions[i], {
+                isRussian: service.url.includes('with_original_language=ru'),
+                isStreaming: service.url.includes('with_networks='),
+            })
         });
     }
+
+    Lampa.Select.show({
+        title: Lampa.Lang.translate('sursSelect_sorting'),
+        items: sortItems,
+        onSelect: function (sortItem) {
+            var sort = sortItem.sort;
+            var url = service.url + sort.extraParams;
+            var sortTitle = getSortTitle(sort.id);
+            
+            // Измененный формат заголовка: "Название — Сортировка"
+            var finalTitle = service.title + ' — ' + sortTitle;
+
+            Lampa.Activity.push({
+                url: url,
+                title: finalTitle,
+                component: 'category_full',
+                card_type: 'true',
+                page: 1,
+                sort_by: sort.id
+            });
+        },
+        onBack: function () {
+            if (service.url.includes('with_networks=')) {
+                showStreamingTypeMenu();
+            } else {
+                showSursSelectMenu();
+            }
+        }
+    });
+}
 
     function showSortList(service) {
         var sortItems = [];
