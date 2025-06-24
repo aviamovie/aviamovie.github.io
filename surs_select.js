@@ -376,6 +376,9 @@
         $('.menu .menu__list').eq(0).append(kidsMenuItem);
     }
 
+        $('div[data-component="streaming"]').after($('div[data-component="tv"]'));
+        $('div[data-component="kids"]').after($('div[data-component="streaming"]'));
+
     // Запуск плагина
     if (window.appready) {
         initPlugin();
