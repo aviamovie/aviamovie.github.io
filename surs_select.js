@@ -19,8 +19,10 @@
         sursSelect_streaming: { ru: "Стриминги", en: "Streaming", uk: "Стрімінг" },
         sursSelect_all_movies: { ru: "Все фильмы", en: "All Movies", uk: "Усі фільми" },
         sursSelect_russian_movies: { ru: "Российские фильмы", en: "Russian Movies", uk: "Російські фільми" },
+        sursSelect_animated_movies: { ru: "Мультфильмы", en: "Animated Movies", uk: "Мультфільми" },
         sursSelect_all_tvshows: { ru: "Все сериалы", en: "All TV Shows", uk: "Усі серіали" },
         sursSelect_russian_tvshows: { ru: "Российские сериалы", en: "Russian TV Shows", uk: "Російські серіали" },
+        sursSelect_animated_tvshows: { ru: "Мультсериалы", en: "Animated TV Shows", uk: "Мультсеріали" },
         sursSelect_global_streaming: { ru: "Глобальные стриминги", en: "Global Streaming", uk: "Глобальний стрімінг" },
         sursSelect_russian_streaming: { ru: "Российские стриминги", en: "Russian Streaming", uk: "Російський стрімінг" },
         sursSelect_service_selection: { ru: "Выбор сервиса", en: "Service Selection", uk: "Вибір сервісу" },
@@ -109,7 +111,7 @@
             params += '&release_date.lte=' + end.toISOString().split('T')[0];
         }
 
-        if (isNewRelease && !options.isRussian && !options.isStreaming) {
+        if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isAnimated) {
             params += '&vote_count.gte=50';
         } else if (options.isRussian && isNewRelease) {
             params += '&vote_count.gte=5';
@@ -205,7 +207,8 @@
             title: Lampa.Lang.translate('sursSelect_movies'),
             items: [
                 { title: Lampa.Lang.translate('sursSelect_all_movies'), url: 'discover/movie?' },
-                { title: Lampa.Lang.translate('sursSelect_russian_movies'), url: 'discover/movie?&with_original_language=ru' }
+                { title: Lampa.Lang.translate('sursSelect_russian_movies'), url: 'discover/movie?&with_original_language=ru' },
+                { title: Lampa.Lang.translate('sursSelect_animated_movies'), url: 'discover/movie?&with_genres=16,10751' }
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -218,7 +221,8 @@
             title: Lampa.Lang.translate('sursSelect_tvshows'),
             items: [
                 { title: Lampa.Lang.translate('sursSelect_all_tvshows'), url: 'discover/tv?' },
-                { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' }
+                { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' },
+                { title: Lampa.Lang.translate('sursSelect_animated_tvshows'), url: 'discover/tv?&with_genres=16,10751' }
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -275,7 +279,8 @@
                 title: Lampa.Lang.translate(currentSortOptions[i].title),
                 sort: applySortParams(currentSortOptions[i], {
                     isRussian: service.url.includes('with_original_language=ru'),
-                    isStreaming: service.url.includes('with_networks=')
+                    isStreaming: service.url.includes('with_networks='),
+                    isAnimated: service.url.includes('with_genres=16,10751')
                 })
             });
         }
@@ -298,7 +303,7 @@
                 if (service.url.includes('with_networks=')) {
                     showStreamingTypeMenu();
                 } else {
-                    showSursSelectMenu();
+                    isMovie ? showMovieMenu() : showTVMenu();
                 }
             }
         });
