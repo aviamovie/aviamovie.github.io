@@ -195,7 +195,7 @@ function applySortParams(sort, options) {
     // Условие для количества голосов
     if (isNewRelease && !options.isRussian && !options.isStreaming) {
         // Для новинок (все фильмы) устанавливаем минимум 30 голосов
-        params += '&vote_count.gte=30';
+        params += '&vote_count.gte=50';
     } else if (options.isRussian && isNewRelease) {
         // Для российских новинок - 5 голосов
         params += '&vote_count.gte=5';
