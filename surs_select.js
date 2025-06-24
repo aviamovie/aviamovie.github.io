@@ -118,7 +118,7 @@
 
         if (options.isKids && isHighRating) {
             // Для детского контента с сортировкой по рейтингу устанавливаем минимум 130 голосов
-            params += '&vote_count.gte=70';
+            params += '&vote_count.gte=95';
         } else if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
             params += '&vote_count.gte=50';
         } else if (options.isRussian && isNewRelease) {
@@ -248,7 +248,7 @@
             items: [
                 { title: Lampa.Lang.translate('sursSelect_kids_movies'), url: 'discover/movie?&with_genres=16,10751&certification_country=US&certification.lte=PG' },
                 { title: Lampa.Lang.translate('sursSelect_kids_tvshows'), url: 'discover/tv?&with_genres=16,10751&certification_country=US&certification.lte=TV-Y7' },
-                { title: Lampa.Lang.translate('sursSelect_kids_family'), url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG' }
+               // { title: Lampa.Lang.translate('sursSelect_kids_family'), url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG' }
             ],
             onSelect: function(item) {
                 showSortList({
