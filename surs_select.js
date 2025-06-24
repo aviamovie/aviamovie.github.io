@@ -220,7 +220,7 @@
             items: [
                 { title: Lampa.Lang.translate('sursSelect_all_movies'), url: 'discover/movie?' },
                 { title: Lampa.Lang.translate('sursSelect_russian_movies'), url: 'discover/movie?&with_original_language=ru' },
-                { title: Lampa.Lang.translate('sursSelect_animated_movies'), url: 'discover/movie?&with_genres=16,10751' }
+
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -234,7 +234,7 @@
             items: [
                 { title: Lampa.Lang.translate('sursSelect_all_tvshows'), url: 'discover/tv?' },
                 { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' },
-                { title: Lampa.Lang.translate('sursSelect_animated_tvshows'), url: 'discover/tv?&with_genres=16,10751' }
+
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
