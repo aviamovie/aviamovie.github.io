@@ -17,12 +17,16 @@
         sursSelect_movies: { ru: "Фильмы", en: "Movies", uk: "Фільми" },
         sursSelect_tvshows: { ru: "Сериалы", en: "TV Shows", uk: "Серіали" },
         sursSelect_streaming: { ru: "Стриминги", en: "Streaming", uk: "Стрімінг" },
+        sursSelect_kids: { ru: "Для детей", en: "For Kids", uk: "Для дітей" },
         sursSelect_all_movies: { ru: "Все фильмы", en: "All Movies", uk: "Усі фільми" },
         sursSelect_russian_movies: { ru: "Российские фильмы", en: "Russian Movies", uk: "Російські фільми" },
         sursSelect_animated_movies: { ru: "Мультфильмы", en: "Animated Movies", uk: "Мультфільми" },
         sursSelect_all_tvshows: { ru: "Все сериалы", en: "All TV Shows", uk: "Усі серіали" },
         sursSelect_russian_tvshows: { ru: "Российские сериалы", en: "Russian TV Shows", uk: "Російські серіали" },
         sursSelect_animated_tvshows: { ru: "Мультсериалы", en: "Animated TV Shows", uk: "Мультсеріали" },
+        sursSelect_kids_movies: { ru: "Мультфильмы", en: "Cartoons", uk: "Мультфільми" },
+        sursSelect_kids_tvshows: { ru: "Мультсериалы", en: "Cartoon Series", uk: "Мультсеріали" },
+        sursSelect_kids_family: { ru: "Семейные", en: "Family", uk: "Сімейні" },
         sursSelect_global_streaming: { ru: "Глобальные стриминги", en: "Global Streaming", uk: "Глобальний стрімінг" },
         sursSelect_russian_streaming: { ru: "Российские стриминги", en: "Russian Streaming", uk: "Російський стрімінг" },
         sursSelect_service_selection: { ru: "Выбор сервиса", en: "Service Selection", uk: "Вибір сервісу" },
@@ -111,12 +115,14 @@
             params += '&release_date.lte=' + end.toISOString().split('T')[0];
         }
 
-        if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isAnimated) {
+        if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
             params += '&vote_count.gte=50';
         } else if (options.isRussian && isNewRelease) {
             params += '&vote_count.gte=5';
-        } else if (!isNewRelease) {
+        } else if (!isNewRelease && !options.isKids) {
             params += '&vote_count.gte=30';
+        } else if (options.isKids) {
+            params += '&vote_count.gte=10';
         }
 
         if (sort.id === 'vote_count.desc') {
@@ -171,7 +177,8 @@
         var items = [
             { title: Lampa.Lang.translate('sursSelect_movies'), action: 'movies' },
             { title: Lampa.Lang.translate('sursSelect_tvshows'), action: 'tvshows' },
-            { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' }
+            { title: Lampa.Lang.translate('sursSelect_streaming'), action: 'streaming' },
+            { title: Lampa.Lang.translate('sursSelect_kids'), action: 'kids' }
         ];
 
         if (window.lnum_plugin === true) {
@@ -186,6 +193,7 @@
                 if (item.action === 'movies') showMovieMenu();
                 else if (item.action === 'tvshows') showTVMenu();
                 else if (item.action === 'streaming') showStreamingTypeMenu();
+                else if (item.action === 'kids') showKidsMenu();
                 else if (item.action === 'lnum_collections') {
                     Lampa.Activity.push({
                         url: '',
@@ -225,6 +233,26 @@
                 { title: Lampa.Lang.translate('sursSelect_animated_tvshows'), url: 'discover/tv?&with_genres=16,10751' }
             ],
             onSelect: showSortList,
+            onBack: showSursSelectMenu
+        });
+    }
+
+    // Меню для детей
+    function showKidsMenu() {
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('sursSelect_kids'),
+            items: [
+                { title: Lampa.Lang.translate('sursSelect_kids_movies'), url: 'discover/movie?&with_genres=16,10751&certification_country=US&certification.lte=PG' },
+                { title: Lampa.Lang.translate('sursSelect_kids_tvshows'), url: 'discover/tv?&with_genres=16,10751&certification_country=US&certification.lte=TV-Y7' },
+                { title: Lampa.Lang.translate('sursSelect_kids_family'), url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG' }
+            ],
+            onSelect: function(item) {
+                showSortList({
+                    url: item.url,
+                    title: item.title,
+                    isKids: true
+                });
+            },
             onBack: showSursSelectMenu
         });
     }
@@ -280,7 +308,7 @@
                 sort: applySortParams(currentSortOptions[i], {
                     isRussian: service.url.includes('with_original_language=ru'),
                     isStreaming: service.url.includes('with_networks='),
-                    isAnimated: service.url.includes('with_genres=16,10751')
+                    isKids: service.isKids || false
                 })
             });
         }
@@ -302,6 +330,8 @@
             onBack: function () {
                 if (service.url.includes('with_networks=')) {
                     showStreamingTypeMenu();
+                } else if (service.isKids) {
+                    showKidsMenu();
                 } else {
                     isMovie ? showMovieMenu() : showTVMenu();
                 }
