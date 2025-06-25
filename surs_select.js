@@ -102,7 +102,7 @@
             var end = new Date(now);
             end.setDate(now.getDate() - 10);
             var start = new Date(now);
-            start.setFullYear(start.getFullYear() - 1);
+            start.setFullYear(start.getFullYear() - 2);
             params += '&first_air_date.gte=' + start.toISOString().split('T')[0];
             params += '&first_air_date.lte=' + end.toISOString().split('T')[0];
         }
@@ -111,7 +111,7 @@
             var end = new Date(now);
             end.setDate(now.getDate() - 40);
             var start = new Date(now);
-            start.setFullYear(start.getFullYear() - 1);
+            start.setFullYear(start.getFullYear() - 2);
             params += '&release_date.gte=' + start.toISOString().split('T')[0];
             params += '&release_date.lte=' + end.toISOString().split('T')[0];
         }
