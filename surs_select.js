@@ -327,8 +327,9 @@
                     title: service.title + ' — ' + Lampa.Lang.translate(sortItem.title),
                     component: 'category_full',
                     card_type: 'true',
-                    page: 1,
                     sort_by: sort.id
+                    page: 1,
+
                 });
             },
             onBack: function () {
