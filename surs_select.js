@@ -246,8 +246,8 @@
         Lampa.Select.show({
             title: Lampa.Lang.translate('sursSelect_kids'),
             items: [
-                { title: Lampa.Lang.translate('sursSelect_kids_movies'), url: 'discover/movie?&with_genres=16&certification_country=RU&certification=6+' },
-                { title: Lampa.Lang.translate('sursSelect_kids_tvshows'), url: 'discover/tv?&with_genres=16&certification_country=RU&certification=6+' },
+                { title: Lampa.Lang.translate('sursSelect_kids_movies'), url: 'discover/movie?&with_genres=16&&certification_country=RU&certification=6%2B' },
+                { title: Lampa.Lang.translate('sursSelect_kids_tvshows'), url: 'discover/tv?&with_genres=16&&certification_country=RU&certification=6%2B' },
                // { title: Lampa.Lang.translate('sursSelect_kids_family'), url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG' }
             ],
             onSelect: function(item) {
