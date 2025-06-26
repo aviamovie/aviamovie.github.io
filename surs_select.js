@@ -16,7 +16,8 @@
         sursSelect_menu_title: { ru: "Разделы", en: "Sections", uk: "Розділи" },
         sursSelect_movies: { ru: "Фильмы", en: "Movies", uk: "Фільми" },
         sursSelect_tvshows: { ru: "Сериалы", en: "TV Shows", uk: "Серіали" },
-        sursSelect_dorama_tvshows: { ru: "Дормамы", en: "Dorama", uk: "Дорамы" },
+        sursSelect_dorama_tvshows: { ru: "Корейские дорамы", en: "Korean dramas", uk: "Корейські драми" },  
+        sursSelect_turkish_tvshows: { ru: "Турецкие сериалы", en: "Turkish series", uk: "Турецькі серіали" },
         sursSelect_streaming: { ru: "Стриминги", en: "Streaming", uk: "Стрімінг" },
         sursSelect_kids: { ru: "Для детей", en: "For Kids", uk: "Для дітей" },
         sursSelect_all_movies: { ru: "Все фильмы", en: "All Movies", uk: "Усі фільми" },
@@ -236,6 +237,7 @@
                 { title: Lampa.Lang.translate('sursSelect_all_tvshows'), url: 'discover/tv?' },
                 { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' },
                 { title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), url: 'discover/tv?&without_genres=16&with_original_language=ko' },
+                { title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), url: 'discover/tv?&without_genres=16&with_original_language=tr' },
 
             ],
             onSelect: showSortList,
