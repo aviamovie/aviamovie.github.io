@@ -333,7 +333,7 @@
                 },
                 { 
                     title: Lampa.Lang.translate('sursSelect_kids_family'), 
-                    url: 'discover/movie&certification_country=RU&certification=6%2B',
+                    url: 'discover/movie?&certification_country=RU&certification=6%2B',
                     isKids: true,
                     isMovie: true 
                 }
