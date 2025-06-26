@@ -125,8 +125,8 @@
                 else params += '&vote_count.gte=10';
             } else {
                 // Российские сериалы
-                if (isHighRating) params += '&vote_count.gte=30';
-                else if (isNewRelease) params += '&vote_count.gte=0';
+                if (isHighRating) params += '&vote_count.gte=10';
+                else if (isNewRelease) params += '&vote_count.gte=';
                 else params += '&vote_count.gte=10';
             }
         }
@@ -139,9 +139,9 @@
                 else params += '&vote_count.gte=10';
             } else {
                 // Российские стриминги
-                if (isHighRating) params += '&vote_count.gte=30';
+                if (isHighRating) params += '&vote_count.gte=10';
                 else if (isNewRelease) params += '&vote_count.gte=';
-                else params += '&vote_count.gte=10';
+                else params += '&vote_count.gte=5';
             }
         } 
         else if (options.isDorama) {
@@ -269,7 +269,7 @@
                 },
                 { 
                     title: Lampa.Lang.translate('sursSelect_russian_movies'), 
-                    url: 'discover/movie?&with_original_language=ru',
+                    url: 'url: 'discover/movie?&with_origin_country=RU',
                     isRussian: true,
                     isMovie: true 
                 },
@@ -296,18 +296,21 @@
                     isRussian: true,
                     isMovie: false 
                 },
-                { 
-                    title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
-                    url: 'discover/tv?&without_genres=16&with_original_language=ko',
-                    isDorama: true,
-                    isMovie: false 
-                },
-                { 
-                    title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), 
-                    url: 'discover/tv?&without_genres=16&with_original_language=tr',
-                    isTurkish: true,
-                    isMovie: false 
-                }
+                // Для дорам
+{ 
+    title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
+    url: 'discover/tv?&without_genres=16&with_origin_country=KR',
+    isDorama: true,
+    isMovie: false 
+}
+
+// Для турецких сериалов
+{ 
+    title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), 
+    url: 'discover/tv?&without_genres=16&with_origin_country=TR',
+    isTurkish: true,
+    isMovie: false 
+}
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
