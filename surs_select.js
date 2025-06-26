@@ -430,7 +430,7 @@
                 var sort = sortItem.sort;
                 Lampa.Activity.push({
                     url: service.url + sort.extraParams,
-                    title: service.title + ' — ' + Lampa.Lang.translate(sortItem.title),
+                    title: service.title + ' - ' + Lampa.Lang.translate(sortItem.title),
                     component: 'category_full',
                     card_type: 'true',
                     sort_by: sort.id,
