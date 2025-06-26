@@ -235,7 +235,7 @@
             items: [
                 { title: Lampa.Lang.translate('sursSelect_all_tvshows'), url: 'discover/tv?' },
                 { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' },
-                { title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), url: 'discover/tv&without_genres=16&with_original_language=ko' },
+                { title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), url: 'discover/tv?&without_genres=16&with_original_language=ko' },
 
             ],
             onSelect: showSortList,
