@@ -452,6 +452,14 @@ addCardListener();
                 
             }
         }
+        .card {
+  -webkit-flex-shrink: 0;
+      -ms-flex-negative: 0;
+          flex-shrink: 0;
+  width: 11.73em;
+  position: relative;
+  will-change: transform;
+}
     </style>
 `);
 
