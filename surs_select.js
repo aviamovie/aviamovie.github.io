@@ -292,7 +292,7 @@
             items: [
                 { 
                     title: Lampa.Lang.translate('sursSelect_all_tvshows'), 
-                    url: 'discover/tv?',
+                    url: 'discover/tv?&without_genres=16',
                     isMovie: false 
                 },
                 { 
