@@ -120,12 +120,12 @@
             // Российский контент
             if (options.isMovie) {
                 // Российские фильмы
-                if (isHighRating) params += '&vote_count.gte=70';
+                if (isHighRating) params += '&vote_count.gte=40';
                 else if (isNewRelease) params += '&vote_count.gte=5';
-                else params += '&vote_count.gte=30';
+                else params += '&vote_count.gte=10';
             } else {
                 // Российские сериалы
-                if (isHighRating) params += '&vote_count.gte=90';
+                if (isHighRating) params += '&vote_count.gte=30';
                 else if (isNewRelease) params += '&vote_count.gte=5';
                 else params += '&vote_count.gte=30';
             }
