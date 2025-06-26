@@ -443,7 +443,12 @@ addCardListener();
     Lampa.Template.add('custom_button_style', `
     <style>
        .custom-button-card {
-    width: 12.2em;
+  -webkit-flex-shrink: 0;
+      -ms-flex-negative: 0;
+          flex-shrink: 0;
+  width: 12.75em;
+  position: relative;
+  will-change: transform;
     }
 
         @media screen and (max-width: 700px) {
@@ -452,14 +457,7 @@ addCardListener();
                 
             }
         }
-        .card {
-  -webkit-flex-shrink: 0;
-      -ms-flex-negative: 0;
-          flex-shrink: 0;
-  width: 12.2em;
-  position: relative;
-  will-change: transform;
-}
+
     </style>
 `);
 
