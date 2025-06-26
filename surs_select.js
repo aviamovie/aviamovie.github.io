@@ -297,7 +297,6 @@
                     isMovie: false 
                 },
                 { 
-                { 
                     title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
                     url: 'discover/tv?&without_genres=16&with_original_language=ko',
                     isDorama: true,
