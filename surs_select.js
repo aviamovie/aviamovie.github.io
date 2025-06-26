@@ -272,8 +272,7 @@
                     url: 'discover/movie?&with_origin_country=RU',
                     isRussian: true,
                     isMovie: true 
-                },
-
+                }
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -297,20 +296,19 @@
                     isMovie: false 
                 },
                 // Для дорам
-{ 
-    title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
-    url: 'discover/tv?&without_genres=16&with_origin_country=KR',
-    isDorama: true,
-    isMovie: false 
-}
-
-// Для турецких сериалов
-{ 
-    title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), 
-    url: 'discover/tv?&without_genres=16&with_origin_country=TR',
-    isTurkish: true,
-    isMovie: false 
-}
+                { 
+                    title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
+                    url: 'discover/tv?&without_genres=16&with_origin_country=KR',
+                    isDorama: true,
+                    isMovie: false 
+                },
+                // Для турецких сериалов
+                { 
+                    title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), 
+                    url: 'discover/tv?&without_genres=16&with_origin_country=TR',
+                    isTurkish: true,
+                    isMovie: false 
+                }
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
