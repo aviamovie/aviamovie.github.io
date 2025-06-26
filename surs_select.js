@@ -107,8 +107,8 @@
             if (options.isMovie) {
                 // Детские фильмы (мультфильмы)
                 if (isHighRating) params += '&vote_count.gte=40';
-                else if (isNewRelease) params += '&vote_count.gte=5';
-                else params += '&vote_count.gte=10';
+                else if (isNewRelease) params += '&vote_count.gte=2';
+                else params += '&vote_count.gte=2';
             } else {
                 // Детские сериалы (мультсериалы)
                 if (isHighRating) params += '&vote_count.gte=40';
