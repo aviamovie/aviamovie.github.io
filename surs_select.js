@@ -269,7 +269,7 @@
                 },
                 { 
                     title: Lampa.Lang.translate('sursSelect_russian_movies'), 
-                    url: url: 'discover/movie?&with_origin_country=RU',
+                    url: 'discover/movie?&with_origin_country=RU',
                     isRussian: true,
                     isMovie: true 
                 },
