@@ -1,4 +1,4 @@
-(function () {
+(function() {
     'use strict';
 
     if (window.SursSelect && window.SursSelect.__initialized) return;
@@ -74,32 +74,15 @@
 
     var baseExcludedKeywords = ['346488', '158718', '41278', '196034', '272265', '13141', '345822', '315535', '290667', '323477', '290609'];
 
-    // Функция для получения названия сортировки
-    function getSortTitle(sortId) {
-        switch (sortId) {
-            case 'release_date.desc':
-            case 'first_air_date.desc':
-                return Lampa.Lang.translate('sursSelect_first_air_date_desc');
-            case 'vote_average.desc':
-                return Lampa.Lang.translate('sursSelect_vote_average_desc');
-            case 'popularity.desc':
-                return Lampa.Lang.translate('sursSelect_popularity_desc');
-            case 'revenue.desc':
-                return Lampa.Lang.translate('sursSelect_revenue_desc');
-            case 'vote_count.desc':
-                return Lampa.Lang.translate('sursSelect_vote_count_desc');
-            default:
-                return '';
-        }
-    }
-
-    // Применение параметров сортировки
+    // Применение параметров сортировки с индивидуальными настройками
     function applySortParams(sort, options) {
         var params = '';
         var now = new Date();
         var isNewRelease = sort.id === 'first_air_date.desc' || sort.id === 'release_date.desc';
         var isHighRating = sort.id === 'vote_average.desc';
+        var isVoteCount = sort.id === 'vote_count.desc';
 
+        // Базовые параметры для дат выпуска
         if (sort.id === 'first_air_date.desc') {
             var end = new Date(now);
             end.setDate(now.getDate() - 10);
@@ -118,23 +101,82 @@
             params += '&release_date.lte=' + end.toISOString().split('T')[0];
         }
 
-        if (options.isKids && isHighRating) {
-            // Для детского контента с сортировкой по рейтингу устанавливаем минимум 130 голосов
-            params += '&vote_count.gte=95';
-        } else if (isNewRelease && !options.isRussian && !options.isStreaming && !options.isKids) {
-            params += '&vote_count.gte=50';
-        } else if (options.isRussian && isNewRelease) {
-            params += '&vote_count.gte=5';
-        } else if (!isNewRelease && !options.isKids) {
-            params += '&vote_count.gte=30';
-        } else if (options.isKids) {
-            params += '&vote_count.gte=2';
+        // Индивидуальные настройки для каждого типа контента
+        if (options.isKids) {
+            // Детский контент
+            if (options.isMovie) {
+                // Детские фильмы (мультфильмы)
+                if (isHighRating) params += '&vote_count.gte=40';
+                else if (isNewRelease) params += '&vote_count.gte=5';
+                else params += '&vote_count.gte=10';
+            } else {
+                // Детские сериалы (мультсериалы)
+                if (isHighRating) params += '&vote_count.gte=40';
+                else if (isNewRelease) params += '&vote_count.gte=5';
+                else params += '&vote_count.gte=10';
+            }
+        } 
+        else if (options.isRussian) {
+            // Российский контент
+            if (options.isMovie) {
+                // Российские фильмы
+                if (isHighRating) params += '&vote_count.gte=120';
+                else if (isNewRelease) params += '&vote_count.gte=5';
+                else params += '&vote_count.gte=30';
+            } else {
+                // Российские сериалы
+                if (isHighRating) params += '&vote_count.gte=90';
+                else if (isNewRelease) params += '&vote_count.gte=5';
+                else params += '&vote_count.gte=30';
+            }
+        }
+        else if (options.isStreaming) {
+            // Стриминговые сервисы
+            if (options.isGlobalStreaming) {
+                // Глобальные стриминги (Netflix, HBO и т.д.)
+                if (isHighRating) params += '&vote_count.gte=150';
+                else if (isNewRelease) params += '&vote_count.gte=20';
+                else params += '&vote_count.gte=10';
+            } else {
+                // Российские стриминги
+                if (isHighRating) params += '&vote_count.gte=70';
+                else if (isNewRelease) params += '&vote_count.gte=';
+                else params += '&vote_count.gte=10';
+            }
+        } 
+        else if (options.isDorama) {
+            // Корейские дорамы
+            if (isHighRating) params += '&vote_count.gte=100';
+            else if (isNewRelease) params += '&vote_count.gte=15';
+            else params += '&vote_count.gte=10';
+        } 
+        else if (options.isTurkish) {
+            // Турецкие сериалы
+            if (isHighRating) params += '&vote_count.gte=120';
+            else if (isNewRelease) params += '&vote_count.gte=15';
+            else params += '&vote_count.gte=10';
+        } 
+        else {
+            // Общие категории
+            if (options.isMovie) {
+                // Все фильмы
+                if (isHighRating) params += '&vote_count.gte=200';
+                else if (isNewRelease) params += '&vote_count.gte=25';
+                else params += '&vote_count.gte=25';
+            } else {
+                // Все сериалы
+                if (isHighRating) params += '&vote_count.gte=150';
+                else if (isNewRelease) params += '&vote_count.gte=25';
+                else params += '&vote_count.gte=25';
+            }
         }
 
-        if (sort.id === 'vote_count.desc') {
+        // Дополнительные параметры для сортировки по количеству голосов
+        if (isVoteCount) {
             params += '&vote_average.gte=5';
         }
 
+        // Исключение нежелательного контента
         params += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
 
         sort.extraParams = params;
@@ -220,9 +262,23 @@
         Lampa.Select.show({
             title: Lampa.Lang.translate('sursSelect_movies'),
             items: [
-                { title: Lampa.Lang.translate('sursSelect_all_movies'), url: 'discover/movie?' },
-                { title: Lampa.Lang.translate('sursSelect_russian_movies'), url: 'discover/movie?&with_original_language=ru' },
-
+                { 
+                    title: Lampa.Lang.translate('sursSelect_all_movies'), 
+                    url: 'discover/movie?',
+                    isMovie: true 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_russian_movies'), 
+                    url: 'discover/movie?&with_original_language=ru',
+                    isRussian: true,
+                    isMovie: true 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_animated_movies'), 
+                    url: 'discover/movie?&with_genres=16',
+                    isKids: true,
+                    isMovie: true 
+                }
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -234,11 +290,35 @@
         Lampa.Select.show({
             title: Lampa.Lang.translate('sursSelect_tvshows'),
             items: [
-                { title: Lampa.Lang.translate('sursSelect_all_tvshows'), url: 'discover/tv?' },
-                { title: Lampa.Lang.translate('sursSelect_russian_tvshows'), url: 'discover/tv?&with_original_language=ru' },
-                { title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), url: 'discover/tv?&without_genres=16&with_original_language=ko' },
-                { title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), url: 'discover/tv?&without_genres=16&with_original_language=tr' },
-
+                { 
+                    title: Lampa.Lang.translate('sursSelect_all_tvshows'), 
+                    url: 'discover/tv?',
+                    isMovie: false 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_russian_tvshows'), 
+                    url: 'discover/tv?&with_original_language=ru',
+                    isRussian: true,
+                    isMovie: false 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_animated_tvshows'), 
+                    url: 'discover/tv?&with_genres=16',
+                    isKids: true,
+                    isMovie: false 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
+                    url: 'discover/tv?&without_genres=16&with_original_language=ko',
+                    isDorama: true,
+                    isMovie: false 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_turkish_tvshows'), 
+                    url: 'discover/tv?&without_genres=16&with_original_language=tr',
+                    isTurkish: true,
+                    isMovie: false 
+                }
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -250,15 +330,31 @@
         Lampa.Select.show({
             title: Lampa.Lang.translate('sursSelect_kids'),
             items: [
-                { title: Lampa.Lang.translate('sursSelect_kids_movies'), url: 'discover/movie?&with_genres=16&&certification_country=RU&certification=6%2B' },
-                { title: Lampa.Lang.translate('sursSelect_kids_tvshows'), url: 'discover/tv?&with_genres=16&&certification_country=RU&certification=6%2B' },
-               // { title: Lampa.Lang.translate('sursSelect_kids_family'), url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG' }
+                { 
+                    title: Lampa.Lang.translate('sursSelect_kids_movies'), 
+                    url: 'discover/movie?&with_genres=16&&certification_country=RU&certification=6%2B',
+                    isKids: true,
+                    isMovie: true 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_kids_tvshows'), 
+                    url: 'discover/tv?&with_genres=16&&certification_country=RU&certification=6%2B',
+                    isKids: true,
+                    isMovie: false 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_kids_family'), 
+                    url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG',
+                    isKids: true,
+                    isMovie: true 
+                }
             ],
             onSelect: function(item) {
                 showSortList({
                     url: item.url,
                     title: item.title,
-                    isKids: true
+                    isKids: item.isKids,
+                    isMovie: item.isMovie
                 });
             },
             onBack: showSursSelectMenu
@@ -270,23 +366,32 @@
         Lampa.Select.show({
             title: Lampa.Lang.translate('sursSelect_streaming'),
             items: [
-                { title: Lampa.Lang.translate('sursSelect_global_streaming'), list: allStreamingServices },
-                { title: Lampa.Lang.translate('sursSelect_russian_streaming'), list: allStreamingServicesRUS }
+                { 
+                    title: Lampa.Lang.translate('sursSelect_global_streaming'), 
+                    list: allStreamingServices,
+                    isGlobalStreaming: true 
+                },
+                { 
+                    title: Lampa.Lang.translate('sursSelect_russian_streaming'), 
+                    list: allStreamingServicesRUS,
+                    isGlobalStreaming: false 
+                }
             ],
             onSelect: function (item) {
-                showServiceList(item.list);
+                showServiceList(item.list, item.isGlobalStreaming);
             },
             onBack: showSursSelectMenu
         });
     }
 
     // Выбор сервиса
-    function showServiceList(serviceList) {
+    function showServiceList(serviceList, isGlobalStreaming) {
         var items = [];
         for (var i = 0; i < serviceList.length; i++) {
             items.push({
                 title: '<div class="settings-folder" style="padding:0!important">' + createLogoHtml(serviceList[i].id, serviceList[i].title) + '</div>',
-                service: serviceList[i]
+                service: serviceList[i],
+                isGlobalStreaming: isGlobalStreaming
             });
             updateLogo(serviceList[i].id, serviceList[i].title);
         }
@@ -297,7 +402,10 @@
             onSelect: function (item) {
                 showSortList({ 
                     url: 'discover/tv?with_networks=' + item.service.id, 
-                    title: item.service.title 
+                    title: item.service.title,
+                    isStreaming: true,
+                    isGlobalStreaming: item.isGlobalStreaming,
+                    isMovie: false
                 });
             },
             onBack: showStreamingTypeMenu
@@ -306,7 +414,7 @@
 
     // Выбор сортировки
     function showSortList(service) {
-        var isMovie = service.url.startsWith('discover/movie');
+        var isMovie = service.isMovie !== undefined ? service.isMovie : service.url.startsWith('discover/movie');
         var currentSortOptions = isMovie ? sortOptionsMovie : sortOptionsTV;
         var sortItems = [];
 
@@ -314,9 +422,13 @@
             sortItems.push({
                 title: Lampa.Lang.translate(currentSortOptions[i].title),
                 sort: applySortParams(currentSortOptions[i], {
-                    isRussian: service.url.includes('with_original_language=ru'),
-                    isStreaming: service.url.includes('with_networks='),
-                    isKids: service.isKids || false
+                    isRussian: service.isRussian || service.url.includes('with_original_language=ru'),
+                    isStreaming: service.isStreaming || service.url.includes('with_networks='),
+                    isGlobalStreaming: service.isGlobalStreaming,
+                    isKids: service.isKids || false,
+                    isDorama: service.isDorama || false,
+                    isTurkish: service.isTurkish || false,
+                    isMovie: isMovie
                 })
             });
         }
@@ -333,11 +445,10 @@
                     card_type: 'true',
                     sort_by: sort.id,
                     page: 1,
-
                 });
             },
             onBack: function () {
-                if (service.url.includes('with_networks=')) {
+                if (service.isStreaming) {
                     showStreamingTypeMenu();
                 } else if (service.isKids) {
                     showKidsMenu();
@@ -384,7 +495,6 @@
     // Запуск плагина
     if (window.appready) {
         initPlugin();
-
     } else {
         Lampa.Listener.follow('app', function (e) {
             if (e.type === 'ready') initPlugin();
