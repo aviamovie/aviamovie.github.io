@@ -120,7 +120,7 @@
             // Российский контент
             if (options.isMovie) {
                 // Российские фильмы
-                if (isHighRating) params += '&vote_count.gte=120';
+                if (isHighRating) params += '&vote_count.gte=70';
                 else if (isNewRelease) params += '&vote_count.gte=5';
                 else params += '&vote_count.gte=30';
             } else {
@@ -273,12 +273,7 @@
                     isRussian: true,
                     isMovie: true 
                 },
-                { 
-                    title: Lampa.Lang.translate('sursSelect_animated_movies'), 
-                    url: 'discover/movie?&with_genres=16',
-                    isKids: true,
-                    isMovie: true 
-                }
+
             ],
             onSelect: showSortList,
             onBack: showSursSelectMenu
@@ -302,11 +297,6 @@
                     isMovie: false 
                 },
                 { 
-                    title: Lampa.Lang.translate('sursSelect_animated_tvshows'), 
-                    url: 'discover/tv?&with_genres=16',
-                    isKids: true,
-                    isMovie: false 
-                },
                 { 
                     title: Lampa.Lang.translate('sursSelect_dorama_tvshows'), 
                     url: 'discover/tv?&without_genres=16&with_original_language=ko',
@@ -332,19 +322,19 @@
             items: [
                 { 
                     title: Lampa.Lang.translate('sursSelect_kids_movies'), 
-                    url: 'discover/movie?&with_genres=16&&certification_country=RU&certification=6%2B',
+                    url: 'discover/movie?&with_genres=16&certification_country=RU&certification=6%2B',
                     isKids: true,
                     isMovie: true 
                 },
                 { 
                     title: Lampa.Lang.translate('sursSelect_kids_tvshows'), 
-                    url: 'discover/tv?&with_genres=16&&certification_country=RU&certification=6%2B',
+                    url: 'discover/tv?&with_genres=16&certification_country=RU&certification=6%2B',
                     isKids: true,
                     isMovie: false 
                 },
                 { 
                     title: Lampa.Lang.translate('sursSelect_kids_family'), 
-                    url: 'discover/movie?&with_genres=10751&certification_country=US&certification.lte=PG',
+                    url: 'discover/movie&certification_country=RU&certification=6%2B',
                     isKids: true,
                     isMovie: true 
                 }
