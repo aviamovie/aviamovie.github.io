@@ -465,7 +465,7 @@ addCardListener();
 
 $('body').append(Lampa.Template.get('custom_button_style', {}, true));
     
-Lampa.Storage.set("interface_size", "small");
+
 
 
 // Функция получения всех настроек
@@ -535,6 +535,17 @@ function getStreamingServices() {
 
 function getStreamingServicesRUS() {
     return getEnabledItems(allStreamingServicesRUS, 'streaming_rus_');
+}
+
+
+//устанавливаем интерфейс на маленький
+
+if (!getStoredSetting('interface_size_initialized', false)) {
+
+    Lampa.Storage.set("interface_size", "small");
+    
+    setStoredSetting('interface_size_initialized', true);
+    
 }
 
 // Глобальные функции фильтрации
