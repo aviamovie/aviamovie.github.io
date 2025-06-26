@@ -456,6 +456,8 @@ addCardListener();
 `);
 
 $('body').append(Lampa.Template.get('custom_button_style', {}, true));
+    
+Lampa.Storage.set("interface_size", "small");
 
 
 // Функция получения всех настроек
