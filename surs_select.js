@@ -126,20 +126,20 @@
             } else {
                 // Российские сериалы
                 if (isHighRating) params += '&vote_count.gte=30';
-                else if (isNewRelease) params += '&vote_count.gte=5';
-                else params += '&vote_count.gte=30';
+                else if (isNewRelease) params += '&vote_count.gte=0';
+                else params += '&vote_count.gte=10';
             }
         }
         else if (options.isStreaming) {
             // Стриминговые сервисы
             if (options.isGlobalStreaming) {
                 // Глобальные стриминги (Netflix, HBO и т.д.)
-                if (isHighRating) params += '&vote_count.gte=150';
+                if (isHighRating) params += '&vote_count.gte=100';
                 else if (isNewRelease) params += '&vote_count.gte=20';
                 else params += '&vote_count.gte=10';
             } else {
                 // Российские стриминги
-                if (isHighRating) params += '&vote_count.gte=70';
+                if (isHighRating) params += '&vote_count.gte=30';
                 else if (isNewRelease) params += '&vote_count.gte=';
                 else params += '&vote_count.gte=10';
             }
@@ -152,17 +152,17 @@
         } 
         else if (options.isTurkish) {
             // Турецкие сериалы
-            if (isHighRating) params += '&vote_count.gte=120';
-            else if (isNewRelease) params += '&vote_count.gte=15';
+            if (isHighRating) params += '&vote_count.gte=60';
+            else if (isNewRelease) params += '&vote_count.gte=10';
             else params += '&vote_count.gte=10';
         } 
         else {
             // Общие категории
             if (options.isMovie) {
                 // Все фильмы
-                if (isHighRating) params += '&vote_count.gte=200';
-                else if (isNewRelease) params += '&vote_count.gte=25';
-                else params += '&vote_count.gte=25';
+                if (isHighRating) params += '&vote_count.gte=100';
+                else if (isNewRelease) params += '&vote_count.gte=20';
+                else params += '&vote_count.gte=20';
             } else {
                 // Все сериалы
                 if (isHighRating) params += '&vote_count.gte=150';
