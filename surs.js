@@ -865,8 +865,7 @@ var SourceTMDB = function (parent) {
                 callback(json);
             },
             function (callback) {
-                //var baseUrl = 'trending/all/week';
-                var baseUrl = 'discover/movie?with_release_type=4|5&region=US&vote_count.gte=15';
+                var baseUrl = 'trending/all/week';
                 baseUrl = applyAgeRestriction(baseUrl);
 
                 owner.get(baseUrl, params, function (json) {
