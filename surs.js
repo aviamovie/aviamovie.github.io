@@ -866,7 +866,7 @@ var SourceTMDB = function (parent) {
             },
             function (callback) {
                 //var baseUrl = 'trending/all/week';
-                var baseUrl = 'discover/movie?with_release_type=1|4|5';
+                var baseUrl = 'discover/movie?with_release_type=4|5|6';
                 baseUrl = applyAgeRestriction(baseUrl);
 
                 owner.get(baseUrl, params, function (json) {
