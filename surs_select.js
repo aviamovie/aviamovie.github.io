@@ -160,7 +160,7 @@
             // Общие категории
             if (options.isMovie) {
                 // Все фильмы
-                if (isHighRating) params += '&vote_count.gte=100';
+                if (isHighRating) params += '&vote_count.gte=300';
                 else if (isNewRelease) params += '&vote_count.gte=20';
                 else params += '&vote_count.gte=20';
             } else {
