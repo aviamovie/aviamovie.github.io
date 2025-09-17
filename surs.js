@@ -2560,52 +2560,52 @@ function add() {
     }
 
     // Создаем источники
-    var tmdb_mod = assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
-    var tmdb_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
-    var tmdb_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
-    var tmdb_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+    var surs_mod = assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
+    var surs_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
+    var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
+    var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
 
     // Проверка на успешное создание источников
-    if (!tmdb_mod || !tmdb_mod_new || !tmdb_mod_kids || !tmdb_mod_rus) {
+    if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
         console.error('Failed to create one or more TMDB sources');
         return;
     }
 
     // Присваиваем источники напрямую (для совместимости с IE8)
-    Lampa.Api.sources.tmdb_mod = tmdb_mod;
-    Lampa.Api.sources.tmdb_mod_new = tmdb_mod_new;
-    Lampa.Api.sources.tmdb_mod_kids = tmdb_mod_kids;
-    Lampa.Api.sources.tmdb_mod_rus = tmdb_mod_rus;
+    Lampa.Api.sources.surs_mod = surs_mod;
+    Lampa.Api.sources.surs_mod_new = surs_mod_new;
+    Lampa.Api.sources.surs_mod_kids = surs_mod_kids;
+    Lampa.Api.sources.surs_mod_rus = surs_mod_rus;
 
     // Динамическое определение источников с использованием Object.defineProperty (для IE9+)
     try {
         Object.defineProperty(Lampa.Api.sources, sourceName, {
             get: function() {
-                return tmdb_mod;
+                return surs_mod;
             }
         });
         Object.defineProperty(Lampa.Api.sources, sourceNameNew, {
             get: function() {
-                return tmdb_mod_new;
+                return surs_mod_new;
             }
         });
         Object.defineProperty(Lampa.Api.sources, sourceNameKids, {
             get: function() {
-                return tmdb_mod_kids;
+                return surs_mod_kids;
             }
         });
         Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
             get: function() {
-                return tmdb_mod_rus;
+                return surs_mod_rus;
             }
         });
     } catch (e) {
         console.warn('Object.defineProperty not supported, using direct assignment: ', e);
         // Запасной вариант для IE8
-        Lampa.Api.sources[sourceName] = tmdb_mod;
-        Lampa.Api.sources[sourceNameNew] = tmdb_mod_new;
-        Lampa.Api.sources[sourceNameKids] = tmdb_mod_kids;
-        Lampa.Api.sources[sourceNameRus] = tmdb_mod_rus;
+        Lampa.Api.sources[sourceName] = surs_mod;
+        Lampa.Api.sources[sourceNameNew] = surs_mod_new;
+        Lampa.Api.sources[sourceNameKids] = surs_mod_kids;
+        Lampa.Api.sources[sourceNameRus] = surs_mod_rus;
     }
 
     // Обновление параметров меню
