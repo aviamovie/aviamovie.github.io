@@ -985,7 +985,7 @@ var SourceTMDB = function (parent) {
         var partsLimit = 12;
 
         var partsData = [
-            function (callback) {
+           /* function (callback) {
                 var json = {
                     title: Lampa.Lang.translate(''),
                     results: customButtons(),
@@ -995,7 +995,7 @@ var SourceTMDB = function (parent) {
                     line_type: 'player-cards'
                 };                      
                 callback(json);
-            },
+            }, */
             function (callback) {
                 var baseUrl = 'trending/all/week';
                 baseUrl = applyAgeRestriction(baseUrl);
@@ -1410,7 +1410,7 @@ var SourceTMDBnew = function (parent) {
         }
 
         var partsData = [
-            function (callback) {
+            /* function (callback) {
                 var json = {
                     title: Lampa.Lang.translate(''),
                     results: customButtons(),
@@ -1419,7 +1419,7 @@ var SourceTMDBnew = function (parent) {
                     line_type: 'player-cards'
                 };                      
                 callback(json);
-            },
+            }, */
 
         ];
 
@@ -1747,7 +1747,7 @@ function buildApiUrl(baseUrl) {
 
 
 var buttonsData = [
-                 function (callback) {
+                 /* function (callback) {
                 var json = {
                     title: Lampa.Lang.translate(''),
                     results: customButtons(),
@@ -1756,7 +1756,7 @@ var buttonsData = [
                     line_type: 'player-cards'
                 };                      
                 callback(json);
-            },
+            }, */
 ];
 
         // Основные данные
