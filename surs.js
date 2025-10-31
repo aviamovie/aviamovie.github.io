@@ -678,6 +678,70 @@ if (!getStoredSetting('interface_size_initialized', false)) {
     
 }
 
+
+function getPartsData() {
+    var partsData = [];
+
+
+        var upcomingEpisodesRequest = function (callback) {
+            callback({
+                source: 'tmdb',
+                results: Lampa.TimeTable.lately().slice(0, 20),
+                title: Lampa.Lang.translate('title_upcoming_episodes'),
+                nomore: true,
+                cardClass: function (_elem, _params) {
+                    return new Episode(_elem, _params);
+                }
+            });
+        };
+        
+        
+    var customButtonsPart = function (callback) {
+        var json = {
+            title: Lampa.Lang.translate(''),
+            results: customButtons(),
+            small: true,
+            collection: true,
+            line_type: 'player-cards'
+        };
+        callback(json);
+    };
+
+    // Функция с трендами (всегда используется в старых версиях)
+    var trendingPart = function (callback) {
+        var baseUrl = 'trending/all/week';
+        baseUrl = applyAgeRestriction(baseUrl);
+
+        owner.get(baseUrl, params, function (json) {
+            if (json.results) {
+                json.results = json.results.filter(function (result) {
+                    var forbiddenCountries = ['KR', 'CN', 'JP'];
+                    return !result.origin_country || !result.origin_country.some(function (country) {
+                        return forbiddenCountries.includes(country);
+                    });
+                });
+            }
+            json.title = Lampa.Lang.translate('surs_title_trend_week');
+            callback(json);
+        }, callback);
+    };
+
+    // Условие по версии приложения
+    if (Lampa.Manifest.app_digital >= 300) {
+        // Новая версия (>= 300) — используем только кастомные кнопки
+        partsData.push(trendingPart);
+        partsData.push(upcomingEpisodesRequest);
+    } else {
+        // Старая версия (< 300) — используем и кастомные кнопки, и тренды
+        partsData.push(customButtonsPart);
+        partsData.push(upcomingEpisodesRequest);
+
+    }
+
+    return partsData;
+}
+
+
 // Глобальные функции фильтрации
 
 function filterCyrillic(items) {
@@ -984,36 +1048,7 @@ var SourceTMDB = function (parent) {
         var onError = arguments.length > 2 ? arguments[2] : undefined;
         var partsLimit = 12;
 
-        var partsData = [
-           /* function (callback) {
-                var json = {
-                    title: Lampa.Lang.translate(''),
-                    results: customButtons(),
-                    small: true,
-                    //customButton: true,
-                    collection: true,
-                    line_type: 'player-cards'
-                };                      
-                callback(json);
-            }, */
-            function (callback) {
-                var baseUrl = 'trending/all/week';
-                baseUrl = applyAgeRestriction(baseUrl);
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = json.results.filter(function (result) {
-                            var forbiddenCountries = ['KR', 'CN', 'JP'];
-                            return !result.origin_country || !result.origin_country.some(function (country) {
-                                return forbiddenCountries.includes(country);
-                            });
-                        });
-                    }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week');
-                    callback(json);
-                }, callback);
-            }
-        ];
+        var partsData = getPartsData();
 
         var CustomData = [];
 
@@ -1409,19 +1444,7 @@ var SourceTMDBnew = function (parent) {
             }
         }
 
-        var partsData = [
-            /* function (callback) {
-                var json = {
-                    title: Lampa.Lang.translate(''),
-                    results: customButtons(),
-                    small: true,
-                    collection: true,
-                    line_type: 'player-cards'
-                };                      
-                callback(json);
-            }, */
-
-        ];
+        var partsData = getPartsData();
 
         var CustomData = [];
 
@@ -1745,43 +1768,12 @@ function buildApiUrl(baseUrl) {
     return baseUrl;
 }
 
+    var partsData = getPartsData();
 
-var buttonsData = [
-                 /* function (callback) {
-                var json = {
-                    title: Lampa.Lang.translate(''),
-                    results: customButtons(),
-                    small: true,
-                    collection: true,
-                    line_type: 'player-cards'
-                };                      
-                callback(json);
-            }, */
-];
-
-        // Основные данные
-var partsData = [
-];
-
-        
-                // Запрос для ближайших эпизодов
-        var upcomingEpisodesRequest = function (callback) {
-            callback({
-                source: 'tmdb',
-                results: Lampa.TimeTable.lately().slice(0, 20),
-                title: Lampa.Lang.translate('title_upcoming_episodes'),
-                nomore: true,
-                cardClass: function (_elem, _params) {
-                    return new Episode(_elem, _params);
-                }
-            });
-        };
-        
-        
-        /* стриминги. */
+          /* стриминги. */
         
 
-function getStreamingWithGenres(serviceName, serviceId) {
+    function getStreamingWithGenres(serviceName, serviceId) {
     return function (callback) {
         var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
         var genre = genres[Math.floor(Math.random() * genres.length)];
@@ -2428,34 +2420,8 @@ function buildApiUrl(baseUrl) {
     return baseUrl;
 }
         
-var buttonsData = [
-                 function (callback) {
-                var json = {
-                    title: Lampa.Lang.translate(''),
-                    results: customButtons(),
-                    small: true,
-                    collection: true,
-                    line_type: 'player-cards'
-                };                      
-                callback(json);
-            },
-];
-var partsData = [];
 
-        
-                // Запрос для ближайших эпизодов
-        var upcomingEpisodesRequest = function (callback) {
-            callback({
-                source: 'tmdb',
-                results: Lampa.TimeTable.lately().slice(0, 20),
-                title: Lampa.Lang.translate('title_upcoming_episodes'),
-                nomore: true,
-                cardClass: function (_elem, _params) {
-                    return new Episode(_elem, _params);
-                }
-            });
-        };
-        
+        var partsData = getPartsData();
         
  /* стриминги. */
 
