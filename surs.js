@@ -1768,7 +1768,8 @@ function buildApiUrl(baseUrl) {
     return baseUrl;
 }
 
-    var partsData = getPartsData();
+    var buttonsData = getPartsData();
+    var PartData =[]
 
           /* стриминги. */
         
@@ -2421,7 +2422,8 @@ function buildApiUrl(baseUrl) {
 }
         
 
-        var partsData = getPartsData();
+    var buttonsData = getPartsData();
+    var PartData =[]
         
  /* стриминги. */
 
