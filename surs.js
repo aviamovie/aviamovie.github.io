@@ -1769,7 +1769,7 @@ function buildApiUrl(baseUrl) {
 }
 
     var buttonsData = getPartsData();
-    var PartsData =[]
+    var partsData =[]
 
           /* стриминги. */
         
@@ -2422,7 +2422,7 @@ function buildApiUrl(baseUrl) {
         
 
     var buttonsData = getPartsData();
-    var PartsData =[]
+    var partsData =[]
         
  /* стриминги. */
 
