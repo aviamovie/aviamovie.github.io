@@ -729,7 +729,7 @@ function getPartsData() {
     // Условие по версии приложения
     if (Lampa.Manifest.app_digital >= 300) {
         // Новая версия (>= 300) — используем только кастомные кнопки
-        partsData.push(trendingPart);
+        //partsData.push(trendingPart);
         partsData.push(upcomingEpisodesRequest);
     } else {
         // Старая версия (< 300) — используем и кастомные кнопки, и тренды
