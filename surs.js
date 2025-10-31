@@ -2298,7 +2298,6 @@ partsData = partsData.map(wrapWithWideFlag);
 
 
 shuffleArray(partsData); // Перемешиваем массив
-partsData.splice(4, 0, upcomingEpisodesRequest);
 
     var combinedData = buttonsData.concat(partsData);
 
@@ -2608,7 +2607,6 @@ partsData = partsData.map(wrapWithWideFlag);
 
 shuffleArray(partsData); // Перемешиваем массив
 
-partsData.splice(4, 0, upcomingEpisodesRequest);
 
     var combinedData = buttonsData.concat(partsData);
 
