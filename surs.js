@@ -734,7 +734,7 @@ function getPartsData() {
     } else {
         // Старая версия (< 300) — используем и кастомные кнопки, и тренды
         partsData.push(customButtonsPart);
-        partsData.push(trendingPart);
+        //partsData.push(trendingPart);
         partsData.push(upcomingEpisodesRequest);
 
     }
