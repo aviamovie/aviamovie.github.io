@@ -679,6 +679,24 @@ if (!getStoredSetting('interface_size_initialized', false)) {
 }
 
 
+    var trendingPart = function (callback) {
+        var baseUrl = 'trending/all/week';
+        baseUrl = applyAgeRestriction(baseUrl);
+
+        owner.get(baseUrl, params, function (json) {
+            if (json.results) {
+                json.results = json.results.filter(function (result) {
+                    var forbiddenCountries = ['KR', 'CN', 'JP'];
+                    return !result.origin_country || !result.origin_country.some(function (country) {
+                        return forbiddenCountries.includes(country);
+                    });
+                });
+            }
+            json.title = Lampa.Lang.translate('surs_title_trend_week');
+            callback(json);
+        }, callback);
+    };
+
 function getPartsData() {
     var partsData = [];
 
@@ -708,23 +726,7 @@ function getPartsData() {
     };
 
     // Функция с трендами (всегда используется в старых версиях)
-    var trendingPart = function (callback) {
-        var baseUrl = 'trending/all/week';
-        baseUrl = applyAgeRestriction(baseUrl);
 
-        owner.get(baseUrl, params, function (json) {
-            if (json.results) {
-                json.results = json.results.filter(function (result) {
-                    var forbiddenCountries = ['KR', 'CN', 'JP'];
-                    return !result.origin_country || !result.origin_country.some(function (country) {
-                        return forbiddenCountries.includes(country);
-                    });
-                });
-            }
-            json.title = Lampa.Lang.translate('surs_title_trend_week');
-            callback(json);
-        }, callback);
-    };
 
     // Условие по версии приложения
     if (Lampa.Manifest.app_digital >= 300) {
@@ -735,7 +737,7 @@ function getPartsData() {
         // Старая версия (< 300) — используем и кастомные кнопки, и тренды
         partsData.push(customButtonsPart);
         //partsData.push(trendingPart);
-        partsData.push(upcomingEpisodesRequest);
+        //partsData.push(upcomingEpisodesRequest);
 
     }
 
