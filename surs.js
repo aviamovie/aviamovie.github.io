@@ -679,6 +679,7 @@ if (!getStoredSetting('interface_size_initialized', false)) {
 }
 
 function getTrendingPart() {
+    var owner = this;
     return function (callback) {
         var baseUrl = 'trending/all/week';
         baseUrl = applyAgeRestriction(baseUrl);
