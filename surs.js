@@ -678,8 +678,8 @@ if (!getStoredSetting('interface_size_initialized', false)) {
     
 }
 
-
-    var trendingPart = function (callback) {
+function getTrendingPart() {
+    return function (callback) {
         var baseUrl = 'trending/all/week';
         baseUrl = applyAgeRestriction(baseUrl);
 
@@ -696,25 +696,24 @@ if (!getStoredSetting('interface_size_initialized', false)) {
             callback(json);
         }, callback);
     };
+}
 
-function getPartsData() {
-    var partsData = [];
+function getUpcomingEpisodesRequest() {
+    return function (callback) {
+        callback({
+            source: 'tmdb',
+            results: Lampa.TimeTable.lately().slice(0, 20),
+            title: Lampa.Lang.translate('title_upcoming_episodes'),
+            nomore: true,
+            cardClass: function (_elem, _params) {
+                return new Episode(_elem, _params);
+            }
+        });
+    };
+}
 
-
-        var upcomingEpisodesRequest = function (callback) {
-            callback({
-                source: 'tmdb',
-                results: Lampa.TimeTable.lately().slice(0, 20),
-                title: Lampa.Lang.translate('title_upcoming_episodes'),
-                nomore: true,
-                cardClass: function (_elem, _params) {
-                    return new Episode(_elem, _params);
-                }
-            });
-        };
-        
-        
-    var customButtonsPart = function (callback) {
+function getCustomButtonsPart() {
+    return function (callback) {
         var json = {
             title: Lampa.Lang.translate(''),
             results: customButtons(),
@@ -724,20 +723,16 @@ function getPartsData() {
         };
         callback(json);
     };
+}
 
-    // Функция с трендами (всегда используется в старых версиях)
+function getPartsData() {
+    var partsData = [];
 
-
-    // Условие по версии приложения
     if (Lampa.Manifest.app_digital >= 300) {
-        // Новая версия (>= 300) — используем только кастомные кнопки
-        //partsData.push(trendingPart);
-        //partsData.push(upcomingEpisodesRequest);
+        // Новая версия (>= 300) 
     } else {
-        // Старая версия (< 300) — используем и кастомные кнопки, и тренды
-        partsData.push(customButtonsPart);
-        //partsData.push(trendingPart);
-        //partsData.push(upcomingEpisodesRequest);
+        // Старая версия (< 300) — кастомные кнопки + тренды + upcoming
+        partsData.push(getCustomButtonsPart());
 
     }
 
