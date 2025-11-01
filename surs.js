@@ -1048,22 +1048,10 @@ var SourceTMDB = function (parent) {
         var partsLimit = 9;
 
         var partsData = getPartsData();
-        var trendingPart = getTrendingPart();
-        var upcomingEpisodesRequest = getUpcomingEpisodesRequest();
+        //var trendingPart = getTrendingPart();
+        //var upcomingEpisodesRequest = getUpcomingEpisodesRequest();
 
         var CustomData = [];
-
-        var upcomingEpisodesRequest = function (callback) {
-            callback({
-                source: 'tmdb',
-                results: Lampa.TimeTable.lately().slice(0, 20),
-                title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
-                nomore: true,
-                cardClass: function (_elem, _params) {
-                    return new Episode(_elem, _params);
-                }
-            });
-        };
 
         function getPopularPersons() {
             return function (callback) {
@@ -1405,9 +1393,8 @@ var SourceTMDB = function (parent) {
         shuffleArray(CustomData);
         CustomData.splice(4, 0, upcomingEpisodesRequest);
 
-        var combinedData1 = partsData.concat(trendingPart);
-        var combinedData = combinedData1.concat(CustomData);
-
+        var combinedData = partsData.concat(CustomData);
+        
 
         function loadPart(partLoaded, partEmpty) {
             Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);
