@@ -1424,7 +1424,7 @@ var SourceTMDB = function (parent) {
         shuffleArray(CustomData);
         CustomData.splice(4, 0, upcomingEpisodesRequest);
 
-        var combinedData = CustomData.concat(trendingsData).concat(partsData);
+        var combinedData = partsData.concat(trendingsData).concat(CustomData);
         
 
         function loadPart(partLoaded, partEmpty) {
