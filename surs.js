@@ -1051,8 +1051,24 @@ var SourceTMDB = function (parent) {
         var CustomData = [];
         var trendingsData = [];
         
-        var trending = function (callback) {
-                var baseUrl = 'trending/all/week';
+        var trendingMovies = function (callback) {
+                var baseUrl = 'trending/movie/week';
+                baseUrl = applyAgeRestriction(baseUrl);
+
+                owner.get(baseUrl, params, function (json) {
+                    if (json.results) {
+                        json.results = json.results.filter(function (result) {
+                            var forbiddenLanguages = ['kr', 'cn', 'jp', 'ko', 'zh', 'ja'];
+                            return !forbiddenLanguages.includes(result.original_language);
+                        });
+                    }
+                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('title_movies');
+                    callback(json);
+                }, callback);
+            }
+        
+        var trendingTV = function (callback) {
+                var baseUrl = 'trending/tv/week';
                 baseUrl = applyAgeRestriction(baseUrl);
 
                 owner.get(baseUrl, params, function (json) {
@@ -1064,12 +1080,13 @@ var SourceTMDB = function (parent) {
                             });
                         });
                     }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week');
+                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('title_serial');
                     callback(json);
                 }, callback);
             }
         
-        trendingsData.push(trending);
+        trendingsData.push(trendingMovies);
+        trendingsData.push(trendingTV);
         
         var upcomingEpisodesRequest = function (callback) {
             callback({
