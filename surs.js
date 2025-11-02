@@ -1048,10 +1048,41 @@ var SourceTMDB = function (parent) {
         var partsLimit = 9;
 
         var partsData = getPartsData();
-        //var trendingPart = getTrendingPart();
-        //var upcomingEpisodesRequest = getUpcomingEpisodesRequest();
-
         var CustomData = [];
+        var trendingsData = [];
+        
+        var trending = function (callback) {
+                var baseUrl = 'trending/all/week';
+                baseUrl = applyAgeRestriction(baseUrl);
+
+                owner.get(baseUrl, params, function (json) {
+                    if (json.results) {
+                        json.results = json.results.filter(function (result) {
+                            var forbiddenCountries = ['KR', 'CN', 'JP'];
+                            return !result.origin_country || !result.origin_country.some(function (country) {
+                                return forbiddenCountries.includes(country);
+                            });
+                        });
+                    }
+                    json.title = Lampa.Lang.translate('surs_title_trend_week');
+                    callback(json);
+                }, callback);
+            }
+        
+        trendingsData.push(trending);
+        
+        var upcomingEpisodesRequest = function (callback) {
+            callback({
+                source: 'tmdb',
+                results: Lampa.TimeTable.lately().slice(0, 20),
+                title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
+                nomore: true,
+                cardClass: function (_elem, _params) {
+                    return new Episode(_elem, _params);
+                }
+            });
+        };
+
 
         function getPopularPersons() {
             return function (callback) {
@@ -1391,9 +1422,9 @@ var SourceTMDB = function (parent) {
         CustomData = CustomData.map(wrapWithWideFlag);
 
         shuffleArray(CustomData);
-        //CustomData.splice(4, 0, upcomingEpisodesRequest);
+        CustomData.splice(4, 0, upcomingEpisodesRequest);
 
-        var combinedData = partsData.concat(CustomData);
+        var combinedData = CustomData.concat(trendingsData).concat(partsData);
         
 
         function loadPart(partLoaded, partEmpty) {
