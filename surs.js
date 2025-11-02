@@ -1050,25 +1050,9 @@ var SourceTMDB = function (parent) {
                     callback(json);
                 }, callback);
             }
-            
-            var trendingRussianTV = function (callback) {
-                var baseUrl = 'trending/tv/week';
-                baseUrl = applyAgeRestriction(baseUrl);
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = json.results.filter(function (result) {
-                            return result.origin_country && result.origin_country.includes('RU');
-                        });
-                    }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate('surs_series');
-                    callback(json);
-                }, callback);
-            }
         
         trendingsData.push(trendingMovies);
         trendingsData.push(trendingTV);
-        trendingsData.push(trendingRussianTV);
         
         
         var upcomingEpisodesRequest = function (callback) {
