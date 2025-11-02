@@ -1062,7 +1062,7 @@ var SourceTMDB = function (parent) {
                             return !forbiddenLanguages.includes(result.original_language);
                         });
                     }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('title_movies');
+                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_movies');
                     callback(json);
                 }, callback);
             }
@@ -1080,7 +1080,7 @@ var SourceTMDB = function (parent) {
                             });
                         });
                     }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('title_serial');
+                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_serials');
                     callback(json);
                 }, callback);
             }
