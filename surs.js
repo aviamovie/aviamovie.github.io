@@ -1080,7 +1080,7 @@ var SourceTMDB = function (parent) {
                             });
                         });
                     }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_serials');
+                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_series');
                     callback(json);
                 }, callback);
             }
