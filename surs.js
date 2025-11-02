@@ -678,40 +678,6 @@ if (!getStoredSetting('interface_size_initialized', false)) {
     
 }
 
-function getTrendingPart() {
-    var owner = this;
-    return function (callback) {
-        var baseUrl = 'trending/all/week';
-        baseUrl = applyAgeRestriction(baseUrl);
-
-        owner.get(baseUrl, params, function (json) {
-            if (json.results) {
-                json.results = json.results.filter(function (result) {
-                    var forbiddenCountries = ['KR', 'CN', 'JP'];
-                    return !result.origin_country || !result.origin_country.some(function (country) {
-                        return forbiddenCountries.includes(country);
-                    });
-                });
-            }
-            json.title = Lampa.Lang.translate('surs_title_trend_week');
-            callback(json);
-        }, callback);
-    };
-}
-
-function getUpcomingEpisodesRequest() {
-    return function (callback) {
-        callback({
-            source: 'tmdb',
-            results: Lampa.TimeTable.lately().slice(0, 20),
-            title: Lampa.Lang.translate('title_upcoming_episodes'),
-            nomore: true,
-            cardClass: function (_elem, _params) {
-                return new Episode(_elem, _params);
-            }
-        });
-    };
-}
 
 function getCustomButtonsPart() {
     return function (callback) {
@@ -1084,9 +1050,26 @@ var SourceTMDB = function (parent) {
                     callback(json);
                 }, callback);
             }
+            
+            var trendingRussianTV = function (callback) {
+                var baseUrl = 'trending/tv/week';
+                baseUrl = applyAgeRestriction(baseUrl);
+
+                owner.get(baseUrl, params, function (json) {
+                    if (json.results) {
+                        json.results = json.results.filter(function (result) {
+                            return result.origin_country && result.origin_country.includes('RU');
+                        });
+                    }
+                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate('surs_series');
+                    callback(json);
+                }, callback);
+            }
         
         trendingsData.push(trendingMovies);
         trendingsData.push(trendingTV);
+        trendingsData.push(trendingRussianTV);
+        
         
         var upcomingEpisodesRequest = function (callback) {
             callback({
