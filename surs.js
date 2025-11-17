@@ -631,6 +631,7 @@ function initCustomButtons() {
                             buttonActions[cardId]();
                         }
                     });
+				   event.stopImmediatePropagation();
                 }
             }
         });
