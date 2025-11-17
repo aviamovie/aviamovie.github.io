@@ -929,102 +929,17 @@ function buildApiUrl(baseUrl) {
     }
 
     return Lampa.Manifest.app_digital >= 300 ? wrapNew : wrapOld;
-}        
+}      
 
-// ближайшие эпизоды
-function getUpcomingEpisodesOld() {
-    return function (callback) {
-        callback({
-            source: 'tmdb',
-            results: Lampa.TimeTable.lately().slice(0, 20),
-            title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
-            nomore: true,
-            cardClass: function (elem, params) {
-                return new Episode(elem, params);
+	      function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
             }
-        });
-    };
-}
-
-function getUpcomingEpisodesNew() {
-    return function (cb) {
-        var lately = Lampa.TimeTable.lately().slice(0, 20);
-
-        lately.forEach(function(item) {
-            item.params = {
-                createInstance: function(item_data) {
-                    return new Lampa.Episode(item_data);
-                },
-                module: Lampa.Maker.module('Episode').only('Card', 'Callback'),
-                emit: {
-                    onlyEnter: function() {
-                        Lampa.Router.call('full', item.card);
-                    },
-                    onlyFocus: function() {
-                        Lampa.Background.change(Lampa.Utils.cardImgBackgroundBlur(item.card));
-                    }
-                }
-            };
-
-            Lampa.Arrays.extend(item, item.episode);
-        });
-
-        cb({
-            results: lately,
-            title: Lampa.Lang.translate('surs_title_upcoming_episodes')
-        });
-    };
-}
-
-function getUpcomingEpisodes() {
-    return Lampa.Manifest.app_digital >= 300 ? getUpcomingEpisodesNew() : getUpcomingEpisodesOld();
-}        
-// популярные персоны
-function getPopularPersonsOld() {
-    return function (callback) {
-        owner.get('person/popular', params, function (json) {
-            json.title = Lampa.Lang.translate('surs_popular_persons');
-            callback(json);
-        }, callback);
-    };
-}
-
-function getPopularPersonsNew() {
-    return function (cb) {
-        owner.get('person/popular', params, function (json) {
-            json = Lampa.Utils.addSource(json, 'tmdb');
-            json.title = Lampa.Lang.translate('surs_popular_persons');
-
-            json.results.forEach(function(person) {
-                person.params = {
-                    module: Lampa.Maker.module('Card').only('Card', 'Release', 'Callback'),
-                    emit: {
-                        onFocus: function() {
-                            Lampa.Background.change(Lampa.Utils.cardImgBackground(person));
-                        },
-                        onEnter: function() {
-                            Lampa.Router.call('actor', person);
-                        }
-                    }
-                };
-            });
-
-            cb(json);
-        }, cb);
-    };
-}
-
-function getPopularPersons() {
-    return Lampa.Manifest.app_digital >= 300 ? getPopularPersonsNew() : getPopularPersonsOld();
-}
-
-//
-function startPlugin() {
-    window.plugin_surs_ready = true;
-    
-
-
-    var Episode = function (data) {
+        }
+ var Episode = function (data) {
         var card = data.card || data;
         var episode = data.next_episode_to_air || data.episode || {};
         if (card.source == undefined) card.source = 'tmdb';
@@ -1119,16 +1034,99 @@ function startPlugin() {
             return js ? this.card : $(this.card);
         };
     };
-    
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
+	
+// ближайшие эпизоды
+function getUpcomingEpisodesOld() {
+    return function (callback) {
+        callback({
+            source: 'tmdb',
+            results: Lampa.TimeTable.lately().slice(0, 20),
+            title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
+            nomore: true,
+            cardClass: function (elem, params) {
+                return new Episode(elem, params);
             }
-        }
+        });
+    };
+}
 
+function getUpcomingEpisodesNew() {  
+    return function (cb) {  
+        var lately = Lampa.TimeTable.lately().slice(0, 20);  
+  
+        lately.forEach(function(item) {  
+            item.params = {  
+                createInstance: function(item_data) {  
+                    // ✅ Правильно: используем Lampa.Maker.make  
+                    return Lampa.Maker.make('Episode', item_data, function(module) {  
+                        return module.only('Card', 'Callback');  
+                    });  
+                },  
+                emit: {  
+                    onlyEnter: function() {  
+                        Lampa.Router.call('full', item.card);  
+                    },  
+                    onlyFocus: function() {  
+                        Lampa.Background.change(Lampa.Utils.cardImgBackgroundBlur(item.card));  
+                    }  
+                }  
+            };  
+  
+            Lampa.Arrays.extend(item, item.episode);  
+        });  
+  
+        cb({  
+            results: lately,  
+            title: Lampa.Lang.translate('surs_title_upcoming_episodes')  
+        });  
+    };  
+}
+
+function getUpcomingEpisodes() {
+    return Lampa.Manifest.app_digital >= 300 ? getUpcomingEpisodesNew() : getUpcomingEpisodesOld();
+}        
+// популярные персоны
+function getPopularPersonsOld() {
+    return function (callback) {
+        owner.get('person/popular', params, function (json) {
+            json.title = Lampa.Lang.translate('surs_popular_persons');
+            callback(json);
+        }, callback);
+    };
+}
+
+function getPopularPersonsNew() {
+    return function (cb) {
+        owner.get('person/popular', params, function (json) {
+            json = Lampa.Utils.addSource(json, 'tmdb');
+            json.title = Lampa.Lang.translate('surs_popular_persons');
+
+            json.results.forEach(function(person) {
+                person.params = {
+                    module: Lampa.Maker.module('Card').only('Card', 'Release', 'Callback'),
+                    emit: {
+                        onFocus: function() {
+                            Lampa.Background.change(Lampa.Utils.cardImgBackground(person));
+                        },
+                        onEnter: function() {
+                            Lampa.Router.call('actor', person);
+                        }
+                    }
+                };
+            });
+
+            cb(json);
+        }, cb);
+    };
+}
+
+function getPopularPersons() {
+    return Lampa.Manifest.app_digital >= 300 ? getPopularPersonsNew() : getPopularPersonsOld();
+}
+
+//
+function startPlugin() {
+    window.plugin_surs_ready = true;
 
 var SourceTMDB = function (parent) {
     this.network = new Lampa.Reguest();
@@ -1503,7 +1501,7 @@ var SourceTMDB = function (parent) {
         CustomData = CustomData.map(wrapWithWideFlag);
 		CustomData.push(getPopularPersons());
         shuffleArray(CustomData);
-       // CustomData.splice(4, 0, getUpcomingEpisodes());
+        CustomData.splice(4, 0, getUpcomingEpisodes());
 
         var combinedData = partsData.concat(trendingsData).concat(CustomData);
         
