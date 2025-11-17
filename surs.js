@@ -1087,9 +1087,10 @@ function getUpcomingEpisodes() {
     return Lampa.Manifest.app_digital >= 300 ? getUpcomingEpisodesNew() : getUpcomingEpisodesOld();
 }        
 // популярные персоны
+var owner = this;
 function getPopularPersonsOld() {
     return function (callback) {
-        this.get('person/popular', params, function (json) {
+        owner.get('person/popular', params, function (json) {
             json.title = Lampa.Lang.translate('surs_popular_persons');
             callback(json);
         }, callback);
@@ -1098,7 +1099,7 @@ function getPopularPersonsOld() {
 
 function getPopularPersonsNew() {
     return function (cb) {
-        this.get('person/popular', params, function (json) {
+        owner.get('person/popular', params, function (json) {
             json = Lampa.Utils.addSource(json, 'tmdb');
             json.title = Lampa.Lang.translate('surs_popular_persons');
 
