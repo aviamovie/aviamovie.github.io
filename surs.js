@@ -408,196 +408,6 @@ var allStreamingServicesRUS = [
     { id: 3882, title: 'More.TV' }
 ];
 
-    // Переменная с SVG-постерами для кастомных кнопок
-var buttonPosters = {
-    surs_main: 'https://aviamovie.github.io/img/main.png',
-    surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png', 
-    surs_history: 'https://aviamovie.github.io/img/history.png', 
-    surs_select: 'https://aviamovie.github.io/img/select_new.png',
-    surs_new: 'https://aviamovie.github.io/img/new.png',
-    surs_best: 'https://aviamovie.github.io/img/best.png',
-    surs_rus: 'https://aviamovie.github.io/img/rus.png',
-    surs_kids: 'https://aviamovie.github.io/img/kids.png'
-};
-
-
-function getAllButtons() {
-    return [
-        { id: 'surs_main', title: 'surs_main',  overview: ' '},
-        { id: 'surs_bookmarks', title: 'surs_bookmarks', overview: ' '},
-        { id: 'surs_history', title: 'surs_history', overview: ' '},
-        { id: 'surs_select', title: 'surs_select', overview: ' ' },
-        { id: 'surs_new', title: 'surs_new', overview: ' ' },
-        { id: 'surs_rus', title: 'surs_rus', poster_path: null, overview: ' ' },
-        { id: 'surs_kids', title: 'surs_kids', overview: ' ' }
-    ];
-}
-
-
-// Функция для получения кастомных кнопок с учётом настроек
-function customButtons() {
-    var allButtons = getAllButtons();
-    return allButtons.filter(function(button) {
-        return getStoredSetting('custom_button_' + button.id, true);
-    }).map(function(button) {
-        return {
-            id: button.id,
-            name: Lampa.Lang.translate(button.title), 
-            overview: button.overview,
-
-        };
-    });
-}
-
-
-    function setupCardHandlers() {
-
-        function initCardListener() {
-            if (window.lampa_listener_extensions) {
-                return;
-            }
-
-            window.lampa_listener_extensions = true;
-
-            Object.defineProperty(window.Lampa.Card.prototype, 'build', {
-                get: function () {
-                    return this._build;
-                },
-                set: function (value) {
-                    this._build = function () {
-                        value.apply(this);
-                        Lampa.Listener.send('card', {
-                            type: 'build',
-                            object: this
-                        });
-                    }.bind(this);
-                }
-            });
-        }
-
-
-
-    var buttonActions = {
-        surs_main: function() {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: Lampa.Storage.get('source'),
-                title: Lampa.Lang.translate('title_main') + ' - ' + Lampa.Storage.get('source'),
-                component: 'main',
-                page: 1
-            });
-        },
-        surs_bookmarks: function() {
-            Lampa.Activity.push({
-                url: '',
-                title: Lampa.Lang.translate('surs_bookmarks') ,
-                component: 'bookmarks',
-                page: 1,
-            });
-        },
-        surs_history: function() {
-            Lampa.Activity.push({
-                url: '',
-                title: Lampa.Lang.translate('surs_history') ,
-                component: 'favorite',
-                type: 'history',
-                page: 1,
-            });
-        },
-        
-        surs_select: function() {
-if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') {
-    window.SursSelect.showSursSelectMenu();
-}
-        },
-        surs_new: function() {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: sourceName + ' NEW',
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',
-                component: 'main',
-                page: 1
-            });
-        },
-        surs_best: function() {
-            Lampa.Noty.show('раздел "лучшее" в разработке');
-        },
-        surs_rus: function() {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: sourceName + ' RUS',
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',
-                component: 'main',
-                page: 1
-            });
-        },
-        surs_kids: function() {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: sourceName + ' KIDS',
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',
-                component: 'main',
-                page: 1
-            });
-        }
-    };
-
-
-
-
-
-function addCardListener() {
-    initCardListener();
-    Lampa.Listener.follow('card', function (event) {
-        if (event.type === 'build') {
-            var cardId = event.object.data.id;
-            var customButtonIds = customButtons().map(function(button) { return button.id; }); 
-            if (customButtonIds.indexOf(cardId) !== -1) {
-                event.object.data.img = buttonPosters[cardId];
-                event.object.card.addClass('custom-button-card');
-
-                event.object.card.on('hover:enter', function(e) {
-                    if (buttonActions[cardId]) {
-                        buttonActions[cardId]();
-                    } else {
-                        console.warn('Действие для кнопки ' + cardId + ' не определено');
-                    }
-                    e.stopImmediatePropagation();
-                });
-            }
-        }
-    });
-}
-
-addCardListener();
-    }
-    
-    Lampa.Template.add('custom_button_style', `
-    <style>
-       .custom-button-card {
-  -webkit-flex-shrink: 0;
-      -ms-flex-negative: 0;
-          flex-shrink: 0;
-  width: 12.75em;
-  position: relative;
-  will-change: transform;
-    }
-
-        @media screen and (max-width: 700px) {
-            .items-cards .custom-button-card {
-                width: 9em !important;
-                
-            }
-        }
-
-    </style>
-`);
-
-$('body').append(Lampa.Template.get('custom_button_style', {}, true));
-    
-
-
-
 // Функция получения всех настроек
 function getAllStoredSettings() {
     return Lampa.Storage.get('surs_settings') || {};
@@ -668,8 +478,6 @@ function getStreamingServicesRUS() {
 }
 
 
-//устанавливаем интерфейс на маленький
-
 if (!getStoredSetting('interface_size_initialized', false)) {
 
     Lampa.Storage.set("interface_size", "small");
@@ -679,31 +487,239 @@ if (!getStoredSetting('interface_size_initialized', false)) {
 }
 
 
-function getCustomButtonsPart() {
-    return function (callback) {
-        var json = {
-            title: Lampa.Lang.translate(''),
-            results: customButtons(),
-            small: true,
-            collection: true,
-            line_type: 'player-cards'
-        };
-        callback(json);
-    };
+var buttonPosters = {
+    surs_main: 'https://aviamovie.github.io/img/main.png',
+    surs_bookmarks: 'https://aviamovie.github.io/img/bookmarks.png',
+    surs_history: 'https://aviamovie.github.io/img/history.png',
+    surs_select: 'https://aviamovie.github.io/img/select_new.png',
+    surs_new: 'https://aviamovie.github.io/img/new.png',
+    surs_rus: 'https://aviamovie.github.io/img/rus.png',
+    surs_kids: 'https://aviamovie.github.io/img/kids.png'
+};
+
+function getAllButtons() {
+    return [
+        { id: 'surs_main', title: 'surs_main' },
+        { id: 'surs_bookmarks', title: 'surs_bookmarks' },
+        { id: 'surs_history', title: 'surs_history' },
+        { id: 'surs_select', title: 'surs_select' },
+        { id: 'surs_new', title: 'surs_new' },
+        { id: 'surs_rus', title: 'surs_rus' },
+        { id: 'surs_kids', title: 'surs_kids' }
+    ];
 }
+
+var buttonActions = {
+    surs_main: function () {
+        Lampa.Activity.push({
+            source: Lampa.Storage.get('source'),
+            title: Lampa.Lang.translate('title_main'),
+            component: 'main',
+            page: 1
+        });
+    },
+    surs_bookmarks: function () {
+        Lampa.Activity.push({
+            url: '',
+            title: Lampa.Lang.translate('surs_bookmarks'),
+            component: 'bookmarks',
+            page: 1
+        });
+    },
+    surs_history: function () {
+        Lampa.Activity.push({
+            url: '',
+            title: Lampa.Lang.translate('surs_history'),
+            component: 'favorite',
+            type: 'history',
+            page: 1
+        });
+    },
+    surs_select: function () {
+        if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') {
+            window.SursSelect.showSursSelectMenu();
+        }
+    },
+    surs_new: function () {
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+        Lampa.Activity.push({
+            source: sourceName + ' NEW',
+            title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',
+            component: 'main',
+            page: 1
+        });
+    },
+    surs_rus: function () {
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+        Lampa.Activity.push({
+            source: sourceName + ' RUS',
+            title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',
+            component: 'main',
+            page: 1
+        });
+    },
+    surs_kids: function () {
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+        Lampa.Activity.push({
+            source: sourceName + ' KIDS',
+            title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',
+            component: 'main',
+            page: 1
+        });
+    }
+};
+
+
+function initCustomButtons() {
+   
+    Lampa.Template.add('custom_button_style', `
+        <style>
+            .custom-button-card {
+                flex-shrink: 0;
+                width: 12.75em !important;
+                position: relative;
+                will-change: transform;
+            }
+            .custom-button-card.card--collection .card__view {
+                padding-bottom: 58%;
+                margin-top: 1em;
+                margin-bottom: -1em;
+            }
+            @media screen and (max-width: 700px) {
+                .items-cards .custom-button-card {
+                    width: 9em !important;
+                }
+            }
+            .custom-button-card .card__title,
+            .custom-button-card .card__age {
+                display: none !important;
+            }
+        </style>
+    `);
+    $('body').append(Lampa.Template.get('custom_button_style', {}, true));
+
+
+     if (Lampa.Manifest.app_digital >= 300) {    
+	 return
+	 }
+	
+    else {
+        function addCardListener() {
+            if (window.lampa_listener_extensions) return;
+            window.lampa_listener_extensions = true;
+
+            Object.defineProperty(window.Lampa.Card.prototype, 'build', {
+                get: function () { return this._build; },
+                set: function (value) {
+                    this._build = function () {
+                        value.apply(this);
+                        Lampa.Listener.send('card', { type: 'build', object: this });
+                    }.bind(this);
+                }
+            });
+        }
+
+        Lampa.Listener.follow('card', function (e) {
+            if (e.type === 'build') {
+                var cardId = e.object.data.id;
+                if (buttonPosters[cardId]) {
+                    e.object.data.img = buttonPosters[cardId];
+                    e.object.card.addClass('custom-button-card');
+
+                    e.object.card.on('hover:enter', function () {
+                        if (buttonActions[cardId]) {
+                            buttonActions[cardId]();
+                        }
+                    });
+                }
+            }
+        });
+
+        addCardListener();
+    }
+}
+function addCustomButtonsRow(partsData) {
+    
+    if (Lampa.Manifest.app_digital < 300) return;
+    
+    partsData.unshift(function(callback) {
+        var allButtons = getAllButtons();
+        var enabledButtons = allButtons.filter(function (b) {
+            return getStoredSetting('custom_button_' + b.id, true);  
+        }).map(function(b) {
+            return {
+                id: b.id,
+                title: Lampa.Lang.translate(b.title),
+                source: 'custom',
+                params: {
+                    createInstance: function(item) {
+                        var card = Lampa.Maker.make('Card', item, function(m) {
+                            return m.only('Card', 'Callback');
+                        });
+                        card.data.img = buttonPosters[item.id] || ''; 
+                        return card;
+                    },
+                    emit: {
+                        onCreate: function() {
+                            this.html.addClass('custom-button-card card--small card--collection');
+                            this.html.find('.card__title').remove();
+                            this.html.find('.card__age').remove();
+                        },
+                        onlyEnter: function() {
+                            if (buttonActions[b.id]) {
+                                buttonActions[b.id]();  
+                            }
+                        }
+                    }
+                }
+            };
+        });
+        
+        callback({
+            results: enabledButtons,  
+            title: '',
+            params: {
+                items: {
+                    view: 20,
+                    mapping: 'line'
+                }
+            }
+        });
+    });
+}
+
 
 function getPartsData() {
     var partsData = [];
-
-    if (Lampa.Manifest.app_digital >= 300) {
-        // Новая версия (>= 300) 
+    if (Lampa.Manifest.app_digital >= 300) { 
+    addCustomButtonsRow(partsData);	
     } else {
-        // Старая версия (< 300) — кастомные кнопки + тренды + upcoming
         partsData.push(getCustomButtonsPart());
-
     }
-
     return partsData;
+}
+
+function getCustomButtonsPart() {
+    return function (callback) {
+        var buttons = getAllButtons().filter(function (b) {
+            return getStoredSetting('custom_button_' + b.id, true);
+        }).map(function (b) {
+            return {
+                id: b.id,
+                name: Lampa.Lang.translate(b.title),
+                img: buttonPosters[b.id],
+                source: 'custom'
+            };
+        });
+
+        callback({
+            title: '',
+            results: buttons,
+            small: true,
+            collection: true,
+            line_type: 'player-cards'
+        });
+    };
 }
 
 
@@ -871,26 +887,138 @@ function buildApiUrl(baseUrl) {
             return Math.random() < 0.1;
         }
             function wrapWithWideFlag(requestFunc) {
-            return function (callback) {
-                requestFunc(function (json) {
-                    if (randomWideFlag()) {
-                        json.small = true;
-                        json.wide = true;
+    // Новый способ — Lampa 3.0+
+    function wrapNew(callback) {
+        requestFunc(function (json) {
+            json = Lampa.Utils.addSource(json, 'tmdb');
 
-                        if (Array.isArray(json.results)) {
-                            json.results.forEach(function (card) {
-                                card.promo = card.overview;
-                                card.promo_title = card.title || card.name;
-                            });
+            if (randomWideFlag()) {
+                if (Array.isArray(json.results)) {
+                    json.results.forEach(function(c) {
+                        c.promo = c.overview || '';
+                        c.promo_title = c.title || c.name || Lampa.Lang.translate('surs_noname');
+                        c.params = {
+                            style: { name: 'wide' }
+                        };
+                    });
+                }
+
+                json.params = {
+                    items: { view: 3 }
+                };
+            }
+            callback(json);
+        });
+    }
+
+    // Старый способ — до 3.0
+    function wrapOld(callback) {
+        requestFunc(function (json) {
+            if (randomWideFlag()) {
+                json.small = true;
+                json.wide = true;
+                if (Array.isArray(json.results)) {
+                    json.results.forEach(function(card) {
+                        card.promo = card.overview || '';
+                        card.promo_title = card.title || card.name || '';
+                    });
+                }
+            }
+            callback(json);
+        });
+    }
+
+    return Lampa.Manifest.app_digital >= 300 ? wrapNew : wrapOld;
+}        
+
+// ближайшие эпизоды
+function getUpcomingEpisodesOld() {
+    return function (callback) {
+        callback({
+            source: 'tmdb',
+            results: Lampa.TimeTable.lately().slice(0, 20),
+            title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
+            nomore: true,
+            cardClass: function (elem, params) {
+                return new Episode(elem, params);
+            }
+        });
+    };
+}
+
+function getUpcomingEpisodesNew() {
+    return function (cb) {
+        var lately = Lampa.TimeTable.lately().slice(0, 20);
+
+        lately.forEach(function(item) {
+            item.params = {
+                createInstance: function(item_data) {
+                    return new Lampa.Episode(item_data);
+                },
+                module: Lampa.Maker.module('Episode').only('Card', 'Callback'),
+                emit: {
+                    onlyEnter: function() {
+                        Lampa.Router.call('full', item.card);
+                    },
+                    onlyFocus: function() {
+                        Lampa.Background.change(Lampa.Utils.cardImgBackgroundBlur(item.card));
+                    }
+                }
+            };
+
+            Lampa.Arrays.extend(item, item.episode);
+        });
+
+        cb({
+            results: lately,
+            title: Lampa.Lang.translate('surs_title_upcoming_episodes')
+        });
+    };
+}
+
+function getUpcomingEpisodes() {
+    return Lampa.Manifest.app_digital >= 300 ? getUpcomingEpisodesNew() : getUpcomingEpisodesOld();
+}        
+// популярные персоны
+function getPopularPersonsOld() {
+    return function (callback) {
+        owner.get('person/popular', params, function (json) {
+            json.title = Lampa.Lang.translate('surs_popular_persons');
+            callback(json);
+        }, callback);
+    };
+}
+
+function getPopularPersonsNew() {
+    return function (cb) {
+        owner.get('person/popular', params, function (json) {
+            json = Lampa.Utils.addSource(json, 'tmdb');
+            json.title = Lampa.Lang.translate('surs_popular_persons');
+
+            json.results.forEach(function(person) {
+                person.params = {
+                    module: Lampa.Maker.module('Card').only('Card', 'Release', 'Callback'),
+                    emit: {
+                        onFocus: function() {
+                            Lampa.Background.change(Lampa.Utils.cardImgBackground(person));
+                        },
+                        onEnter: function() {
+                            Lampa.Router.call('actor', person);
                         }
                     }
-                    callback(json);
-                });
-            };
-        }
-        
-        
+                };
+            });
 
+            cb(json);
+        }, cb);
+    };
+}
+
+function getPopularPersons() {
+    return Lampa.Manifest.app_digital >= 300 ? getPopularPersonsNew() : getPopularPersonsOld();
+}
+
+//
 function startPlugin() {
     window.plugin_surs_ready = true;
     
@@ -1013,7 +1141,7 @@ var SourceTMDB = function (parent) {
         var onError = arguments.length > 2 ? arguments[2] : undefined;
         var partsLimit = 9;
 
-        var partsData = getPartsData();
+        var partsData = getPartsData();	 
         var CustomData = [];
         var trendingsData = [];
         
@@ -1054,37 +1182,6 @@ var SourceTMDB = function (parent) {
         trendingsData.push(trendingMovies);
         trendingsData.push(trendingTV);
         
-        
-        var upcomingEpisodesRequest = function (callback) {
-            callback({
-                source: 'tmdb',
-                results: Lampa.TimeTable.lately().slice(0, 20),
-                title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
-                nomore: true,
-                cardClass: function (_elem, _params) {
-                    return new Episode(_elem, _params);
-                }
-            });
-        };
-
-
-        function getPopularPersons() {
-            return function (callback) {
-                var baseUrl = 'person/popular';
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = json.results.filter(function (result) {
-                            return true;
-                        });
-                    }
-                    json.title = Lampa.Lang.translate('surs_popular_persons');
-                    callback(json);
-                }, callback);
-            };
-        }
-
-        CustomData.push(getPopularPersons());
 
         function getStreamingWithGenres(serviceName, serviceId, isRussian) {
             return function (callback) {
@@ -1404,9 +1501,9 @@ var SourceTMDB = function (parent) {
 
 
         CustomData = CustomData.map(wrapWithWideFlag);
-
+		CustomData.push(getPopularPersons());
         shuffleArray(CustomData);
-        CustomData.splice(4, 0, upcomingEpisodesRequest);
+        CustomData.splice(4, 0, getUpcomingEpisodes());
 
         var combinedData = partsData.concat(trendingsData).concat(CustomData);
         
@@ -1435,7 +1532,7 @@ var SourceTMDBnew = function (parent) {
         var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var onComplete = arguments.length > 1 ? arguments[1] : undefined;
         var onError = arguments.length > 2 ? arguments[2] : undefined;
-        var partsLimit = 12;
+        var partsLimit = 9;
 
         // Функция для перемешивания массива
         function shuffleArray(array) {
@@ -1659,7 +1756,7 @@ var SourceTMDBkids = function (parent) {
         var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var onComplete = arguments.length > 1 ? arguments[1] : undefined;
         var onError = arguments.length > 2 ? arguments[2] : undefined;
-        var partsLimit = 7;
+        var partsLimit = 9;
 
         // Опции сортировки
         var sortOptions = [
@@ -1730,7 +1827,7 @@ var SourceTMDBkids = function (parent) {
 // Функции формирования url с доп параметрами
 
 function applyMinVotes(baseUrl) {
-    var minVotes = 5; // Всегда 10 голосов
+    var minVotes = 5; 
 
     baseUrl += '&vote_count.gte=' + minVotes;
     
@@ -2300,7 +2397,7 @@ partsData = partsData.map(wrapWithWideFlag);
 
 
 
-shuffleArray(partsData); // Перемешиваем массив
+shuffleArray(partsData); 
 
     var combinedData = buttonsData.concat(partsData);
 
@@ -2329,7 +2426,7 @@ var SourceTMDBrus = function (parent) {
         var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         var onComplete = arguments.length > 1 ? arguments[1] : undefined;
         var onError = arguments.length > 2 ? arguments[2] : undefined;
-        var partsLimit = 12;
+        var partsLimit = 9;
 
         // Опции сортировки
         var sortOptions = [
@@ -2386,9 +2483,6 @@ var SourceTMDBrus = function (parent) {
             
         ];
         
-
-// Фильтрация кириллица
-
 
 
 
@@ -3908,66 +4002,47 @@ function addSettingMenu() {
                 }
             });
 
-            Lampa.SettingsApi.addParam({
-                component: 'surs',
-                param: {
-                    name: 'surs_setName',
-                    type: 'button',
-                    defaultValue: Lampa.Lang.translate('surs_enter_new_name')
-                },
-                field: {
-                    name: Lampa.Lang.translate('surs_rename_selections'),
-                    description: Lampa.Lang.translate('surs_rename_description') + ' ' + currentSource
-                },
-                onChange: function() {
-                    try {
-                        Lampa.Input.edit({
-                            free: true,
-                            title: Lampa.Lang.translate('surs_enter_new_name'),
-                            nosave: true,
-                            value: ''
-                        }, function(input) {
-                            try {
-                                if (input.value) {
-                                    Lampa.Storage.set('surs_name', input.value);
-                                    Lampa.Noty.show(Lampa.Lang.translate('surs_name_saved'));
+Lampa.SettingsApi.addParam({
+    component: 'surs',
+    param: {
+        name: 'surs_setName',
+        type: 'button'
+    },
+    field: {
+        name: Lampa.Lang.translate('surs_rename_selections'),
+        description: Lampa.Lang.translate('surs_rename_description') + ' ' + currentSource
+    },
+    onChange: function() {
+        var currentName = Lampa.Storage.get('surs_name') || '';
 
-                                    setTimeout(function() {
-                                        try {
-                                            Lampa.Controller.toggle('settings');
-                                        } catch (e) {
-                                            console.error('Error toggling settings:', e);
-                                        }
-                                    }, 200);
+        Lampa.Input.edit({
+            free: true,
+            title: Lampa.Lang.translate('surs_enter_new_name'),
+            value: currentName
+            // nosave: true — больше не нужен и даже мешает
+        }, function(newName) {                // ← сюда приходит строка!
+            if (typeof newName === 'string') {
+                newName = newName.trim();
+            }
 
-                                    setTimeout(function() {
-                                        try {
-                                            var newName = Lampa.Storage.get('surs_name');
-                                            softRefresh(newName, false);
-                                        } catch (e) {
-                                            console.error('Error in softRefresh:', e);
-                                        }
-                                    }, 2000);
+            if (newName && newName.length > 0) {
+                Lampa.Storage.set('surs_name', newName);
+                Lampa.Noty.show(Lampa.Lang.translate('surs_name_saved') || 'Название сохранено');
 
-                                    setTimeout(function() {
-                                        try {
-                                            window.location.reload();
-                                        } catch (e) {
-                                            console.error('Error reloading:', e);
-                                        }
-                                    }, 3000);
-                                } else {
-                                    Lampa.Noty.show(Lampa.Lang.translate('surs_name_not_entered'));
-                                }
-                            } catch (e) {
-                                console.error('Error in input callback:', e);
-                            }
-                        });
-                    } catch (e) {
-                        console.error('Error in setName onChange:', e);
-                    }
-                }
-            });
+                setTimeout(() => Lampa.Controller.toggle('settings'), 300);
+
+                setTimeout(() => {
+                    try { softRefresh(newName, false); } catch(e) {}
+                }, 2000);
+
+                setTimeout(() => location.reload(), 3500);
+
+            } else {
+                Lampa.Noty.show(Lampa.Lang.translate('surs_name_not_entered') || 'Название не введено');
+            }
+        });
+    }
+});
         }
     } catch (e) {
         console.error('Error in addSettingMenu:', e);
@@ -4585,7 +4660,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    setupCardHandlers();
+    initCustomButtons();;
     loadSidePlugins();
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -4597,7 +4672,7 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-            setupCardHandlers();
+            initCustomButtons();
             loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
