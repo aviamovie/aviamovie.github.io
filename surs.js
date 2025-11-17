@@ -1503,7 +1503,7 @@ var SourceTMDB = function (parent) {
         CustomData = CustomData.map(wrapWithWideFlag);
 		CustomData.push(getPopularPersons());
         shuffleArray(CustomData);
-        CustomData.splice(4, 0, getUpcomingEpisodes());
+       // CustomData.splice(4, 0, getUpcomingEpisodes());
 
         var combinedData = partsData.concat(trendingsData).concat(CustomData);
         
