@@ -630,8 +630,8 @@ function initCustomButtons() {
                         if (buttonActions[cardId]) {
                             buttonActions[cardId]();
                         }
+						 event.stopImmediatePropagation();
                     });
-				   event.stopImmediatePropagation();
                 }
             }
         });
@@ -1089,7 +1089,7 @@ function getUpcomingEpisodes() {
 // популярные персоны
 function getPopularPersonsOld() {
     return function (callback) {
-        owner.get('person/popular', params, function (json) {
+        this.get('person/popular', params, function (json) {
             json.title = Lampa.Lang.translate('surs_popular_persons');
             callback(json);
         }, callback);
@@ -1098,7 +1098,7 @@ function getPopularPersonsOld() {
 
 function getPopularPersonsNew() {
     return function (cb) {
-        owner.get('person/popular', params, function (json) {
+        this.get('person/popular', params, function (json) {
             json = Lampa.Utils.addSource(json, 'tmdb');
             json.title = Lampa.Lang.translate('surs_popular_persons');
 
