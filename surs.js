@@ -510,9 +510,8 @@ function getAllButtons() {
 }
 
 var buttonActions = {
-	
     surs_main: function () {
-		var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
         Lampa.Activity.push({
             source: Lampa.Storage.get('source'),
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,
@@ -543,9 +542,8 @@ var buttonActions = {
         }
     },
     surs_new: function () {
-        
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  // ← перенесено вверх
         Lampa.Activity.push({
-			var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             source: sourceName + ' NEW',
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',
             component: 'main',
@@ -553,9 +551,8 @@ var buttonActions = {
         });
     },
     surs_rus: function () {
-        
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  // ← тоже вверх
         Lampa.Activity.push({
-			var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             source: sourceName + ' RUS',
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',
             component: 'main',
@@ -563,9 +560,8 @@ var buttonActions = {
         });
     },
     surs_kids: function () {
-        
+        var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  // ← и здесь
         Lampa.Activity.push({
-			var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             source: sourceName + ' KIDS',
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',
             component: 'main',
