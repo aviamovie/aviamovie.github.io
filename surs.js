@@ -513,7 +513,7 @@ var buttonActions = {
     surs_main: function () {
         Lampa.Activity.push({
             source: Lampa.Storage.get('source'),
-            title: Lampa.Lang.translate('title_main'),
+            title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,
             component: 'main',
             page: 1
         });
