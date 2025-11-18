@@ -510,8 +510,9 @@ function getAllButtons() {
 }
 
 var buttonActions = {
-	var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+	
     surs_main: function () {
+		var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
         Lampa.Activity.push({
             source: Lampa.Storage.get('source'),
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,
@@ -544,6 +545,7 @@ var buttonActions = {
     surs_new: function () {
         
         Lampa.Activity.push({
+			var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             source: sourceName + ' NEW',
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',
             component: 'main',
@@ -553,6 +555,7 @@ var buttonActions = {
     surs_rus: function () {
         
         Lampa.Activity.push({
+			var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             source: sourceName + ' RUS',
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',
             component: 'main',
@@ -562,6 +565,7 @@ var buttonActions = {
     surs_kids: function () {
         
         Lampa.Activity.push({
+			var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             source: sourceName + ' KIDS',
             title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',
             component: 'main',
