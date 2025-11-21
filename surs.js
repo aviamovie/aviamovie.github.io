@@ -586,7 +586,7 @@ function initCustomButtons() {
                 margin-top: 1em;
                 margin-bottom: -1em;
             }
-            @media screen and (max-width: 700px) {
+            @media screen and (max-width: 900px) {
                 .items-cards .custom-button-card {
                     width: 9em !important;
                 }
