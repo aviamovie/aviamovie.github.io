@@ -492,74 +492,82 @@
     }  
   
     function addCustomButtonsRow(partsData) {  
-        partsData.unshift(function(callback) {  
-            var allButtons = getAllButtons();  
-            var enabledButtons = allButtons.filter(function(b) {  
-                return getStoredSetting('custom_button_' + b.id, true);  
-            }).map(function(b) {  
-                var cardData = {  
-                    source: 'custom',  
-                    title: Lampa.Lang.translate(b.title),  
-                    name: Lampa.Lang.translate(b.title),  
-                    id: b.id,  
-                    params: {  
-                        createInstance: function() {  
-                            var card = createCard(this, 'Card');  
+    partsData.unshift(function(callback) {  
+        var allButtons = getAllButtons();  
+        var enabledButtons = allButtons.filter(function(b) {  
+            return getStoredSetting('custom_button_' + b.id, true);  
+        }).map(function(b) {  
+            var cardData = {  
+                source: 'custom',  
+                title: Lampa.Lang.translate(b.title),  
+                name: Lampa.Lang.translate(b.title),  
+                id: b.id,  
+                params: {  
+                    createInstance: function() {  
+                        var card = createCard(this, 'Card');  
+                          
+                        // Используем спрайты для стандартных иконок  
+                        if (b.id === 'surs_main') {  
+                            card.data.icon_svg = '<svg><use xlink:href="#sprite-home"></use></svg>';  
+                        } else if (b.id === 'surs_bookmarks') {  
+                            card.data.icon_svg = '<svg><use xlink:href="#sprite-book"></use></svg>';  
+                        } else if (b.id === 'surs_history') {  
+                            card.data.icon_svg = '<svg><use xlink:href="#sprite-history"></use></svg>';  
+                        } else if (buttonIcons[b.id]) {  
+                            card.data.icon_svg = buttonIcons[b.id];  
+                        }  
+                          
+                        return card;  
+                    },  
+                    emit: {  
+                        onCreate: function() {  
+                            this.html.addClass('card--button-compact');  
+  
+                            // Для всех SVG иконок  
+                            var imgElement = this.html.find('.card__img');  
+                            var svgContainer = document.createElement('div');  
+                            svgContainer.classList.add('card__svg-icon');  
                               
-                            // Используем штатные иконки для стандартных кнопок  
                             if (b.id === 'surs_main') {  
-                                card.data.icon = 'home';  
+                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
                             } else if (b.id === 'surs_bookmarks') {  
-                                card.data.icon = 'bookmark';  
+                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-book"></use></svg>';  
                             } else if (b.id === 'surs_history') {  
-                                card.data.icon = 'history';  
+                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
                             } else if (buttonIcons[b.id]) {  
-                                card.data.icon_svg = buttonIcons[b.id];  
+                                svgContainer.innerHTML = buttonIcons[b.id];  
                             }  
                               
-                            return card;  
+                            imgElement.replaceWith(svgContainer);  
+  
+                            var buttonLabel = document.createElement('div');  
+                            buttonLabel.classList.add('card__button-label');  
+                            buttonLabel.innerText = Lampa.Lang.translate(b.title);  
+                            this.html.find('.card__view').append(buttonLabel);  
                         },  
-                        emit: {  
-                            onCreate: function() {  
-                                this.html.addClass('card--button-compact');  
-  
-                                // Для SVG иконок  
-                                if (buttonIcons[b.id] && b.id !== 'surs_main' && b.id !== 'surs_bookmarks' && b.id !== 'surs_history') {  
-                                    var imgElement = this.html.find('.card__img');  
-                                    var svgContainer = document.createElement('div');  
-                                    svgContainer.classList.add('card__svg-icon');  
-                                    svgContainer.innerHTML = buttonIcons[b.id];  
-                                    imgElement.replaceWith(svgContainer);  
-                                }  
-  
-                                var buttonLabel = document.createElement('div');  
-                                buttonLabel.classList.add('card__button-label');  
-                                buttonLabel.innerText = Lampa.Lang.translate(b.title);  
-                                this.html.find('.card__view').append(buttonLabel);  
-                            },  
-                            onlyEnter: function() {  
-                                if (buttonActions[b.id]) {  
-                                    buttonActions[b.id]();  
-                                }  
+                        onlyEnter: function() {  
+                            if (buttonActions[b.id]) {  
+                                buttonActions[b.id]();  
                             }  
                         }  
                     }  
-                };  
-                return cardData;  
-            });  
-  
-            callback({  
-                results: enabledButtons,  
-                title: '',  
-                params: {  
-                    items: {  
-                        view: 20,  
-                        mapping: 'line'  
-                    }  
                 }  
-            });  
+            };  
+            return cardData;  
         });  
-    }  
+  
+        callback({  
+            results: enabledButtons,  
+            title: '',  
+            params: {  
+                items: {  
+                    view: 20,  
+                    mapping: 'line'  
+                }  
+            }  
+        });  
+    });  
+}  
   
     function getPartsData() {  
         var partsData = [];  
