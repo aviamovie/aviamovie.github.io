@@ -4631,7 +4631,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    initCustomButtons();;
+
     loadSidePlugins();
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -4643,7 +4643,6 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-            initCustomButtons();
             loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
