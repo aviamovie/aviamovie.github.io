@@ -1,855 +1,453 @@
-/* ==== Поддержка автора ==== */
-
-// Буду благодарен за поддержку! Мечтаю собрать на ПАЗик, чтобы построить из него автодом, отдыхать с семьей у реки.  Но и сам процес постройки, честно говоря, видится мне не менее увлекательным занятием.
-
-//Да ПАЗик, будет на японском моторе, погугли, очень интересный донор под автодом.
-
-//Кто то лодку покупает, мне стрельнул в голову автобус. Такая взрослая жизнь.
-
-//С женой уговор, заработаю на покупку на хобби, бухтеть не булет, поэтому прошу поддержать. 
-
-//Дабы отработать свой хлеб, ниже будет описание процеса установки и настройки, для удобства вынес для тебя некоторые настройки.
-
-// Любая сумма поможет, в комментарии укажи "это тебе на ПАЗик".  
-// **СБЕР:** +7 923 668 0000  
-
-
-
-
-/* ==== Информация о плагине ==== */
-
-// Плагин создает уникальные подборки фильмов и сериалов на главной странице по жанрам, стримингам, популярности, просмотрам и кассовым сборам.  
-// Обновление подборок происходит при каждом нажатии кнопки "Главная" (Home).
-
-// ======= Установка =======
-//  Если у тебя свой сервер, файл положить в wwwroot.  
-// 1. Для индивидуального использования:  
-//    - В Лампа открыть "Настройки" → "плагины".  
-//    - В разделе плагинов прописать: ВашАдрес/surs.js.  
-
-// 2. Для загрузки плагина всем пользователям:  
-//    - Добавить в lampainit.js строку:  
-//    - Lampa.Utils.putScriptAsync(["/surs.js"], function() {});
-
-
-
-// ======= Настройки =========
-//Для запрета пользователю менять название подборок, используй:
-//Lampa.Storage.set('surs_disableCustomName', true); //это скроет пункт меню с вводом собственного названия 
-
-//Для установки своего названия для всех используй:
-//Lampa.Storage.set('surs_name', 'YOURS_TITLE');
-
-//Для скрытия всего меню "подборки" используй 
-//Lampa.Storage.set('surs_disableMenu', true);
-
-/* ==== Дополнения ==== */
-
-// Плагин работает как автономно (с ручным выбором источника через настройки), так и совместно с плагином для добавления профилей  на один аккаунт:  
-
-// [Плагин профилей от Levende]
-//https://levende.github.io/lampa-plugins/profiles.js.  
-
-// - Детские и Русские профили получают отдельные подборки на главной странице, переключение происходит автоматически при смене профиля.  
-
-// - Для автоматического переключения между детским, русским и основным источником, в профиле должен быть указан параметр:  
-//   -  "surs": true — активирует автоматическое назначенте surs основным источником.
-//   - "forKids": true — переключает источник автоматически на детский.
-//  - "onlyRus": true — переключает источник автоматически на российский.
-
-
-// ====Пример конфигурации профилей ====
-
-// необходимо модифицировать init.conf для работы с profiles.js:  
-
-// Добавляет 5 профилей на один аккаунт (пароль/почта/логин).  
-// Иконки профилей нужно разместить в wwwroot/profileIcons  
-
-
-/*
-  "accounts": {
-    "test1": "2026-01-10T00:00:00",
-      "pochta235@rambler.ru": "2024-06-15T00:00:00",
-      "vasyapupkin@yandex.ru": "2024-06-15T00:00:00",
-    },
-
-"params": {
-    "profiles": [
-      {
-        "id": "",
-        "title": "Он",
-        "icon": "/profileIcons/id1.png", // иконки для примера
-        "params": {
-        
-          "surs": true — у этого профиля автоматически будет включен основной источник.
-
-        }
-      },
-      {
-        "id": "_id2",
-        "title": "Она",
-        "icon": "/profileIcons/id2.png",
-        "params": {
-         "surs": true //— у этого профиля автоматически будет включен основной источник. Этот флаг отвечает в целом, за автоматическое переключение источника.
-
-        }
-      },
-      {
-        "id": "_id3",
-        "title": "Ребенок",
-        "icon": "/profileIcons/id3.png",
-        "params": {
-         "surs": true //даем понять что нужно переключать источники.
-        "forKids": true //даем понять что переключать необходимо на детский вариант.
-        }
-      },
-
- {
-        "id": "_id4",
-        "title": "Ребенок",
-        "icon": "/profileIcons/id4.png",
-        "params": {
-         "surs": true 
-        "forKids": true //даем понять что переключать необходимо на детский вариант
- 
-        }
-      },
-
- {
-        "id": "_id5",
-        "title": "Родственники",
-        "icon": "/profileIcons/id5.png",
-        "params": {
-        "surs": true 
-        "onlyRus": true //даем понять что переключать необходимо на российские подборки 
- 
-        }
-      }
-
-    ]
-  }
+(function() {  
+    'use strict';  
   
- //напоминаю про ПАЗик.
-*/
-
-
-(function (  ) {
-    'use strict';
-    
-    
-    if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(searchElement, fromIndex) {
-        var k;
-        if (this == null) {
-            throw new TypeError('"this" is null or not defined');
-        }
-        var o = Object(this);
-        var len = o.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        k = fromIndex | 0;
-        if (k < 0) {
-            k += len;
-            if (k < 0) k = 0;
-        }
-        for (; k < len; k++) {
-            if (k in o && o[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    };
-}
-    
-    if (!Array.isArray) {
-    Array.isArray = function(arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-    };
-}
-    
-   if (!Array.prototype.filter) {
-  Array.prototype.filter = function(callback, thisArg) {
-    var array = this;
-    var result = [];
-    for (var i = 0; i < array.length; i++) {
-      if (callback.call(thisArg, array[i], i, array)) {
-        result.push(array[i]);
-      }
-    }
-    return result;
-  };
-}
-
-if (!Object.assign) {
-  Object.assign = function(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-    return target;
-  };
-}
-
-if (!Array.prototype.map) {
-  Array.prototype.map = function(callback, thisArg) {
-    var array = this;
-    var result = [];
-    for (var i = 0; i < array.length; i++) {
-      result.push(callback.call(thisArg, array[i], i, array));
-    }
-    return result;
-  };
-}
-
-if (!Array.prototype.forEach) {
-  Array.prototype.forEach = function(callback, thisArg) {
-    var array = this;
-    for (var i = 0; i < array.length; i++) {
-      callback.call(thisArg, array[i], i, array);
-    }
-  };
-}
-
-if (!Array.prototype.includes) {
-  Array.prototype.includes = function(searchElement) {
-    return this.indexOf(searchElement) !== -1;
-  };
-}
-
-if (!Date.prototype.toISOString) {
-  Date.prototype.toISOString = function() {
-    var pad = function(num) {
-      return (num < 10 ? '0' : '') + num;
-    };
-    return (
-      this.getUTCFullYear() +
-      '-' +
-      pad(this.getUTCMonth() + 1) +
-      '-' +
-      pad(this.getUTCDate()) +
-      'T' +
-      pad(this.getUTCHours()) +
-      ':' +
-      pad(this.getUTCMinutes()) +
-      ':' +
-      pad(this.getUTCSeconds()) +
-      '.' +
-      (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
-      'Z'
-    );
-  };
-}
-
-if (!Array.prototype.some) {
-  Array.prototype.some = function(callback, thisArg) {
-    var array = this;
-    for (var i = 0; i < array.length; i++) {
-      if (callback.call(thisArg, array[i], i, array)) {
-        return true;
-      }
-    }
-    return false;
-  };
-}
-
-if (!Array.prototype.concat) {
-  Array.prototype.concat = function() {
-    var result = [];
-    for (var i = 0; i < this.length; i++) {
-      result.push(this[i]);
-    }
-    for (var j = 0; j < arguments.length; j++) {
-      var arg = arguments[j];
-      if (Array.isArray(arg)) {
-        for (var k = 0; k < arg.length; k++) {
-          result.push(arg[k]);
-        }
-      } else {
-        result.push(arg);
-      }
-    }
-    return result;
-  };
-}
-
-if (!Object.keys) {
-  Object.keys = function(obj) {
-    var result = [];
-    for (var key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        result.push(key);
-      }
-    }
-    return result;
-  };
-}
-
-// Полифил для Array.prototype.indexOf
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function(searchElement, fromIndex) {
-        var k;
-        if (this == null) {
-            throw new TypeError('"this" is null or not defined');
-        }
-        var o = Object(this);
-        var len = o.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        k = fromIndex | 0;
-        if (k < 0) {
-            k += len;
-            if (k < 0) k = 0;
-        }
-        for (; k < len; k++) {
-            if (k in o && o[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    };
-}
-
-// Полифил для console
-if (!window.console) {
-    window.console = {};
-    var methods = ['log', 'warn', 'error', 'info', 'debug', 'trace'];
-    for (var i = 0; i < methods.length; i++) {
-        window.console[methods[i]] = function() {};
-    }
-}
-
-// Полифил для stopImmediatePropagation
-if (!Event.prototype.stopImmediatePropagation) {
-    Event.prototype.stopImmediatePropagation = function() {
-        this.stopPropagation();
-        this.cancelBubble = true;
-    };
-}
-
-
-
-// Опции сортировки
-var allSortOptions = [
-    { id: 'vote_count.desc', title: 'surs_vote_count_desc' },
-    { id: 'vote_average.desc', title: 'surs_vote_average_desc' },
-    { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' },
-    { id: 'popularity.desc', title: 'surs_popularity_desc' },
-    { id: 'revenue.desc', title: 'surs_revenue_desc' }
-];
-
-// Жанры фильмов
-var allGenres = [
-    { id: 28, title: 'surs_genre_action' },
-    { id: 35, title: 'surs_genre_comedy' },
-    { id: 18, title: 'surs_genre_drama' },
-    { id: 10749, title: 'surs_genre_romance' },
-    { id: 16, title: 'surs_genre_animation' },
-    { id: 10762, title: 'surs_genre_kids' },
-    { id: 12, title: 'surs_genre_adventure' },
-    { id: 80, title: 'surs_genre_crime' },
-    { id: 9648, title: 'surs_genre_mystery' },
-    { id: 878, title: 'surs_genre_sci_fi' },
-    { id: 37, title: 'surs_genre_western' },
-    { id: 53, title: 'surs_genre_thriller' },
-    { id: 10751, title: 'surs_genre_family' },
-    { id: 14, title: 'surs_genre_fantasy' },
-    { id: 10764, title: 'surs_genre_reality' },
-    { id: 10759, title: 'surs_genre_action_adventure' },
-    { id: 10766, title: 'surs_genre_soap' },
-    { id: 10767, title: 'surs_genre_talk_show' }
-];
-
-// Стриминговые сервисы
-var allStreamingServices = [
-    { id: 49, title: 'HBO' },
-    { id: 77, title: 'SyFy' },
-    { id: 2552, title: 'Apple TV+' },
-    { id: 453, title: 'Hulu' },
-    { id: 1024, title: 'Amazon Prime' },
-    { id: 213, title: 'Netflix' },
-    { id: 3186, title: 'HBO Max' },
-    { id: 2076, title: 'Paramount network' },
-    { id: 4330, title: 'Paramount+' },
-    { id: 3353, title: 'Peacock' },
-    { id: 2739, title: 'Disney+' },
-    { id: 2, title: 'ABC' },
-    { id: 6, title: 'NBC' },
-    { id: 16, title: 'CBS' },
-    { id: 318, title: 'Starz' },
-    { id: 174, title: 'AMC' },
-    { id: 19, title: 'FOX' },
-    { id: 64, title: 'Discovery' },
-    { id: 1778, title: 'test' },
-    { id: 493, title: 'BBC America' },
-    { id: 88, title: 'FX' },
-    { id: 67, title: 'Showtime' }
-];
-
-var allStreamingServicesRUS = [
-    { id: 2493, title: 'Start' },
-    { id: 2859, title: 'Premier' },
-    { id: 4085, title: 'KION' },
-    { id: 3923, title: 'ИВИ' },
-    { id: 412, title: 'Россия 1' },
-    { id: 558, title: 'Первый канал' },
-    { id: 3871, title: 'Okko' },
-    { id: 3827, title: 'Кинопоиск' },
-    { id: 5806, title: 'Wink' },
-    { id: 806, title: 'СТС' },
-    { id: 1191, title: 'ТНТ' },
-    { id: 1119, title: 'НТВ' },
-    { id: 3031, title: 'Пятница' },
-    { id: 3882, title: 'More.TV' }
-];
-
-// Функция получения всех настроек
-function getAllStoredSettings() {
-    return Lampa.Storage.get('surs_settings') || {};
-}
-
-// Функция получения настроек текущего пользователя
-function getProfileSettings() {
-    var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';
-    var allSettings = getAllStoredSettings();
-
-    if (!allSettings.hasOwnProperty(profileId)) {
-        allSettings[profileId] = {};
-        saveAllStoredSettings(allSettings);
-    }
-
-    return allSettings[profileId];
-}
-
-// Функция сохранения всех настроек
-function saveAllStoredSettings(settings) {
-    Lampa.Storage.set('surs_settings', settings);
-}
-
-// Функция получения конкретного сохраненного значения (по умолчанию true)
-function getStoredSetting(key, defaultValue) {
-    var profileSettings = getProfileSettings();
-    return profileSettings.hasOwnProperty(key) ? profileSettings[key] : defaultValue;
-}
-
-// Функция сохранения отдельного значения
-function setStoredSetting(key, value) {
-    var allSettings = getAllStoredSettings();
-    var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';
-
-    if (!allSettings.hasOwnProperty(profileId)) {
-        allSettings[profileId] = {};
-    }
-
-    allSettings[profileId][key] = value;
-    saveAllStoredSettings(allSettings);
-}
-
-// Функция фильтрации включенных элементов
-function getEnabledItems(allItems, storageKeyPrefix) {
-    var result = [];
-    for (var i = 0; i < allItems.length; i++) {
-        if (getStoredSetting(storageKeyPrefix + allItems[i].id, true)) {
-            result.push(allItems[i]);
-        }
-    }
-    return result;
-}
-
-function getSortOptions() {
-    return getEnabledItems(allSortOptions, 'sort_');
-}
-
-function getGenres() {
-    return getEnabledItems(allGenres, 'genre_');
-}
-
-function getStreamingServices() {
-    return getEnabledItems(allStreamingServices, 'streaming_');
-}
-
-function getStreamingServicesRUS() {
-    return getEnabledItems(allStreamingServicesRUS, 'streaming_rus_');
-}
-
-
-if (!getStoredSetting('interface_size_initialized', false)) {
-
-    Lampa.Storage.set("interface_size", "small");
-    
-    setStoredSetting('interface_size_initialized', true);
-    
-}
-
-// SVG иконки для кастомных кнопок (замена PNG)
-    var buttonIcons = {
-        surs_main: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', // home
-        surs_bookmarks: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>', // bookmark
-        surs_history: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', // clock
-        surs_select: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', // settings
-        surs_new: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 18 21 18 11 2 13 2"/></svg>', // star
-        surs_rus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path fill="#fff" d="M3 9h18v6H3z"/><path fill="#fc0" d="M3 3h18v6H3z"/></svg>', // flag (Russia approximation)
-        surs_kids: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' // users (family/kids)
-    };
-
-function getAllButtons() {
-        return [
-            { id: 'surs_main', title: 'surs_main' },
-            { id: 'surs_bookmarks', title: 'surs_bookmarks' },
-            { id: 'surs_history', title: 'surs_history' },
-            { id: 'surs_select', title: 'surs_select' },
-            { id: 'surs_new', title: 'surs_new' },
-            { id: 'surs_rus', title: 'surs_rus' },
-            { id: 'surs_kids', title: 'surs_kids' }
-        ];
-    }
-
-    var buttonActions = {
-        surs_main: function () {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: Lampa.Storage.get('source'),
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,
-                component: 'main',
-                page: 1
-            });
-        },
-        surs_bookmarks: function () {
-            Lampa.Activity.push({
-                url: '',
-                title: Lampa.Lang.translate('surs_bookmarks'),
-                component: 'bookmarks',
-                page: 1
-            });
-        },
-        surs_history: function () {
-            Lampa.Activity.push({
-                url: '',
-                title: Lampa.Lang.translate('surs_history'),
-                component: 'favorite',
-                type: 'history',
-                page: 1
-            });
-        },
-        surs_select: function () {
-            if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') {
-                window.SursSelect.showSursSelectMenu();
-            }
-        },
-        surs_new: function () {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: sourceName + ' NEW',
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',
-                component: 'main',
-                page: 1
-            });
-        },
-        surs_rus: function () {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: sourceName + ' RUS',
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',
-                component: 'main',
-                page: 1
-            });
-        },
-        surs_kids: function () {
-            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
-            Lampa.Activity.push({
-                source: sourceName + ' KIDS',
-                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',
-                component: 'main',
-                page: 1
-            });
-        }
-    };
-
-    // Добавление стилей для кастомных кнопок (аналогично жанрам)
-    function addStyles() {
-        Lampa.Template.add('custom_buttons_compact_style', `
-            <style>
-                .card--button-compact {
-                    width: 12.75em !important;
-                }
-                .card--button-compact .card__view {
-                    padding-bottom: 56% !important;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background-color: rgba(0, 0, 0, 0.2);
-                    border-radius: 1em;
-                }
-                .card--button-compact.hover .card__view,
-                .card--button-compact.focus .card__view {
-                    background-color: rgba(255, 255, 255, 0.1);
-                }
-                .card--button-compact .card__title,
-                .card--button-compact .card__age {
-                    display: none !important;
-                }
-                .card__svg-icon {
-                    position: absolute;
-                    top: 45%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 40% !important;
-                    height: 40% !important;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .card__svg-icon svg {
-                    width: 100% !important;
-                    height: 100% !important;
-                    fill: currentColor;
-                }
-                .card__svg-icon svg path,
-                .card__svg-icon svg polygon,
-                .card__svg-icon svg circle {
-                    fill: rgba(255, 255, 255, 0.8) !important;
-                }
-                .card__button-label {
-                    position: absolute;
-                    bottom: 0.4em;
-                    left: 0;
-                    right: 0;
-                    text-align: center;
-                    color: #fff;
-                    padding: 0.5em;
-                    font-size: 1.1em;
-                    font-weight: 500;
-                    z-index: 1;
-                }
-            </style>
-        `);
-        $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));
-    }
-
-
-// Глобальные функции фильтрации
-
-function filterCyrillic(items) {
-    var language = Lampa.Storage.get('language');
-    // Если язык не русский и не украинский, возвращаем все элементы без фильтрации
-    if (language !== 'ru' && language !== 'uk') {
-        return items;
-    }
-
-    // Применяем настройки для русского и украинского языка
-    var storedValue = Lampa.Storage.get('cirillic');
-    var isFilterEnabled = storedValue === '1' || storedValue === null || storedValue === undefined || storedValue === '';
-
-    if (!isFilterEnabled) {
-        return items;
-    }
-
-    function containsCyrillic(value) {
-        if (typeof value === 'string') {
-            return /[а-яА-ЯёЁїЇіІєЄґҐ]/.test(value); // Добавлены украинские символы
-        } else if (typeof value === 'object' && value !== null) {
-            var keys = Object.keys(value);
-            for (var i = 0; i < keys.length; i++) {
-                if (containsCyrillic(value[keys[i]])) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    var filteredItems = items.filter(function(item) {
-        return containsCyrillic(item);
-    });
-
-    return filteredItems;
-}
-
-// Применение всех фильтров к элементам
-function applyFilters(items) {
-    items = filterCyrillic(items);
-    return items;
-}
-
-// Добавление фильтра по минимальному количеству голосов
-function applyMinVotes(baseUrl) {
-    var minVotes = getStoredSetting('minVotes');
-    minVotes = parseInt(minVotes, 10);
-    if (isNaN(minVotes)) {
-        minVotes = 10;
-    }
-
-    if (minVotes > 0) {
-        baseUrl += '&vote_count.gte=' + minVotes;
-    }
-
-    return baseUrl;
-}
-
-// Добавление фильтра по возрастным ограничениям
-function applyAgeRestriction(baseUrl) {
-    var ageRestriction = getStoredSetting('ageRestrictions');
-
-    if (ageRestriction && String(ageRestriction).trim() !== '') {
-        var certificationMap = {
-            '0+': '0+',
-            '6+': '6+',
-            '12+': '12+',
-            '16+': '16+',
-            '18+': '18+'
-        };
-
-        if (certificationMap.hasOwnProperty(ageRestriction)) {
-            baseUrl += '&certification_country=RU&certification=' + encodeURIComponent(certificationMap[ageRestriction]);
-        }
-    }
-
-    return baseUrl;
-}
-
-// Добавление фильтра по исключению ключевых слов
-function applyWithoutKeywords(baseUrl) {
-    var filterLevel = getStoredSetting('withoutKeywords');
-    var baseExcludedKeywords = [
-        '346488',
-        '158718',
-        '41278'
-    ];
-
-    if (!filterLevel || filterLevel == '1') {
-        baseExcludedKeywords.push(
-            '13141',
-            '345822',
-            '315535',
-            '290667',
-            '323477',
-            '290609'
-        );
-    }
-
-    if (filterLevel == '2') {
-        baseExcludedKeywords.push(
-            '210024',
-            '13141',
-            '345822',
-            '315535',
-            '290667',
-            '323477',
-            '290609'
-        );
-    }
-
-    baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
-
-    return baseUrl;
-}
-
-// Построение URL с применением всех фильтров
-function buildApiUrl(baseUrl) {
-    baseUrl = applyMinVotes(baseUrl);
-    baseUrl = applyAgeRestriction(baseUrl);
-    baseUrl = applyWithoutKeywords(baseUrl);
-    return baseUrl;
-}
-
-        function adjustSortForMovies(sort) {
-            if (sort.id === 'first_air_date.desc') {
-                sort = { id: 'release_date.desc', title: 'surs_first_air_date_desc' };
-            }
-
-            if (sort.id === 'release_date.desc') {
-                var endDate = new Date();
-                endDate.setDate(endDate.getDate() - 25);
-                endDate = endDate.toISOString().split('T')[0];
-
-                var startDate = new Date();
-                startDate.setFullYear(startDate.getFullYear() - 1);
-                startDate = startDate.toISOString().split('T')[0];
-
-                sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;
-            }
-
-            return sort;
-        }
-
-        function adjustSortForTVShows(sort) {
-            if (sort.id === 'first_air_date.desc') {
-                var endDate = new Date();
-                endDate.setDate(endDate.getDate() - 10);
-                endDate = endDate.toISOString().split('T')[0];
-
-                var startDate = new Date();
-                startDate.setFullYear(startDate.getFullYear() - 1);
-                startDate = startDate.toISOString().split('T')[0];
-                sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;
-            }
-
-            return sort;
-        }
-        
-                function randomWideFlag() {
-            return Math.random() < 0.1;
-        }
-            function wrapWithWideFlag(requestFunc) {
-    // Новый способ — Lampa 3.0+
-    function wrapNew(callback) {
-        requestFunc(function (json) {
-            json = Lampa.Utils.addSource(json, 'tmdb');
-
-            if (randomWideFlag()) {
-                if (Array.isArray(json.results)) {
-                    json.results.forEach(function(c) {
-                        c.promo = c.overview || '';
-                        c.promo_title = c.title || c.name || Lampa.Lang.translate('surs_noname');
-                        c.params = {
-                            style: { name: 'wide' }
-                        };
-                    });
-                }
-
-                json.params = {
-                    items: { view: 3 }
-                };
-            }
-            callback(json);
-        });
-    }
-
-    // Старый способ — до 3.0
-    function wrapOld(callback) {
-        requestFunc(function (json) {
-            if (randomWideFlag()) {
-                json.small = true;
-                json.wide = true;
-                if (Array.isArray(json.results)) {
-                    json.results.forEach(function(card) {
-                        card.promo = card.overview || '';
-                        card.promo_title = card.title || card.name || '';
-                    });
-                }
-            }
-            callback(json);
-        });
-    }
-
-    return Lampa.Manifest.app_digital >= 300 ? wrapNew : wrapOld;
-}      
-
-	      function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
- 
-function randomWideFlag() {  
+    // Опции сортировки  
+    var allSortOptions = [  
+        { id: 'vote_count.desc', title: 'surs_vote_count_desc' },  
+        { id: 'vote_average.desc', title: 'surs_vote_average_desc' },  
+        { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' },  
+        { id: 'popularity.desc', title: 'surs_popularity_desc' },  
+        { id: 'revenue.desc', title: 'surs_revenue_desc' }  
+    ];  
+  
+    // Жанры фильмов  
+    var allGenres = [  
+        { id: 28, title: 'surs_genre_action' },  
+        { id: 35, title: 'surs_genre_comedy' },  
+        { id: 18, title: 'surs_genre_drama' },  
+        { id: 10749, title: 'surs_genre_romance' },  
+        { id: 16, title: 'surs_genre_animation' },  
+        { id: 10762, title: 'surs_genre_kids' },  
+        { id: 12, title: 'surs_genre_adventure' },  
+        { id: 80, title: 'surs_genre_crime' },  
+        { id: 9648, title: 'surs_genre_mystery' },  
+        { id: 878, title: 'surs_genre_sci_fi' },  
+        { id: 37, title: 'surs_genre_western' },  
+        { id: 53, title: 'surs_genre_thriller' },  
+        { id: 10751, title: 'surs_genre_family' },  
+        { id: 14, title: 'surs_genre_fantasy' },  
+        { id: 10764, title: 'surs_genre_reality' },  
+        { id: 10759, title: 'surs_genre_action_adventure' },  
+        { id: 10766, title: 'surs_genre_soap' },  
+        { id: 10767, title: 'surs_genre_talk_show' }  
+    ];  
+  
+    // Стриминговые сервисы  
+    var allStreamingServices = [  
+        { id: 49, title: 'HBO' },  
+        { id: 77, title: 'SyFy' },  
+        { id: 2552, title: 'Apple TV+' },  
+        { id: 453, title: 'Hulu' },  
+        { id: 1024, title: 'Amazon Prime' },  
+        { id: 213, title: 'Netflix' },  
+        { id: 3186, title: 'HBO Max' },  
+        { id: 2076, title: 'Paramount network' },  
+        { id: 4330, title: 'Paramount+' },  
+        { id: 3353, title: 'Peacock' },  
+        { id: 2739, title: 'Disney+' },  
+        { id: 2, title: 'ABC' },  
+        { id: 6, title: 'NBC' },  
+        { id: 16, title: 'CBS' },  
+        { id: 318, title: 'Starz' },  
+        { id: 174, title: 'AMC' },  
+        { id: 19, title: 'FOX' },  
+        { id: 64, title: 'Discovery' },  
+        { id: 1778, title: 'test' },  
+        { id: 493, title: 'BBC America' },  
+        { id: 88, title: 'FX' },  
+        { id: 67, title: 'Showtime' }  
+    ];  
+  
+    var allStreamingServicesRUS = [  
+        { id: 2493, title: 'Start' },  
+        { id: 2859, title: 'Premier' },  
+        { id: 4085, title: 'KION' },  
+        { id: 3923, title: 'ИВИ' },  
+        { id: 412, title: 'Россия 1' },  
+        { id: 558, title: 'Первый канал' },  
+        { id: 3871, title: 'Okko' },  
+        { id: 3827, title: 'Кинопоиск' },  
+        { id: 5806, title: 'Wink' },  
+        { id: 806, title: 'СТС' },  
+        { id: 1191, title: 'ТНТ' },  
+        { id: 1119, title: 'НТВ' },  
+        { id: 3031, title: 'Пятница' },  
+        { id: 3882, title: 'More.TV' }  
+    ];  
+  
+    // Функция получения всех настроек  
+    function getAllStoredSettings() {  
+        return Lampa.Storage.get('surs_settings') || {};  
+    }  
+  
+    // Функция получения настроек текущего пользователя  
+    function getProfileSettings() {  
+        var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';  
+        var allSettings = getAllStoredSettings();  
+  
+        if (!allSettings.hasOwnProperty(profileId)) {  
+            allSettings[profileId] = {};  
+            saveAllStoredSettings(allSettings);  
+        }  
+  
+        return allSettings[profileId];  
+    }  
+  
+    // Функция сохранения всех настроек  
+    function saveAllStoredSettings(settings) {  
+        Lampa.Storage.set('surs_settings', settings);  
+    }  
+  
+    // Функция получения конкретного сохраненного значения (по умолчанию true)  
+    function getStoredSetting(key, defaultValue) {  
+        var profileSettings = getProfileSettings();  
+        return profileSettings.hasOwnProperty(key) ? profileSettings[key] : defaultValue;  
+    }  
+  
+    // Функция сохранения отдельного значения  
+    function setStoredSetting(key, value) {  
+        var allSettings = getAllStoredSettings();  
+        var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';  
+  
+        if (!allSettings.hasOwnProperty(profileId)) {  
+            allSettings[profileId] = {};  
+        }  
+  
+        allSettings[profileId][key] = value;  
+        saveAllStoredSettings(allSettings);  
+    }  
+  
+    // Функция фильтрации включенных элементов  
+    function getEnabledItems(allItems, storageKeyPrefix) {  
+        var result = [];  
+        for (var i = 0; i < allItems.length; i++) {  
+            if (getStoredSetting(storageKeyPrefix + allItems[i].id, true)) {  
+                result.push(allItems[i]);  
+            }  
+        }  
+        return result;  
+    }  
+  
+    function getSortOptions() {  
+        return getEnabledItems(allSortOptions, 'sort_');  
+    }  
+  
+    function getGenres() {  
+        return getEnabledItems(allGenres, 'genre_');  
+    }  
+  
+    function getStreamingServices() {  
+        return getEnabledItems(allStreamingServices, 'streaming_');  
+    }  
+  
+    function getStreamingServicesRUS() {  
+        return getEnabledItems(allStreamingServicesRUS, 'streaming_rus_');  
+    }  
+  
+    if (!getStoredSetting('interface_size_initialized', false)) {  
+        Lampa.Storage.set("interface_size", "small");  
+        setStoredSetting('interface_size_initialized', true);  
+    }  
+  
+    // SVG иконки только для нестандартных кнопок  
+    var buttonIcons = {  
+        surs_select: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',  
+        surs_new: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 18 21 18 11 2 13 2"/></svg>',  
+        surs_rus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path fill="#fff" d="M3 9h18v6H3z"/><path fill="#fc0" d="M3 3h18v6H3z"/></svg>',  
+        surs_kids: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'  
+    };  
+  
+    function getAllButtons() {  
+        return [  
+            { id: 'surs_main', title: 'surs_main' },  
+            { id: 'surs_bookmarks', title: 'surs_bookmarks' },  
+            { id: 'surs_history', title: 'surs_history' },  
+            { id: 'surs_select', title: 'surs_select' },  
+            { id: 'surs_new', title: 'surs_new' },  
+            { id: 'surs_rus', title: 'surs_rus' },  
+            { id: 'surs_kids', title: 'surs_kids' }  
+        ];  
+    }  
+  
+    var buttonActions = {  
+        surs_main: function() {  
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  
+            Lampa.Activity.push({  
+                source: Lampa.Storage.get('source'),  
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName,  
+                component: 'main',  
+                page: 1  
+            });  
+        },  
+        surs_bookmarks: function() {  
+            Lampa.Activity.push({  
+                url: '',  
+                title: Lampa.Lang.translate('surs_bookmarks'),  
+                component: 'bookmarks',  
+                page: 1  
+            });  
+        },  
+        surs_history: function() {  
+            Lampa.Activity.push({  
+                url: '',  
+                title: Lampa.Lang.translate('surs_history'),  
+                component: 'favorite',  
+                type: 'history',  
+                page: 1  
+            });  
+        },  
+        surs_select: function() {  
+            if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') {  
+                window.SursSelect.showSursSelectMenu();  
+            }  
+        },  
+        surs_new: function() {  
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  
+            Lampa.Activity.push({  
+                source: sourceName + ' NEW',  
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW',  
+                component: 'main',  
+                page: 1  
+            });  
+        },  
+        surs_rus: function() {  
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  
+            Lampa.Activity.push({  
+                source: sourceName + ' RUS',  
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' RUS',  
+                component: 'main',  
+                page: 1  
+            });  
+        },  
+        surs_kids: function() {  
+            var sourceName = Lampa.Storage.get('surs_name') || 'SURS';  
+            Lampa.Activity.push({  
+                source: sourceName + ' KIDS',  
+                title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',  
+                component: 'main',  
+                page: 1  
+            });  
+        }  
+    };  
+
+    // Добавление стилей для кастомных кнопок  
+    function addStyles() {  
+        Lampa.Template.add('custom_buttons_compact_style', `  
+            <style>  
+                .card--button-compact {  
+                    width: 12.75em !important;  
+                }  
+                .card--button-compact .card__view {  
+                    padding-bottom: 56% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
+                    background-color: rgba(0, 0, 0, 0.2);  
+                    border-radius: 1em;  
+                }  
+                .card--button-compact.hover .card__view,  
+                .card--button-compact.focus .card__view {  
+                    background-color: rgba(255, 255, 255, 0.1);  
+                }  
+                .card--button-compact .card__title,  
+                .card--button-compact .card__age {  
+                    display: none !important;  
+                }  
+                .card__svg-icon {  
+                    position: absolute;  
+                    top: 45%;  
+                    left: 50%;  
+                    transform: translate(-50%, -50%);  
+                    width: 40% !important;  
+                    height: 40% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
+                }  
+                .card__svg-icon svg {  
+                    width: 100% !important;  
+                    height: 100% !important;  
+                    fill: currentColor;  
+                }  
+                .card__svg-icon svg path,  
+                .card__svg-icon svg polygon,  
+                .card__svg-icon svg circle {  
+                    fill: rgba(255, 255, 255, 0.8) !important;  
+                }  
+                .card__button-label {  
+
+
+
+
+                    position: absolute;  
+                    bottom: 0.4em;  
+                    left: 0;  
+                    right: 0;  
+                    text-align: center;  
+                    color: #fff;  
+                    padding: 0.5em;  
+                    font-size: 1.1em;  
+                    font-weight: 500;  
+                    z-index: 1;  
+                }  
+            </style>  
+        `);  
+        $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));  
+    }  
+  
+    // Глобальные функции фильтрации  
+    function filterCyrillic(items) {  
+        var language = Lampa.Storage.get('language');  
+        if (language !== 'ru' && language !== 'uk') {  
+            return items;  
+        }  
+  
+        var storedValue = Lampa.Storage.get('cirillic');  
+        var isFilterEnabled = storedValue === '1' || storedValue === null || storedValue === undefined || storedValue === '';  
+  
+        if (!isFilterEnabled) {  
+            return items;  
+        }  
+  
+        function containsCyrillic(value) {  
+            if (typeof value === 'string') {  
+                return /[а-яА-ЯёЁїЇіІєЄґҐ]/.test(value);  
+            } else if (typeof value === 'object' && value !== null) {  
+                var keys = Object.keys(value);  
+                for (var i = 0; i < keys.length; i++) {  
+                    if (containsCyrillic(value[keys[i]])) {  
+                        return true;  
+                    }  
+                }  
+            }  
+            return false;  
+        }  
+  
+        var filteredItems = items.filter(function(item) {  
+            return containsCyrillic(item);  
+        });  
+  
+        return filteredItems;  
+    }  
+  
+    function applyFilters(items) {  
+        items = filterCyrillic(items);  
+        return items;  
+    }  
+  
+    function applyMinVotes(baseUrl) {  
+        var minVotes = getStoredSetting('minVotes');  
+        minVotes = parseInt(minVotes, 10);  
+        if (isNaN(minVotes)) {  
+            minVotes = 10;  
+        }  
+  
+        if (minVotes > 0) {  
+            baseUrl += '&vote_count.gte=' + minVotes;  
+        }  
+  
+        return baseUrl;  
+    }  
+  
+    function applyAgeRestriction(baseUrl) {  
+        var ageRestriction = getStoredSetting('ageRestrictions');  
+  
+        if (ageRestriction && String(ageRestriction).trim() !== '') {  
+            var certificationMap = {  
+                '0+': '0+',  
+                '6+': '6+',  
+                '12+': '12+',  
+                '16+': '16+',  
+                '18+': '18+'  
+            };  
+  
+            if (certificationMap.hasOwnProperty(ageRestriction)) {  
+                baseUrl += '&certification_country=RU&certification=' + encodeURIComponent(certificationMap[ageRestriction]);  
+            }  
+        }  
+  
+        return baseUrl;  
+    }  
+  
+    function applyWithoutKeywords(baseUrl) {  
+        var filterLevel = getStoredSetting('withoutKeywords');  
+        var baseExcludedKeywords = [  
+            '346488',  
+            '158718',  
+            '41278'  
+        ];  
+  
+        if (!filterLevel || filterLevel == '1') {  
+            baseExcludedKeywords.push(  
+                '13141',  
+                '345822',  
+                '315535',  
+                '290667',  
+                '323477',  
+                '290609'  
+            );  
+        }  
+  
+        if (filterLevel == '2') {  
+            baseExcludedKeywords.push(  
+                '210024',  
+                '13141',  
+                '345822',  
+                '315535',  
+                '290667',  
+                '323477',  
+                '290609'  
+            );  
+        }  
+  
+        baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));  
+  
+        return baseUrl;  
+    }  
+  
+    function buildApiUrl(baseUrl) {  
+        baseUrl = applyMinVotes(baseUrl);  
+        baseUrl = applyAgeRestriction(baseUrl);  
+        baseUrl = applyWithoutKeywords(baseUrl);  
+        return baseUrl;  
+    }  
+  
+    function adjustSortForMovies(sort) {  
+        if (sort.id === 'first_air_date.desc') {  
+            sort = { id: 'release_date.desc', title: 'surs_first_air_date_desc' };  
+        }  
+  
+        if (sort.id === 'release_date.desc') {  
+            var endDate = new Date();  
+            endDate.setDate(endDate.getDate() - 25);  
+            endDate = endDate.toISOString().split('T')[0];  
+  
+            var startDate = new Date();  
+            startDate.setFullYear(startDate.getFullYear() - 1);  
+            startDate = startDate.toISOString().split('T')[0];  
+  
+            sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;  
+        }  
+  
+        return sort;  
+    }  
+  
+    function adjustSortForTVShows(sort) {  
+        if (sort.id === 'first_air_date.desc') {  
+            var endDate = new Date();  
+            endDate.setDate(endDate.getDate() - 10);  
+            endDate = endDate.toISOString().split('T')[0];  
+  
+            var startDate = new Date();  
+            startDate.setFullYear(startDate.getFullYear() - 1);  
+            startDate = startDate.toISOString().split('T')[0];  
+            sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;  
+        }  
+  
+        return sort;  
+    }  
+  
+    function randomWideFlag() {  
         return Math.random() < 0.1;  
     }  
   
@@ -887,21 +485,19 @@ function randomWideFlag() {
         }  
     }  
   
-    // Создание карточек для Lampa 3  
     function createCard(data, type) {  
         return Lampa.Maker.make(type, data, function(module) {  
             return module.only('Card', 'Callback');  
         });  
     }  
   
-    // Добавление кастомных кнопок  
     function addCustomButtonsRow(partsData) {  
         partsData.unshift(function(callback) {  
             var allButtons = getAllButtons();  
             var enabledButtons = allButtons.filter(function(b) {  
                 return getStoredSetting('custom_button_' + b.id, true);  
             }).map(function(b) {  
-                return {  
+                var cardData = {  
                     source: 'custom',  
                     title: Lampa.Lang.translate(b.title),  
                     name: Lampa.Lang.translate(b.title),  
@@ -909,19 +505,30 @@ function randomWideFlag() {
                     params: {  
                         createInstance: function() {  
                             var card = createCard(this, 'Card');  
-                            card.data.icon_svg = buttonIcons[b.id];  
+                              
+                            // Используем штатные иконки для стандартных кнопок  
+                            if (b.id === 'surs_main') {  
+                                card.data.icon = 'home';  
+                            } else if (b.id === 'surs_bookmarks') {  
+                                card.data.icon = 'bookmark';  
+                            } else if (b.id === 'surs_history') {  
+                                card.data.icon = 'history';  
+                            } else if (buttonIcons[b.id]) {  
+                                card.data.icon_svg = buttonIcons[b.id];  
+                            }  
+                              
                             return card;  
                         },  
                         emit: {  
                             onCreate: function() {  
                                 this.html.addClass('card--button-compact');  
   
-                                var iconData = buttonIcons[b.id];  
-                                if (iconData && iconData.startsWith('<svg')) {  
+                                // Для SVG иконок  
+                                if (buttonIcons[b.id] && b.id !== 'surs_main' && b.id !== 'surs_bookmarks' && b.id !== 'surs_history') {  
                                     var imgElement = this.html.find('.card__img');  
                                     var svgContainer = document.createElement('div');  
                                     svgContainer.classList.add('card__svg-icon');  
-                                    svgContainer.innerHTML = iconData;  
+                                    svgContainer.innerHTML = buttonIcons[b.id];  
                                     imgElement.replaceWith(svgContainer);  
                                 }  
   
@@ -938,6 +545,7 @@ function randomWideFlag() {
                         }  
                     }  
                 };  
+                return cardData;  
             });  
   
             callback({  
@@ -959,7 +567,6 @@ function randomWideFlag() {
         return partsData;  
     }  
   
-    // Ближайшие эпизоды для Lampa 3  
     function getUpcomingEpisodes() {  
         return function(cb) {  
             var lately = Lampa.TimeTable.lately().slice(0, 20);  
@@ -991,7 +598,6 @@ function randomWideFlag() {
         };  
     }  
   
-    // Популярные персоны для Lampa 3  
     function getPopularPersons() {  
         return function(cb) {  
             Lampa.Api.get('person/popular', {}, function(json) {  
@@ -1019,61 +625,60 @@ function randomWideFlag() {
         };  
     }  
   
-
-function startPlugin() {
-    window.plugin_surs_ready = true;
-
-var SourceTMDB = function (parent) {
-    this.network = new Lampa.Reguest();
-    this.discovery = false;
-
-    this.main = function () {
-        var owner = this;
-        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var onComplete = arguments.length > 1 ? arguments[1] : undefined;
-        var onError = arguments.length > 2 ? arguments[2] : undefined;
-        var partsLimit = 9;
-
-        var partsData = getPartsData();	 
-        var CustomData = [];
-        var trendingsData = [];
-        
-        var trendingMovies = function (callback) {
-                var baseUrl = 'trending/movie/week';
-                baseUrl = applyAgeRestriction(baseUrl);
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = json.results.filter(function (result) {
-                            var forbiddenLanguages = ['kr', 'cn', 'jp', 'ko', 'zh', 'ja'];
-                            return !forbiddenLanguages.includes(result.original_language);
-                        });
-                    }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_movies');
-                    callback(json);
-                }, callback);
-            }
-        
-        var trendingTV = function (callback) {
-                var baseUrl = 'trending/tv/week';
-                baseUrl = applyAgeRestriction(baseUrl);
-
-                owner.get(baseUrl, params, function (json) {
-                    if (json.results) {
-                        json.results = json.results.filter(function (result) {
-                            var forbiddenCountries = ['KR', 'CN', 'JP'];
-                            return !result.origin_country || !result.origin_country.some(function (country) {
-                                return forbiddenCountries.includes(country);
-                            });
-                        });
-                    }
-                    json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_series');
-                    callback(json);
-                }, callback);
-            }
-        
-        trendingsData.push(trendingMovies);
-        trendingsData.push(trendingTV);
+    function startPlugin() {  
+        window.plugin_surs_ready = true;  
+  
+        var SourceTMDB = function(parent) {  
+            this.network = new Lampa.Reguest();  
+            this.discovery = false;  
+  
+            this.main = function() {  
+                var owner = this;  
+                var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};  
+                var onComplete = arguments.length > 1 ? arguments[1] : undefined;  
+                var onError = arguments.length > 2 ? arguments[2] : undefined;  
+                var partsLimit = 9;  
+  
+                var partsData = getPartsData();  
+                var CustomData = [];  
+                var trendingsData = [];  
+                  
+                var trendingMovies = function(callback) {  
+                    var baseUrl = 'trending/movie/week';  
+                    baseUrl = applyAgeRestriction(baseUrl);  
+  
+                    owner.get(baseUrl, params, function(json) {  
+                        if (json.results) {  
+                            json.results = json.results.filter(function(result) {  
+                                var forbiddenLanguages = ['kr', 'cn', 'jp', 'ko', 'zh', 'ja'];  
+                                return !forbiddenLanguages.includes(result.original_language);  
+                            });  
+                        }  
+                        json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_movies');  
+                        callback(json);  
+                    }, callback);  
+                };  
+              
+                var trendingTV = function(callback) {  
+                    var baseUrl = 'trending/tv/week';  
+                    baseUrl = applyAgeRestriction(baseUrl);  
+  
+                    owner.get(baseUrl, params, function(json) {  
+                        if (json.results) {  
+                            json.results = json.results.filter(function(result) {  
+                                var forbiddenCountries = ['KR', 'CN', 'JP'];  
+                                return !result.origin_country || !result.origin_country.some(function(country) {  
+                                    return forbiddenCountries.includes(country);  
+                                });  
+                            });  
+                        }  
+                        json.title = Lampa.Lang.translate('surs_title_trend_week') + ' ' + Lampa.Lang.translate('surs_series');  
+                        callback(json);  
+                    }, callback);  
+                };  
+              
+                trendingsData.push(trendingMovies);  
+                trendingsData.push(trendingTV);  
         
 
         function getStreamingWithGenres(serviceName, serviceId, isRussian) {
@@ -1424,28 +1029,22 @@ function getPopularPersonsNew() {
     };
 }
 
-function getPopularPersons() {
-    return Lampa.Manifest.app_digital >= 300 ? getPopularPersonsNew() : getPopularPersonsOld();
-}
-
-
-
-        CustomData = CustomData.map(wrapWithWideFlag);
-		CustomData.push(getPopularPersons());
-        shuffleArray(CustomData);
-        CustomData.splice(4, 0, getUpcomingEpisodes());
-
-        var combinedData = partsData.concat(trendingsData).concat(CustomData);
-        
-
-        function loadPart(partLoaded, partEmpty) {
-            Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);
-        }
-
-        loadPart(onComplete, onError);
-        return loadPart;
-    };
-};
+CustomData = CustomData.map(wrapWithWideFlag);  
+                CustomData.push(getPopularPersons());  
+                shuffleArray(CustomData);  
+                CustomData.splice(4, 0, getUpcomingEpisodes());  
+  
+                var combinedData = partsData.concat(trendingsData).concat(CustomData);  
+                  
+  
+                function loadPart(partLoaded, partEmpty) {  
+                    Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);  
+                }  
+  
+                loadPart(onComplete, onError);  
+                return loadPart;  
+            };  
+        };  
 
 
 
