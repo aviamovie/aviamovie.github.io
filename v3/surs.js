@@ -631,72 +631,6 @@ function getAllButtons() {
         $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));
     }
 
-    // Добавление ряда кастомных кнопок (только новый стиль)
-    function addCustomButtonsRow(partsData) {
-        partsData.unshift(function(callback) {
-            var allButtons = getAllButtons();
-            var enabledButtons = allButtons.filter(function (b) {
-                return getStoredSetting('custom_button_' + b.id, true);
-            }).map(function(b) {
-                return {
-                    source: 'custom',
-                    title: Lampa.Lang.translate(b.title),
-                    name: Lampa.Lang.translate(b.title),
-                    id: b.id,
-                    params: {
-                        createInstance: function () {
-                            var card = Lampa.Maker.make('Card', this, function (m) {
-                                return m.only('Card', 'Callback');
-                            });
-                            card.data.icon_svg = buttonIcons[b.id];
-                            return card;
-                        },
-                        emit: {
-                            onCreate: function() {
-                                this.html.addClass('card--button-compact');
-
-                                var iconData = buttonIcons[b.id];
-                                if (iconData && iconData.startsWith('<svg')) {
-                                    var imgElement = this.html.find('.card__img');
-                                    var svgContainer = document.createElement('div');
-                                    svgContainer.classList.add('card__svg-icon');
-                                    svgContainer.innerHTML = iconData;
-                                    imgElement.replaceWith(svgContainer);
-                                }
-
-                                var buttonLabel = document.createElement('div');
-                                buttonLabel.classList.add('card__button-label');
-                                buttonLabel.innerText = Lampa.Lang.translate(b.title);
-                                this.html.find('.card__view').append(buttonLabel);
-                            },
-                            onlyEnter: function() {
-                                if (buttonActions[b.id]) {
-                                    buttonActions[b.id]();
-                                }
-                            }
-                        }
-                    }
-                };
-            });
-
-            callback({
-                results: enabledButtons,
-                title: '',
-                params: {
-                    items: {
-                        view: 20,
-                        mapping: 'line'
-                    }
-                }
-            });
-        });
-    }
-
-    function getPartsData() {
-        var partsData = [];
-        addCustomButtonsRow(partsData);
-        return partsData;
-    }
 
 // Глобальные функции фильтрации
 
@@ -914,152 +848,177 @@ function buildApiUrl(baseUrl) {
                 array[j] = temp;
             }
         }
- var Episode = function (data) {
-        var card = data.card || data;
-        var episode = data.next_episode_to_air || data.episode || {};
-        if (card.source == undefined) card.source = 'tmdb';
-        Lampa.Arrays.extend(card, {
-            title: card.name,
-            original_title: card.original_name,
-            release_date: card.first_air_date
-        });
-        card.release_year = ((card.release_date || '0000') + '').slice(0, 4);
-
-        function remove(elem) {
-            if (elem) elem.remove();
-        }
-
-        this.build = function () {
-            this.card = Lampa.Template.js('card_episode');
-            this.img_poster = this.card.querySelector('.card__img') || {};
-            this.img_episode = this.card.querySelector('.full-episode__img img') || {};
-            this.card.querySelector('.card__title').innerText = card.title;
-            this.card.querySelector('.full-episode__num').innerText = card.unwatched || '';
-            if (episode && episode.air_date) {
-                this.card.querySelector('.full-episode__name').innerText = ('Сезон ' + (episode.season_number || '?') + ' ') + (episode.name || Lampa.Lang.translate('surs_noname'));
-                this.card.querySelector('.full-episode__date').innerText = episode.air_date ? Lampa.Utils.parseTime(episode.air_date).full : '----';
-            }
-
-            if (card.release_year == '0000') {
-                remove(this.card.querySelector('.card__age'));
-            } else {
-                this.card.querySelector('.card__age').innerText = card.release_year;
-            }
-
-            this.card.addEventListener('visible', this.visible.bind(this));
-        };
-
-        this.image = function () {
-            var _this = this;
-            this.img_poster.onload = function () {};
-            this.img_poster.onerror = function () {
-                _this.img_poster.src = './img/img_broken.svg';
-            };
-            this.img_episode.onload = function () {
-                _this.card.querySelector('.full-episode__img').classList.add('full-episode__img--loaded');
-            };
-            this.img_episode.onerror = function () {
-                _this.img_episode.src = './img/img_broken.svg';
-            };
-        };
-
-        this.create = function () {
-            var _this2 = this;
-            this.build();
-            this.card.addEventListener('hover:focus', function () {
-                if (_this2.onFocus) _this2.onFocus(_this2.card, card);
-            });
-            this.card.addEventListener('hover:hover', function () {
-                if (_this2.onHover) _this2.onHover(_this2.card, card);
-            });
-            this.card.addEventListener('hover:enter', function () {
-                if (_this2.onEnter) _this2.onEnter(_this2.card, card);
-            });
-            this.image();
-        };
-
-        this.visible = function () {
-            if (card.poster_path) this.img_poster.src = Lampa.Api.img(card.poster_path);
-            else if (card.profile_path) this.img_poster.src = Lampa.Api.img(card.profile_path);
-            else if (card.poster) this.img_poster.src = card.poster;
-            else if (card.img) this.img_poster.src = card.img;
-            else this.img_poster.src = './img/img_broken.svg';
-            if (card.still_path) this.img_episode.src = Lampa.Api.img(episode.still_path, 'w300');
-            else if (card.backdrop_path) this.img_episode.src = Lampa.Api.img(card.backdrop_path, 'w300');
-            else if (episode.img) this.img_episode.src = episode.img;
-            else if (card.img) this.img_episode.src = card.img;
-            else this.img_episode.src = './img/img_broken.svg';
-            if (this.onVisible) this.onVisible(this.card, card);
-        };
-
-        this.destroy = function () {
-            this.img_poster.onerror = function () {};
-            this.img_poster.onload = function () {};
-            this.img_episode.onerror = function () {};
-            this.img_episode.onload = function () {};
-            this.img_poster.src = '';
-            this.img_episode.src = '';
-            remove(this.card);
-            this.card = null;
-            this.img_poster = null;
-            this.img_episode = null;
-        };
-
-        this.render = function (js) {
-            return js ? this.card : $(this.card);
-        };
-    };
-	
-// ближайшие эпизоды
-function getUpcomingEpisodesOld() {
-    return function (callback) {
-        callback({
-            source: 'tmdb',
-            results: Lampa.TimeTable.lately().slice(0, 20),
-            title: Lampa.Lang.translate('surs_title_upcoming_episodes'),
-            nomore: true,
-            cardClass: function (elem, params) {
-                return new Episode(elem, params);
-            }
-        });
-    };
-}
-
-function getUpcomingEpisodesNew() {  
-    return function (cb) {  
-        var lately = Lampa.TimeTable.lately().slice(0, 20);  
+ 
+function randomWideFlag() {  
+        return Math.random() < 0.1;  
+    }  
   
-        lately.forEach(function(item) {  
-            item.params = {  
-                createInstance: function(item_data) {  
-                    // ✅ Правильно: используем Lampa.Maker.make  
-                    return Lampa.Maker.make('Episode', item_data, function(module) {  
-                        return module.only('Card', 'Callback');  
-                    });  
-                },  
-                emit: {  
-                    onlyEnter: function() {  
-                        Lampa.Router.call('full', item.card);  
-                    },  
-                    onlyFocus: function() {  
-                        Lampa.Background.change(Lampa.Utils.cardImgBackgroundBlur(item.card));  
+    function wrapWithWideFlag(requestFunc) {  
+        return function(callback) {  
+            requestFunc(function(json) {  
+                json = Lampa.Utils.addSource(json, 'tmdb');  
+  
+                if (randomWideFlag()) {  
+                    if (Array.isArray(json.results)) {  
+                        json.results.forEach(function(c) {  
+                            c.promo = c.overview || '';  
+                            c.promo_title = c.title || c.name || Lampa.Lang.translate('surs_noname');  
+                            c.params = {  
+                                style: { name: 'wide' }  
+                            };  
+                        });  
+                    }  
+  
+                    json.params = {  
+                        items: { view: 3 }  
+                    };  
+                }  
+                callback(json);  
+            });  
+        };  
+    }  
+  
+    function shuffleArray(array) {  
+        for (var i = array.length - 1; i > 0; i--) {  
+            var j = Math.floor(Math.random() * (i + 1));  
+            var temp = array[i];  
+            array[i] = array[j];  
+            array[j] = temp;  
+        }  
+    }  
+  
+    // Создание карточек для Lampa 3  
+    function createCard(data, type) {  
+        return Lampa.Maker.make(type, data, function(module) {  
+            return module.only('Card', 'Callback');  
+        });  
+    }  
+  
+    // Добавление кастомных кнопок  
+    function addCustomButtonsRow(partsData) {  
+        partsData.unshift(function(callback) {  
+            var allButtons = getAllButtons();  
+            var enabledButtons = allButtons.filter(function(b) {  
+                return getStoredSetting('custom_button_' + b.id, true);  
+            }).map(function(b) {  
+                return {  
+                    source: 'custom',  
+                    title: Lampa.Lang.translate(b.title),  
+                    name: Lampa.Lang.translate(b.title),  
+                    id: b.id,  
+                    params: {  
+                        createInstance: function() {  
+                            var card = createCard(this, 'Card');  
+                            card.data.icon_svg = buttonIcons[b.id];  
+                            return card;  
+                        },  
+                        emit: {  
+                            onCreate: function() {  
+                                this.html.addClass('card--button-compact');  
+  
+                                var iconData = buttonIcons[b.id];  
+                                if (iconData && iconData.startsWith('<svg')) {  
+                                    var imgElement = this.html.find('.card__img');  
+                                    var svgContainer = document.createElement('div');  
+                                    svgContainer.classList.add('card__svg-icon');  
+                                    svgContainer.innerHTML = iconData;  
+                                    imgElement.replaceWith(svgContainer);  
+                                }  
+  
+                                var buttonLabel = document.createElement('div');  
+                                buttonLabel.classList.add('card__button-label');  
+                                buttonLabel.innerText = Lampa.Lang.translate(b.title);  
+                                this.html.find('.card__view').append(buttonLabel);  
+                            },  
+                            onlyEnter: function() {  
+                                if (buttonActions[b.id]) {  
+                                    buttonActions[b.id]();  
+                                }  
+                            }  
+                        }  
+                    }  
+                };  
+            });  
+  
+            callback({  
+                results: enabledButtons,  
+                title: '',  
+                params: {  
+                    items: {  
+                        view: 20,  
+                        mapping: 'line'  
                     }  
                 }  
-            };  
-  
-            Lampa.Arrays.extend(item, item.episode);  
+            });  
         });  
+    }  
   
-        cb({  
-            results: lately,  
-            title: Lampa.Lang.translate('surs_title_upcoming_episodes')  
-        });  
-    };  
-}
-
-function getUpcomingEpisodes() {
-    return Lampa.Manifest.app_digital >= 300 ? getUpcomingEpisodesNew() : getUpcomingEpisodesOld();
-}        
+    function getPartsData() {  
+        var partsData = [];  
+        addCustomButtonsRow(partsData);  
+        return partsData;  
+    }  
+  
+    // Ближайшие эпизоды для Lampa 3  
+    function getUpcomingEpisodes() {  
+        return function(cb) {  
+            var lately = Lampa.TimeTable.lately().slice(0, 20);  
+  
+            lately.forEach(function(item) {  
+                item.params = {  
+                    createInstance: function(item_data) {  
+                        return Lampa.Maker.make('Episode', item_data, function(module) {  
+                            return module.only('Card', 'Callback');  
+                        });  
+                    },  
+                    emit: {  
+                        onlyEnter: function() {  
+                            Lampa.Router.call('full', item.card);  
+                        },  
+                        onlyFocus: function() {  
+                            Lampa.Background.change(Lampa.Utils.cardImgBackgroundBlur(item.card));  
+                        }  
+                    }  
+                };  
+  
+                Lampa.Arrays.extend(item, item.episode);  
+            });  
+  
+            cb({  
+                results: lately,  
+                title: Lampa.Lang.translate('surs_title_upcoming_episodes')  
+            });  
+        };  
+    }  
+  
+    // Популярные персоны для Lampa 3  
+    function getPopularPersons() {  
+        return function(cb) {  
+            Lampa.Api.get('person/popular', {}, function(json) {  
+                json = Lampa.Utils.addSource(json, 'tmdb');  
+                json.title = Lampa.Lang.translate('surs_popular_persons');  
+  
+                json.results.forEach(function(person) {  
+                    person.params = {  
+                        createInstance: function(person_data) {  
+                            return createCard(person_data, 'Card');  
+                        },  
+                        emit: {  
+                            onlyFocus: function() {  
+                                Lampa.Background.change(Lampa.Utils.cardImgBackground(person));  
+                            },  
+                            onlyEnter: function() {  
+                                Lampa.Router.call('actor', person);  
+                            }  
+                        }  
+                    };  
+                });  
+  
+                cb(json);  
+            }, cb);  
+        };  
+    }  
+  
 
 function startPlugin() {
     window.plugin_surs_ready = true;
@@ -4631,7 +4590,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-
+    addStyles();
     loadSidePlugins();
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -4643,6 +4602,7 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
+            addStyles();
             loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
