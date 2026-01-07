@@ -647,7 +647,8 @@
                 var onError = arguments.length > 2 ? arguments[2] : undefined;  
                 var partsLimit = 9;  
   
-                var partsData = getPartsData();  
+                //var partsData = getPartsData();  
+                var partsData = []
                 var CustomData = [];  
                 var trendingsData = [];  
                   
