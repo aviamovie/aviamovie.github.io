@@ -237,16 +237,8 @@
             return cardData;  
         });  
           
-        return {  
-            results: enabledButtons,  
-            title: '',  
-            params: {  
-                items: {  
-                    view: 20,  
-                    mapping: 'line'  
-                }  
-            }  
-        };  
+        // ИСПРАВЛЕНО: Возвращаем данные в правильной структуре для Lampa.ContentRows.add  
+        return enabledButtons;  
     }  
       
     // Initialize the button plugin  
