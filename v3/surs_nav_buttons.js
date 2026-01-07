@@ -174,7 +174,7 @@
         });  
     }  
       
-    // Create buttons row  
+    // Create buttons row - обновлено для Lampa v3  
     function createButtonsRow() {  
         var allButtons = getAllButtons();  
         var enabledButtons = allButtons.filter(function(b) {  
@@ -237,20 +237,78 @@
             return cardData;  
         });  
           
-        // ИСПРАВЛЕНО: Возвращаем данные в правильной структуре для Lampa.ContentRows.add  
-        return enabledButtons;  
+        // Возвращаем данные в формате, ожидаемом Lampa v3  
+        return {  
+            results: enabledButtons,  
+            title: '',  
+            params: {  
+                items: {  
+                    view: 20,  
+                    mapping: 'line'  
+                }  
+            }  
+        };  
     }  
       
-    // Initialize the button plugin  
+    // Добавление настроек в вкладку "Каналы"  
+    function addSettings() {  
+        Lampa.SettingsApi.addParam({  
+            component: 'surs_buttons',  
+            param: {  
+                type: 'trigger',  
+                default: true,  
+                values: {  
+                    'surs_main': 'Главная SURS',  
+                    'surs_bookmarks': 'Закладки SURS',  
+                    'surs_history': 'История SURS',  
+                    'surs_select': 'Выбор SURS',  
+                    'surs_new': 'SURS NEW',  
+                    'surs_rus': 'SURS RUS',  
+                    'surs_kids': 'SURS KIDS'  
+                },  
+                name: 'SURS кнопки'  
+            },  
+            onChange: function(value) {  
+                var profileSettings = getProfileSettings();  
+                Object.keys(value).forEach(function(key) {  
+                    profileSettings['custom_button_' + key] = value[key];  
+                });  
+                saveAllStoredSettings(getAllStoredSettings());  
+                // Перезагружаем главный экран для применения изменений  
+                Lampa.Controller.reload('main');  
+            },  
+            onRender: function() {  
+                var profileSettings = getProfileSettings();  
+                var values = {};  
+                getAllButtons().forEach(function(btn) {  
+                    values[btn.id] = getStoredSetting('custom_button_' + btn.id, true);  
+                });  
+                return values;  
+            }  
+        });  
+    }  
+      
+    // Initialize the button plugin - обновлено для Lampa v3  
     function initButtonPlugin() {  
         addStyles();  
           
-        // Add buttons to the first row  
-        Lampa.ContentRows.add({  
-            title: '',  
-            template: 'cards',  
-            data: createButtonsRow(),  
-            position: 'first'  
+        // Добавляем настройки  
+        addSettings();  
+          
+        // Используем новый API для добавления контента в Lampa v3  
+        Lampa.Listener.follow('full', function(e) {  
+            if (e.type === 'complite') {  
+                var scroll = e.object.scroll;  
+                var cards = e.object.cards;  
+                  
+                // Добавляем кнопки в начало  
+                var buttonsData = createButtonsRow();  
+                if (buttonsData.results && buttonsData.results.length > 0) {  
+                    cards.data = buttonsData.results.concat(cards.data || []);  
+                    cards.render();  
+                    scroll.update();  
+                }  
+            }  
         });  
     }  
       
