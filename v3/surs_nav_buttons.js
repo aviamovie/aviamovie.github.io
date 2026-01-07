@@ -312,11 +312,11 @@
         });  
     }  
       
-    // Wait for Lampa to be ready  
-    if (window.Lampa) {  
-        initButtonPlugin();  
-    } else {  
-        window.addEventListener('lampa:ready', initButtonPlugin);  
-    }  
+    if (Lampa.Manifest.app_digital >= 300) {      
+        if (window.appready) initButtonPlugin();      
+        else Lampa.Listener.follow('app', function (e) {      
+            if (e.type === 'ready') initButtonPlugin();      
+        });      
+    }      
       
 })();
