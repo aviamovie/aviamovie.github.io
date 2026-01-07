@@ -153,6 +153,8 @@
           
         Lampa.ContentRows.add({  
             index: 0,  
+            name: 'surs_buttons',  // Добавлено обязательное поле name  
+            title: '',             // Добавлено обязательное поле title  
             screen: ['main'],  
             call: function(params, screen) {  
                 var buttons = getAllButtons();  
@@ -189,32 +191,44 @@
                                     this.html.addClass('card--small');  
                                     this.html.addClass('card--collection');  
                                       
+                                    // ИСПРАВЛЕНО: Получаем ID из данных карточки  
+                                    var cardId = this.card ? this.card.id : (this.params && this.params.id);  
+                                      
+                                    if (!cardId) {  
+                                        console.warn('Card ID not found');  
+                                        return;  
+                                    }  
+                                      
                                     // Заменяем изображение на SVG  
                                     var imgElement = this.html.find('.card__img');  
                                     var svgContainer = document.createElement('div');  
                                     svgContainer.classList.add('card__svg-icon');  
                                       
-                                    if (this.card.id === 'surs_main') {  
+                                    if (cardId === 'surs_main') {  
                                         svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
-                                    } else if (this.card.id === 'surs_bookmarks') {  
+                                    } else if (cardId === 'surs_bookmarks') {  
                                         svgContainer.innerHTML = '<svg><use xlink:href="#sprite-book"></use></svg>';  
-                                    } else if (this.card.id === 'surs_history') {  
+                                    } else if (cardId === 'surs_history') {  
                                         svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
-                                    } else if (buttonIcons[this.card.id]) {  
-                                        svgContainer.innerHTML = buttonIcons[this.card.id];  
+                                    } else if (buttonIcons[cardId]) {  
+                                        svgContainer.innerHTML = buttonIcons[cardId];  
                                     }  
                                       
-                                    imgElement.replaceWith(svgContainer);  
+                                    if (imgElement.length > 0) {  
+                                        imgElement.replaceWith(svgContainer);  
+                                    }  
                                       
                                     // Добавляем подпись  
                                     var buttonLabel = document.createElement('div');  
                                     buttonLabel.classList.add('card__button-label');  
-                                    buttonLabel.innerText = Lampa.Lang.translate(this.card.title);  
+                                    buttonLabel.innerText = Lampa.Lang.translate(this.card ? this.card.title : cardId);  
                                     this.html.find('.card__view').append(buttonLabel);  
                                 },  
                                 onlyEnter: function() {  
-                                    if (buttonActions[this.card.id]) {  
-                                        buttonActions[this.card.id]();  
+                                    // ИСПРАВЛЕНО: Получаем ID из данных карточки  
+                                    var cardId = this.card ? this.card.id : (this.params && this.params.id);  
+                                    if (cardId && buttonActions[cardId]) {  
+                                        buttonActions[cardId]();  
                                     }  
                                 }  
                             }  
