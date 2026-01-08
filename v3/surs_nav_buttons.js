@@ -116,6 +116,9 @@
                 .card--button-compact {  
                     width: 12.75em !important;  
                 }  
+                 .items-line {  
+                    padding-bottom: 1em !important;  
+                    }  
                 /* Mobile styles */  
                 @media screen and (max-width: 767px) {  
                     .card--button-compact {  
