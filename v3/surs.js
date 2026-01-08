@@ -1868,7 +1868,7 @@ function getStreamingWithGenres(serviceName, serviceId) {
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
             '&with_genres=' + genre.id +
-            '&sort_by=' + sort.key +
+            '&sort_by=' + sort.id +
             '&air_date.lte=' + new Date().toISOString().substr(0, 10)
         );
 
@@ -1877,7 +1877,7 @@ function getStreamingWithGenres(serviceName, serviceId) {
                 json.results = applyFilters(json.results);
             }
 
-            json.title = Lampa.Lang.translate(sort.title + ' (' + genre.title + ') на ' + serviceName);
+            json.title = Lampa.Lang.translate(sort.title) + ' (' + Lampa.Lang.translate(genre.title) + ') ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;
             callback(json);
         }, callback);
     };
@@ -1889,7 +1889,7 @@ function getStreaming(serviceName, serviceId) {
         var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
-            '&sort_by=' + sort.key +
+            '&sort_by=' + sort.id +
             '&air_date.lte=' + new Date().toISOString().substr(0, 10)
         );
 
@@ -1898,7 +1898,7 @@ function getStreaming(serviceName, serviceId) {
                 json.results = applyFilters(json.results);
             }
 
-            json.title = Lampa.Lang.translate(sort.title + ' на ' + serviceName);
+            json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;
             callback(json);
         }, callback);
     };
@@ -1920,11 +1920,11 @@ selectedStreamingServices.forEach(function (service) {
 function getMovies(genre) {
     return function (callback) {
         var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);
-        var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;
+        var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;
 
-apiUrl += '&with_original_language=ru&region=RU';
+apiUrl += '&with_original_language=ru®ion=RU';
 
-        if (sort.key === 'release_date.desc') {
+        if (sort.id === 'release_date.desc') {
             var today = new Date().toISOString().split('T')[0];
             apiUrl += '&release_date.lte=' + today;
         }
@@ -1934,8 +1934,8 @@ apiUrl += '&with_original_language=ru&region=RU';
         }
           apiUrl = buildApiUrl(apiUrl);
         owner.get(apiUrl, params, function (json) {
-            var titlePrefix = ' - российские';
-            json.title = Lampa.Lang.translate(sort.title + titlePrefix + ' (' + genre.title + ')');
+            var titlePrefix = Lampa.Lang.translate('surs_russian');
+            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';
             callback(json);
         }, callback);
     };
@@ -1951,12 +1951,12 @@ allGenres.forEach(function (genre) {
 function getTVShows(genre) {
     return function (callback) {
         var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
-        var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.key + '&with_origin_country=RU';
+        var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';
 
         apiUrl = buildApiUrl(apiUrl);
 
         owner.get(apiUrl, params, function (json) {
-            json.title = Lampa.Lang.translate(sort.title + ' - российские сериалы (' + genre.title + ')');
+            json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';
             callback(json);
         }, callback);
     };
@@ -1979,9 +1979,9 @@ function getBestContentByGenre(genre, contentType) {
         apiUrl = applyWithoutKeywords(apiUrl); 
 
         owner.get(apiUrl, params, function (json) {
-            json.title = Lampa.Lang.translate(contentType === 'movie' 
-                ? 'Топ российские фильмы (' + genre.title + ')'
-                : 'Топ российские сериалы (' + genre.title + ')');
+            json.title = (contentType === 'movie' 
+                ? Lampa.Lang.translate('surs_top_movies') + ' ' + Lampa.Lang.translate('surs_russian')
+                : Lampa.Lang.translate('surs_top_tv') + ' ' + Lampa.Lang.translate('surs_russian')) + ' (' + Lampa.Lang.translate(genre.title) + ')';
             
             callback(json);
         }, callback);
@@ -2006,8 +2006,7 @@ function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
         baseUrl = applyWithoutKeywords(baseUrl); 
 
         owner.get(baseUrl, params, function (json) {
-            json.title = Lampa.Lang.translate('Топ российские ' + (type === 'movie' ? 'фильмы' : 'сериалы') + 
-                         ' (' + genre.title + ') за ' + startYear + '-' + endYear);
+            json.title = Lampa.Lang.translate('surs_top_' + (type === 'movie' ? 'movies' : 'tv')) + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate(type === 'movie' ? 'surs_movies' : 'surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')' + Lampa.Lang.translate('surs_for_period') + startYear + '-' + endYear;
             callback(json);
         }, callback);
     };
@@ -2038,6 +2037,7 @@ shuffleArray(partsData); // Перемешиваем массив
         return loadPart;
     };
 };
+
 
 
 
