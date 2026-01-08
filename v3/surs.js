@@ -75,31 +75,41 @@
         { id: 3882, title: 'More.TV' }  
     ];  
     
-            var periods = [
-            { start: 1970, end: 1974 },
-            { start: 1975, end: 1979 },
-            { start: 1980, end: 1984 },
-            { start: 1985, end: 1989 },
-            { start: 1990, end: 1994 },
-            { start: 1995, end: 1999 },
-            { start: 2000, end: 2004 },
-            { start: 2005, end: 2009 },
-            { start: 2010, end: 2014 },
-            { start: 2015, end: 2019 },
-            { start: 2020, end: 2025 }
-        ];
+    /* 
+     * Периоды для случайного выбора 
+     */
+    var periods = [
+        { start: 1970, end: 1974 },
+        { start: 1975, end: 1979 },
+        { start: 1980, end: 1984 },
+        { start: 1985, end: 1989 },
+        { start: 1990, end: 1994 },
+        { start: 1995, end: 1999 },
+        { start: 2000, end: 2004 },
+        { start: 2005, end: 2009 },
+        { start: 2010, end: 2014 },
+        { start: 2015, end: 2019 },
+        { start: 2020, end: 2025 }
+    ];
 
-        function getRandomPeriod() {
-            var index = Math.floor(Math.random() * periods.length);
-            return periods[index];
-        }
+    /* 
+     * Получает случайный период из массива periods 
+     */
+    function getRandomPeriod() {
+        var index = Math.floor(Math.random() * periods.length);
+        return periods[index];
+    }
   
-    // Функция получения всех настроек  
+    /* 
+     * Функция получения всех настроек 
+     */
     function getAllStoredSettings() {  
         return Lampa.Storage.get('surs_settings') || {};  
     }  
   
-    // Функция получения настроек текущего пользователя  
+    /* 
+     * Функция получения настроек текущего пользователя 
+     */
     function getProfileSettings() {  
         var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';  
         var allSettings = getAllStoredSettings();  
@@ -112,18 +122,24 @@
         return allSettings[profileId];  
     }  
   
-    // Функция сохранения всех настроек  
+    /* 
+     * Функция сохранения всех настроек 
+     */
     function saveAllStoredSettings(settings) {  
         Lampa.Storage.set('surs_settings', settings);  
     }  
   
-    // Функция получения конкретного сохраненного значения (по умолчанию true)  
+    /* 
+     * Функция получения конкретного сохраненного значения (по умолчанию true) 
+     */
     function getStoredSetting(key, defaultValue) {  
         var profileSettings = getProfileSettings();  
         return profileSettings.hasOwnProperty(key) ? profileSettings[key] : defaultValue;  
     }  
   
-    // Функция сохранения отдельного значения  
+    /* 
+     * Функция сохранения отдельного значения 
+     */
     function setStoredSetting(key, value) {  
         var allSettings = getAllStoredSettings();  
         var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';  
@@ -136,7 +152,9 @@
         saveAllStoredSettings(allSettings);  
     }  
   
-    // Функция фильтрации включенных элементов  
+    /* 
+     * Функция фильтрации включенных элементов 
+     */
     function getEnabledItems(allItems, storageKeyPrefix) {  
         var result = [];  
         for (var i = 0; i < allItems.length; i++) {  
@@ -147,18 +165,30 @@
         return result;  
     }  
   
+    /* 
+     * Получает опции сортировки 
+     */
     function getSortOptions() {  
         return getEnabledItems(allSortOptions, 'sort_');  
     }  
   
+    /* 
+     * Получает жанры 
+     */
     function getGenres() {  
         return getEnabledItems(allGenres, 'genre_');  
     }  
   
+    /* 
+     * Получает стриминговые сервисы 
+     */
     function getStreamingServices() {  
         return getEnabledItems(allStreamingServices, 'streaming_');  
     }  
   
+    /* 
+     * Получает русские стриминговые сервисы 
+     */
     function getStreamingServicesRUS() {  
         return getEnabledItems(allStreamingServicesRUS, 'streaming_rus_');  
     }  
@@ -168,7 +198,9 @@
         setStoredSetting('interface_size_initialized', true);  
     }  
    
-    // Глобальные функции фильтрации  
+    /* 
+     * Глобальные функции фильтрации 
+     */
     function filterCyrillic(items) {  
         var language = Lampa.Storage.get('language');  
         if (language !== 'ru' && language !== 'uk') {  
@@ -182,6 +214,9 @@
             return items;  
         }  
   
+        /* 
+         * Проверяет наличие кириллицы в значении 
+         */
         function containsCyrillic(value) {  
             if (typeof value === 'string') {  
                 return /[а-яА-ЯёЁїЇіІєЄґҐ]/.test(value);  
@@ -203,11 +238,17 @@
         return filteredItems;  
     }  
   
+    /* 
+     * Применяет фильтры к элементам 
+     */
     function applyFilters(items) {  
         items = filterCyrillic(items);  
         return items;  
     }  
   
+    /* 
+     * Применяет минимальное количество голосов к URL 
+     */
     function applyMinVotes(baseUrl) {  
         var minVotes = getStoredSetting('minVotes');  
         minVotes = parseInt(minVotes, 10);  
@@ -222,6 +263,9 @@
         return baseUrl;  
     }  
   
+    /* 
+     * Применяет возрастные ограничения к URL 
+     */
     function applyAgeRestriction(baseUrl) {  
         var ageRestriction = getStoredSetting('ageRestrictions');  
   
@@ -242,6 +286,9 @@
         return baseUrl;  
     }  
   
+    /* 
+     * Применяет исключение ключевых слов к URL 
+     */
     function applyWithoutKeywords(baseUrl) {  
         var filterLevel = getStoredSetting('withoutKeywords');  
         var baseExcludedKeywords = [  
@@ -278,6 +325,9 @@
         return baseUrl;  
     }  
   
+    /* 
+     * Собирает полный API URL с фильтрами 
+     */
     function buildApiUrl(baseUrl) {  
         baseUrl = applyMinVotes(baseUrl);  
         baseUrl = applyAgeRestriction(baseUrl);  
@@ -285,6 +335,9 @@
         return baseUrl;  
     }  
   
+    /* 
+     * Корректирует сортировку для фильмов, добавляет фильтры по датам (не старше 8 месяцев, до 10 дней назад) 
+     */
     function adjustSortForMovies(sort) {  
         if (sort.id === 'first_air_date.desc') {  
             sort = { id: 'release_date.desc', title: 'surs_first_air_date_desc' };  
@@ -292,7 +345,7 @@
   
         if (sort.id === 'release_date.desc') {  
             var endDate = new Date();  
-            endDate.setDate(endDate.getDate() - 25);  
+            endDate.setDate(endDate.getDate() - 10);  
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
@@ -311,7 +364,7 @@
     function adjustSortForTVShows(sort) {  
         if (sort.id === 'first_air_date.desc') {  
             var endDate = new Date();  
-            endDate.setDate(endDate.getDate() - 5);  
+            endDate.setDate(endDate.getDate() - 10);  
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
@@ -323,10 +376,16 @@
         return sort;  
     }  
   
+    /* 
+     * Генерирует случайный флаг для широкого просмотра 
+     */
     function randomWideFlag() {  
         return Math.random() < 0.1;  
     }  
   
+    /* 
+     * Обертка для добавления флага широкого просмотра к запросу 
+     */
     function wrapWithWideFlag(requestFunc) {  
         return function(callback) {  
             requestFunc(function(json) {  
@@ -352,6 +411,9 @@
         };  
     }  
   
+    /* 
+     * Перемешивает массив случайным образом 
+     */
     function shuffleArray(array) {  
         for (var i = array.length - 1; i > 0; i--) {  
             var j = Math.floor(Math.random() * (i + 1));  
@@ -362,25 +424,37 @@
     }  
     
       
-      function getAllButtons() {  
-    if (typeof window.surs_getAllButtons === 'function') {  
-        return window.surs_getAllButtons();   
-    }  
-    return [];  
-}
+    /* 
+     * Получает все кнопки 
+     */
+    function getAllButtons() {  
+        if (typeof window.surs_getAllButtons === 'function') {  
+            return window.surs_getAllButtons();   
+        }  
+        return [];  
+    }
     
-        function addCustomButtonsRow(partsData) {  
-    if (window.surs_getCustomButtonsRow) {  
-        window.surs_getCustomButtonsRow(partsData);  
-    }  
-}
+    /* 
+     * Добавляет строку пользовательских кнопок 
+     */
+    function addCustomButtonsRow(partsData) {  
+        if (window.surs_getCustomButtonsRow) {  
+            window.surs_getCustomButtonsRow(partsData);  
+        }  
+    }
     
+    /* 
+     * Получает данные частей 
+     */
     function getPartsData() {  
         var partsData = [];  
         addCustomButtonsRow(partsData);  
         return partsData;  
     }  
   
+    /* 
+     * Получает предстоящие эпизоды 
+     */
     function getUpcomingEpisodes() {  
         return function(cb) {  
             var lately = Lampa.TimeTable.lately().slice(0, 20);  
@@ -411,6 +485,7 @@
             });  
         };  
     }  
+    
    
     function startPlugin() {  
         window.plugin_surs_ready = true;  
@@ -780,6 +855,7 @@
             };  
         };  
 
+
     var SourceTMDBnew = function (parent) {
         this.network = new Lampa.Reguest();
         this.discovery = false;
@@ -889,12 +965,17 @@
                     var sort = adjustSortForMovies({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });
                     var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;
 
-                    if (options.russian) {
-                        apiUrl += '&with_origin_country=RU';
-                    }
-                    
-                    if (options.ukrainian) {
-                        apiUrl += '&with_origin_country=UA';
+                    var isRussian = options.russian;
+                    var isUkrainian = options.ukrainian;
+
+                    if (isRussian) {
+                        apiUrl += '&with_origin_country=RU&region=RU';
+                        // Для российских фильмов используем primary_release_date для региональных релизов
+                        if (sort.extraParams) {
+                            sort.extraParams = sort.extraParams.replace(/release_date/g, 'primary_release_date');
+                        }
+                    } else if (isUkrainian) {
+                        apiUrl += '&with_origin_country=UA&region=UA';
                     }
 
                     if (sort.extraParams) {
@@ -905,15 +986,15 @@
 
                     owner.get(apiUrl, params, function (json) {
                         if (json.results) {
-                            if (!options.russian && !options.ukrainian) {
+                            if (!isRussian && !isUkrainian) {
                                 json.results = applyFilters(json.results);
                             }
                             if (json.results.length < 5) {
                                 callback({results: []});
                                 return;
                             }
-                            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :
-                                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
+                            var titlePrefix = isRussian ? Lampa.Lang.translate('surs_russian') :
+                                             isUkrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
                             json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';
                         }
                         callback(json);
@@ -931,17 +1012,19 @@
                     var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });
                     var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;
 
-                    if (options.russian) {
-                        apiUrl += '&with_origin_country=RU';
-                    }
-                    if (options.korean) {
-                        apiUrl += '&with_origin_country=KR';
-                    }
-                    if (options.turkish) {
-                        apiUrl += '&with_origin_country=TR';
-                    }
-                    if (options.ukrainian) {
-                        apiUrl += '&with_origin_country=UA';
+                    var isRussian = options.russian;
+                    var isKorean = options.korean;
+                    var isTurkish = options.turkish;
+                    var isUkrainian = options.ukrainian;
+
+                    if (isRussian) {
+                        apiUrl += '&with_origin_country=RU&region=RU';
+                    } else if (isKorean) {
+                        apiUrl += '&with_origin_country=KR&region=KR';
+                    } else if (isTurkish) {
+                        apiUrl += '&with_origin_country=TR&region=TR';
+                    } else if (isUkrainian) {
+                        apiUrl += '&with_origin_country=UA&region=UA';
                     }
 
                     if (sort.extraParams) {
@@ -952,17 +1035,17 @@
 
                     owner.get(apiUrl, params, function (json) {
                         if (json.results) {
-                            if (!options.russian && !options.ukrainian) {
+                            if (!isRussian && !isUkrainian) {
                                 json.results = applyFilters(json.results);
                             }
                             if (json.results.length < 5) {
                                 callback({results: []});
                                 return;
                             }
-                            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :
-                                             options.korean ? Lampa.Lang.translate('surs_korean') :
-                                             options.turkish ? Lampa.Lang.translate('surs_turkish') :
-                                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
+                            var titlePrefix = isRussian ? Lampa.Lang.translate('surs_russian') :
+                                             isKorean ? Lampa.Lang.translate('surs_korean') :
+                                             isTurkish ? Lampa.Lang.translate('surs_turkish') :
+                                             isUkrainian ? Lampa.Lang.translate('surs_ukrainian') : '';
                             json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';
                         }
                         callback(json);
@@ -976,10 +1059,12 @@
             function getRussianNewMovies() {
                 return function (callback) {
                     var sort = adjustSortForMovies({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });
-                    var apiUrl = 'discover/movie?with_origin_country=RU&sort_by=' + sort.id;
+                    var apiUrl = 'discover/movie?with_origin_country=RU&region=RU&sort_by=' + sort.id;
 
                     if (sort.extraParams) {
-                        apiUrl += sort.extraParams;
+                        // Для российских фильмов используем primary_release_date
+                        var extraParams = sort.extraParams.replace(/release_date/g, 'primary_release_date');
+                        apiUrl += extraParams;
                     }
 
                     // Специально для фильмов: мин. 15 голосов
@@ -990,7 +1075,7 @@
 
                     owner.get(apiUrl, params, function (json) {
                         if (json.results) {
-                            // Для российских не применяем фильтр кириллицы, как в getMovies
+                            // Для российских не применяем фильтр кириллицы
                             if (json.results.length < 5) {
                                 callback({results: []});
                                 return;
@@ -1008,7 +1093,7 @@
             function getRussianNewTVShows() {
                 return function (callback) {
                     var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });
-                    var apiUrl = 'discover/tv?with_origin_country=RU&sort_by=' + sort.id;
+                    var apiUrl = 'discover/tv?with_origin_country=RU&region=RU&sort_by=' + sort.id;
 
                     if (sort.extraParams) {
                         apiUrl += sort.extraParams;
@@ -1018,7 +1103,7 @@
 
                     owner.get(apiUrl, params, function (json) {
                         if (json.results) {
-                            // Для российских не применяем фильтр кириллицы, как в getTVShows
+                            // Для российских не применяем фильтр кириллицы
                             if (json.results.length < 5) {
                                 callback({results: []});
                                 return;
@@ -1034,6 +1119,7 @@
 
             var isUkrainianLanguage = Lampa.Storage.get('language') === 'uk';
 
+            // Добавляем подборки новинок российских сериалов и фильмов на позиции 2 и 3
             CustomData.push(getRussianNewTVShows());
             CustomData.push(getRussianNewMovies());
 
@@ -1077,7 +1163,9 @@
 
             var combinedData = partsData.concat(CustomData);
 
-        
+            /* 
+             * Загружает следующую часть данных 
+             */
             function loadPart(partLoaded, partEmpty) {
                 Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);
             }
@@ -1086,6 +1174,7 @@
             return loadPart;
         };
     };
+
 
 /* для детей */
 
