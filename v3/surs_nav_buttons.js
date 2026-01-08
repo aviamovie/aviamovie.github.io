@@ -17,7 +17,8 @@
             { id: 'surs_select', title: 'surs_select' },  
             { id: 'surs_new', title: 'surs_new' },  
             { id: 'surs_rus', title: 'surs_rus' },  
-            { id: 'surs_kids', title: 'surs_kids' }  
+            { id: 'surs_kids', title: 'surs_kids' },  
+            { id: 'surs_settings', title: 'title_settings' }  // Добавлена кнопка настроек  
         ];  
     }  
       
@@ -76,6 +77,14 @@
                 source: sourceName + ' KIDS',  
                 title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' KIDS',  
                 component: 'main',  
+                page: 1  
+            });  
+        },  
+        surs_settings: function() {  // Добавлено действие для кнопки настроек  
+            Lampa.Activity.push({  
+                url: '',  
+                title: Lampa.Lang.translate('title_settings'),  
+                component: 'settings',  
                 page: 1  
             });  
         }  
@@ -219,6 +228,8 @@
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-book"></use></svg>';  
                             } else if (b.id === 'surs_history') {  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-history"></use></svg>';  
+                            } else if (b.id === 'surs_settings') {  // Добавлен спрайт для настроек  
+                                card.data.icon_svg = '<svg><use xlink:href="#sprite-settings"></use></svg>';  
                             } else if (buttonIcons[b.id]) {  
                                 card.data.icon_svg = buttonIcons[b.id];  
                             }  
@@ -237,6 +248,8 @@
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-book"></use></svg>';  
                                 } else if (b.id === 'surs_history') {  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
+                                } else if (b.id === 'surs_settings') {  // Добавлен спрайт для настроек  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-settings"></use></svg>';  
                                 } else if (buttonIcons[b.id]) {  
                                     svgContainer.innerHTML = buttonIcons[b.id];  
                                 }  
