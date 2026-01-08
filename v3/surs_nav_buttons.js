@@ -80,14 +80,9 @@
                 page: 1  
             });  
         },  
-        surs_settings: function() {  // Добавлено действие для кнопки настроек  
-            Lampa.Activity.push({  
-                url: '',  
-                title: Lampa.Lang.translate('title_settings'),  
-                component: 'settings',  
-                page: 1  
-            });  
-        }  
+       surs_settings: function() {  
+                Lampa.Controller.toggle('settings');  
+            }
     };  
       
     // Функции для работы с настройками  
