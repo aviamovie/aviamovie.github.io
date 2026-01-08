@@ -118,20 +118,31 @@ function addStyles() {
             .items-line {  
                 padding-bottom: 0.5em !important;  
             }  
-            /* Mobile styles */  
+
             @media screen and (max-width: 767px) {  
-                .card--button-compact {  
-                    width: 9em !important;  
-                }  
-                /* Hide button labels on mobile */  
-                .card--button-compact .card__button-label {  
-                    display: none !important;  
-                }  
-                /* Reduce row height */  
-                .items-line {  
-                    padding-bottom: 0.1em !important;  
-                }  
-            }  
+    .card--button-compact {  
+        width: 9em !important;  
+    }  
+    /* Hide button labels on mobile */  
+    .card--button-compact .card__button-label {  
+        display: none !important;  
+    }  
+    /* Reduce row height */  
+    .items-line {  
+        padding-bottom: 0.1em !important;  
+    }  
+    /* Add these styles for proper icon centering on mobile */  
+    .card__svg-icon {  
+        position: relative !important;  
+        top: auto !important;  
+        left: auto !important;  
+        transform: none !important;  
+        width: 50% !important;  
+        height: 50% !important;  
+        margin: auto !important;  
+    }  
+}
+
             .card--button-compact .card__view {  
                 padding-bottom: 56% !important;  
                 display: flex;  
