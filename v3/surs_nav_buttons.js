@@ -1,5 +1,4 @@
-(function() {  
-    'use strict';  
+(function() { 'use strict';  
       
     // SVG иконки для кнопок  
     var buttonIcons = {  
@@ -8,7 +7,7 @@
         surs_rus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path fill="#fff" d="M3 9h18v6H3z"/><path fill="#fc0" d="M3 3h18v6H3z"/></svg>',  
         surs_kids: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'  
     };  
-      
+  
     function getAllButtons() {  
         return [  
             { id: 'surs_main', title: 'surs_main' },  
@@ -20,7 +19,7 @@
             { id: 'surs_kids', title: 'surs_kids' }  
         ];  
     }  
-      
+  
     var buttonActions = {  
         surs_main: function() {  
             Lampa.Activity.push({  
@@ -80,12 +79,12 @@
             });  
         }  
     };  
-      
+  
     // Функции для работы с настройками  
     function getAllStoredSettings() {  
         return Lampa.Storage.get('surs_settings') || {};  
     }  
-      
+  
     function getProfileSettings() {  
         var profileId = Lampa.Storage.get('lampac_profile_id', '') || 'default';  
         var allSettings = getAllStoredSettings();  
@@ -95,96 +94,109 @@
         }  
         return allSettings[profileId];  
     }  
-      
+  
     function saveAllStoredSettings(settings) {  
         Lampa.Storage.set('surs_settings', settings);  
     }  
-      
+  
     function getStoredSetting(key, defaultValue) {  
         var profileSettings = getProfileSettings();  
         return profileSettings.hasOwnProperty(key) ? profileSettings[key] : defaultValue;  
     }  
-      
-    // Добавление стилей  
-function addStyles() {  
-    Lampa.Template.add('custom_buttons_compact_style', `  
-        <style>  
-        .card--button-compact {  
-            width: 12.75em !important;  
-        }  
-          
-        /* Mobile styles - reduce button size to 10em and row width by 15% */  
-        @media screen and (max-width: 767px) {  
+  
+    // Добавление стилей с мобильными адаптациями  
+    function addStyles() {  
+        Lampa.Template.add('custom_buttons_compact_style', `  
+            <style>  
             .card--button-compact {  
-                width: 8em !important;  
+                width: 12.75em !important;  
             }  
-            .items-cards {  
-                width: 65% !important; /* Reduce row width by 15% */  
-                margin: 0 auto !important;  
+              
+            /* Mobile styles */  
+            @media screen and (max-width: 767px) {  
+                .card--button-compact {  
+                    width: 9em !important;  
+                }  
+                  
+                /* Hide button labels on mobile */  
+                .card__button-label {  
+                    display: none !important;  
+                }  
+                  
+                /* Custom row width reduction */  
+                .items-line[data-name="surs_buttons"] {  
+                    width: 85% !important;  
+                    margin: 0 auto !important;  
+                }  
+                  
+                /* Alternative targeting if above doesn't work */  
+                .items-line:first-child {  
+                    width: 85% !important;  
+                    margin: 0 auto !important;  
+                }  
             }  
-        }  
-          
-        .card--button-compact .card__view {  
-            padding-bottom: 56% !important;  
-            display: flex;  
-            align-items: center;  
-            justify-content: center;  
-            background-color: rgba(0, 0, 0, 0.2);  
-            border-radius: 1em;  
-        }  
-        .card--button-compact.hover .card__view,   
-        .card--button-compact.focus .card__view {  
-            background-color: rgba(255, 255, 255, 0.1);  
-        }  
-        .card--button-compact .card__title,   
-        .card--button-compact .card__age {  
-            display: none !important;  
-        }  
-        .card__svg-icon {  
-            position: absolute;  
-            top: 45%;  
-            left: 50%;  
-            transform: translate(-50%, -50%);  
-            width: 40% !important;  
-            height: 40% !important;  
-            display: flex;  
-            align-items: center;  
-            justify-content: center;  
-        }  
-        .card__svg-icon svg {  
-            width: 100% !important;  
-            height: 100% !important;  
-            fill: currentColor;  
-        }  
-        .card__svg-icon svg path,   
-        .card__svg-icon svg polygon,   
-        .card__svg-icon svg circle {  
-            fill: rgba(255, 255, 255, 0.8) !important;  
-        }  
-        .card__button-label {  
-            position: absolute;  
-            bottom: 0.4em;  
-            left: 0;  
-            right: 0;  
-            text-align: center;  
-            color: #fff;  
-            padding: 0.5em;  
-            font-size: 1.1em;  
-            font-weight: 500;  
-            z-index: 1;  
-        }  
-        </style>  
-    `);  
-    $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));  
-}
-      
+              
+            .card--button-compact .card__view {  
+                padding-bottom: 56% !important;  
+                display: flex;  
+                align-items: center;  
+                justify-content: center;  
+                background-color: rgba(0, 0, 0, 0.2);  
+                border-radius: 1em;  
+            }  
+            .card--button-compact.hover .card__view,   
+            .card--button-compact.focus .card__view {  
+                background-color: rgba(255, 255, 255, 0.1);  
+            }  
+            .card--button-compact .card__title,   
+            .card--button-compact .card__age {  
+                display: none !important;  
+            }  
+            .card__svg-icon {  
+                position: absolute;  
+                top: 45%;  
+                left: 50%;  
+                transform: translate(-50%, -50%);  
+                width: 40% !important;  
+                height: 40% !important;  
+                display: flex;  
+                align-items: center;  
+                justify-content: center;  
+            }  
+            .card__svg-icon svg {  
+                width: 100% !important;  
+                height: 100% !important;  
+                fill: currentColor;  
+            }  
+            .card__svg-icon svg path,   
+            .card__svg-icon svg polygon,   
+            .card__svg-icon svg circle {  
+                fill: rgba(255, 255, 255, 0.8) !important;  
+            }  
+            .card__button-label {  
+                position: absolute;  
+                bottom: 0.4em;  
+                left: 0;  
+                right: 0;  
+                text-align: center;  
+                color: #fff;  
+                padding: 0.5em;  
+                font-size: 1.1em;  
+                font-weight: 500;  
+                z-index: 1;  
+            }  
+            </style>  
+        `);  
+        $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));  
+    }  
+  
     function createCard(data, type) {  
         return Lampa.Maker.make(type, data, function(module) {  
             return module.only('Card', 'Callback');  
         });  
     }  
-      
-    // Добавление кнопок - адаптировано из рабочего примера  
+  
+    // Добавление кнопок  
     function addCustomButtonsRow(partsData) {  
         partsData.unshift(function(callback) {  
             var allButtons = getAllButtons();  
@@ -199,7 +211,6 @@ function addStyles() {
                     params: {  
                         createInstance: function() {  
                             var card = createCard(this, 'Card');  
-                              
                             // Используем спрайты для стандартных иконок  
                             if (b.id === 'surs_main') {  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-home"></use></svg>';  
@@ -210,18 +221,15 @@ function addStyles() {
                             } else if (buttonIcons[b.id]) {  
                                 card.data.icon_svg = buttonIcons[b.id];  
                             }  
-                              
                             return card;  
                         },  
                         emit: {  
                             onCreate: function() {  
                                 this.html.addClass('card--button-compact');  
-                                  
                                 // Для всех SVG иконок  
                                 var imgElement = this.html.find('.card__img');  
                                 var svgContainer = document.createElement('div');  
                                 svgContainer.classList.add('card__svg-icon');  
-                                  
                                 if (b.id === 'surs_main') {  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
                                 } else if (b.id === 'surs_bookmarks') {  
@@ -231,9 +239,7 @@ function addStyles() {
                                 } else if (buttonIcons[b.id]) {  
                                     svgContainer.innerHTML = buttonIcons[b.id];  
                                 }  
-                                  
                                 imgElement.replaceWith(svgContainer);  
-                                  
                                 var buttonLabel = document.createElement('div');  
                                 buttonLabel.classList.add('card__button-label');  
                                 buttonLabel.innerText = Lampa.Lang.translate(b.title);  
@@ -249,7 +255,6 @@ function addStyles() {
                 };  
                 return cardData;  
             });  
-              
             callback({  
                 results: enabledButtons,  
                 title: '',  
@@ -262,10 +267,9 @@ function addStyles() {
             });  
         });  
     }  
-      
+  
     function startPlugin() {  
         window.plugin_custom_buttons_ready = true;  
-          
         addStyles();  
           
         // Экспортируем функцию для использования в других плагинах  
@@ -282,7 +286,6 @@ function addStyles() {
             call: function(params, screen) {  
                 var partsData = [];  
                 addCustomButtonsRow(partsData);  
-                  
                 return function(callback) {  
                     if (partsData.length > 0) {  
                         partsData[0](callback);  
@@ -291,7 +294,7 @@ function addStyles() {
             }  
         });  
     }  
-      
+  
     // Проверяем версию Lampa и инициализируем плагин  
     if (Lampa.Manifest.app_digital >= 300) {  
         if (window.appready) {  
