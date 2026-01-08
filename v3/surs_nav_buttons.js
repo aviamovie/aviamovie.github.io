@@ -134,11 +134,11 @@
                     }  
                     .card__svg-icon {  
                         position: absolute;  
-                        top: 50%;  
+                        top: 55%;  
                         left: 50%;  
                         transform: translate(-50%, -50%);  
-                        width: 70% !important;  
-                        height: 70% !important;  
+                        width: 75% !important;  
+                        height: 75% !important;  
                         display: flex;  
                         align-items: center;  
                         justify-content: center;  
