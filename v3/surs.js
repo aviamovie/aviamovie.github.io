@@ -3980,7 +3980,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    loadSidePlugins();
+    //loadSidePlugins();
 
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -3992,7 +3992,7 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-            loadSidePlugins();
+            //loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
