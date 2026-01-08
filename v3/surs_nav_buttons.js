@@ -134,8 +134,8 @@ function addStyles() {
     /* Add these styles for proper icon centering on mobile */  
     .card__svg-icon {  
         position: relative !important;  
-        top: auto !important;  
-        left: auto !important;  
+        top: 50%;  
+        left: 50%;  
         transform: none !important;  
         width: 50% !important;  
         height: 50% !important;  
