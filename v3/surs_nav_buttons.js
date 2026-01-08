@@ -165,10 +165,10 @@ function addStyles() {
             /* Mobile styles - half size buttons */  
             @media screen and (max-width: 580px) {  
                 .card--button-compact {  
-                    width: 8em !important;  
+                    width: 8.6em !important;  
                 }  
                 .card--button-compact .card__view {  
-                    padding-bottom: 35% !important;  
+                    padding-bottom: 10% !important;  
                     border-radius: 0.7em;  
                 }  
                 .card__svg-icon {  
