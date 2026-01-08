@@ -137,8 +137,8 @@
                         top: 50%;  
                         left: 50%;  
                         transform: translate(-50%, -50%);  
-                        width: 55% !important;  
-                        height: 55% !important;  
+                        width: 70% !important;  
+                        height: 70% !important;  
                         display: flex;  
                         align-items: center;  
                         justify-content: center;  
