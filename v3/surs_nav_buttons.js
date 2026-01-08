@@ -176,14 +176,16 @@
                     height: 100% !important;  
                     fill: currentColor;  
                 }  
+                /*
                 .card__svg-icon svg path,  
                 .card__svg-icon svg polygon,  
                 .card__svg-icon svg circle {  
                     fill: rgba(255, 255, 255, 0.8) !important;  
                 }  
+                */
                 .card__button-label {  
                     position: absolute;  
-                    bottom: 0.3em;  
+                    bottom: 0.4em;  
                     left: 0;  
                     right: 0;  
                     text-align: center;  
