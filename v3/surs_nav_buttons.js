@@ -183,14 +183,14 @@
                 }  
                 .card__button-label {  
                     position: absolute;  
-                    bottom: 0.4em;  
+                    bottom: 0.3em;  
                     left: 0;  
                     right: 0;  
                     text-align: center;  
                     color: #fff;  
                     padding: 0.5em;  
-                    font-size: 1.1em;  
-                    font-weight: 500;  
+                    font-size: 1.0em;  
+                    font-weight: 400;  
                     z-index: 1;  
                 }  
             </style>  
