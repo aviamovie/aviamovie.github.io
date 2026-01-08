@@ -106,65 +106,95 @@
     }  
       
     // Добавление стилей  
-    function addStyles() {  
-        Lampa.Template.add('custom_buttons_compact_style', `  
-            <style>  
+function addStyles() {  
+    Lampa.Template.add('custom_buttons_compact_style', `  
+        <style>  
+            .card--button-compact {  
+                width: 12.75em !important;  
+            }  
+            .card--button-compact .card__view {  
+                padding-bottom: 56% !important;  
+                display: flex;  
+                align-items: center;  
+                justify-content: center;  
+                background-color: rgba(0, 0, 0, 0.2);  
+                border-radius: 1em;  
+            }  
+            .card--button-compact.hover .card__view,  
+            .card--button-compact.focus .card__view {  
+                background-color: rgba(255, 255, 255, 0.1);  
+            }  
+            .card--button-compact .card__title,  
+            .card--button-compact .card__age {  
+                display: none !important;  
+            }  
+            .card__svg-icon {  
+                position: absolute;  
+                top: 45%;  
+                left: 50%;  
+                transform: translate(-50%, -50%);  
+                width: 40% !important;  
+                height: 40% !important;  
+                display: flex;  
+                align-items: center;  
+                justify-content: center;  
+            }  
+            .card__svg-icon svg {  
+                width: 100% !important;  
+                height: 100% !important;  
+                fill: currentColor;  
+            }  
+            .card__svg-icon svg path,  
+            .card__svg-icon svg polygon,  
+            .card__svg-icon svg circle {  
+                fill: rgba(255, 255, 255, 0.8) !important;  
+            }  
+            .card__button-label {  
+                position: absolute;  
+                bottom: 0.4em;  
+                left: 0;  
+                right: 0;  
+                text-align: center;  
+                color: #fff;  
+                padding: 0.5em;  
+                font-size: 1.1em;  
+                font-weight: 500;  
+                z-index: 1;  
+            }  
+              
+            /* Mobile styles - half size buttons */  
+            @media screen and (max-width: 580px) {  
                 .card--button-compact {  
-                    width: 12.75em !important;  
+                    width: 6.375em !important;  
                 }  
                 .card--button-compact .card__view {  
                     padding-bottom: 56% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                    background-color: rgba(0, 0, 0, 0.2);  
-                    border-radius: 1em;  
-                }  
-                .card--button-compact.hover .card__view,  
-                .card--button-compact.focus .card__view {  
-                    background-color: rgba(255, 255, 255, 0.1);  
-                }  
-                .card--button-compact .card__title,  
-                .card--button-compact .card__age {  
-                    display: none !important;  
+                    border-radius: 0.5em;  
                 }  
                 .card__svg-icon {  
-                    position: absolute;  
-                    top: 45%;  
-                    left: 50%;  
-                    transform: translate(-50%, -50%);  
                     width: 40% !important;  
                     height: 40% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                }  
-                .card__svg-icon svg {  
-                    width: 100% !important;  
-                    height: 100% !important;  
-                    fill: currentColor;  
-                }  
-                .card__svg-icon svg path,  
-                .card__svg-icon svg polygon,  
-                .card__svg-icon svg circle {  
-                    fill: rgba(255, 255, 255, 0.8) !important;  
                 }  
                 .card__button-label {  
-                    position: absolute;  
-                    bottom: 0.4em;  
-                    left: 0;  
-                    right: 0;  
-                    text-align: center;  
-                    color: #fff;  
-                    padding: 0.5em;  
-                    font-size: 1.1em;  
-                    font-weight: 500;  
-                    z-index: 1;  
+                    font-size: 0.8em;  
+                    bottom: 0.2em;  
+                    padding: 0.3em;  
                 }  
-            </style>  
-        `);  
-        $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));  
-    }  
+            }  
+              
+            /* Even smaller for very small phones */  
+            @media screen and (max-width: 400px) {  
+                .card--button-compact {  
+                    width: 5.5em !important;  
+                }  
+                .card__button-label {  
+                    font-size: 0.7em;  
+                }  
+            }  
+        </style>  
+    `);  
+    $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));  
+}
       
     function createCard(data, type) {  
         return Lampa.Maker.make(type, data, function(module) {  
