@@ -134,11 +134,11 @@ function addStyles() {
     /* Add these styles for proper icon centering on mobile */  
     .card__svg-icon {  
         position: absolute;   !important;  
-        top: 50%;  !important;  
+        top: 60%;  !important;  
         left: 50%;  !important;  
         transform: translate(-50%, -50%);   !important;  
-        width: 50%; !important;  
-        height: 50%; !important;  
+        width: 60%; !important;  
+        height: 60%; !important;  
         align-items: center; !important;  
     }  
 }
