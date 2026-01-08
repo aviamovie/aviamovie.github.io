@@ -168,7 +168,7 @@ function addStyles() {
                     width: 8.6em !important;  
                 }  
                 .card--button-compact .card__view {  
-                    padding-bottom: 10% !important;  
+                    //padding-bottom: 10% !important;  
                     border-radius: 0.7em;  
                 }  
                 .card__svg-icon {  
