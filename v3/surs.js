@@ -3958,23 +3958,6 @@ surs_history: {
 }
 });
 
-function loadSidePlugins() {
-    
-    setTimeout(function () {
-        if (!window.SursSelect || !window.SursSelect.__initialized) {
-            Lampa.Utils.putScriptAsync(
-                'https://aviamovie.github.io/surs_select.js',
-                function () {
-                    console.log('SURS select успешно загружен.');
-                }
-            );
-        } else {
-            console.log('SursSelect уже загружен.');
-        }
-    }, 2000);
-}
-
-
 
 if (window.appready) {
     add();
