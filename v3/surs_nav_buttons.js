@@ -1,4 +1,4 @@
-function() { 'use strict';  
+function() { 'use strict';   
     // SVG иконки для кнопок  
     var buttonIcons = {  
         surs_select: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',  
@@ -11,13 +11,13 @@ function() { 'use strict';
         return [  
             { id: 'surs_main', title: 'title_main' },  
             { id: 'surs_bookmarks', title: 'settings_input_links' },  
-            { id: 'surs_history', title: 'menu_history' },  
+            { id: 'surs_history', title: 'title_history' },  
             { id: 'surs_select', title: 'surs_select' },  
             { id: 'surs_new', title: 'surs_new' },  
             { id: 'surs_rus', title: 'surs_rus' },  
             { id: 'surs_kids', title: 'surs_kids' },  
-            { id: 'surs_bookmarks_settings', title: 'title_settings' },  
-            { id: 'surs_history_settings', title: 'title_settings' },  
+            { id: 'surs_bookmarks_settings', title: 'title_bookmarks' },  
+            { id: 'surs_history_settings', title: 'title_history' },  
             { id: 'surs_settings', title: 'title_settings' }  
         ];  
     }  
@@ -42,7 +42,7 @@ function() { 'use strict';
         surs_history: function() {  
             Lampa.Activity.push({  
                 url: '',  
-                title: Lampa.Lang.translate('menu_history'),  
+                title: Lampa.Lang.translate('title_history'),  
                 component: 'favorite',  
                 type: 'history',  
                 page: 1  
@@ -83,16 +83,17 @@ function() { 'use strict';
         surs_bookmarks_settings: function() {  
             Lampa.Activity.push({  
                 url: '',  
-                title: Lampa.Lang.translate('title_settings') + ' - ' + Lampa.Lang.translate('settings_input_links'),  
-                component: 'settings',  
+                title: Lampa.Lang.translate('title_bookmarks'),  
+                component: 'bookmarks',  
                 page: 1  
             });  
         },  
         surs_history_settings: function() {  
             Lampa.Activity.push({  
                 url: '',  
-                title: Lampa.Lang.translate('title_settings') + ' - ' + Lampa.Lang.translate('menu_history'),  
-                component: 'settings',  
+                title: Lampa.Lang.translate('fav_clear_title'),  
+                component: 'favorite',  
+                type: 'history',  
                 page: 1  
             });  
         },  
@@ -237,7 +238,6 @@ function() { 'use strict';
                             if (b.id === 'surs_main') {  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-home"></use></svg>';  
                             } else if (b.id === 'surs_bookmarks') {  
-                                // Заменяем на иконку из бокового меню  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-favorite"></use></svg>';  
                             } else if (b.id === 'surs_history') {  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-history"></use></svg>';  
@@ -258,7 +258,6 @@ function() { 'use strict';
                                 if (b.id === 'surs_main') {  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
                                 } else if (b.id === 'surs_bookmarks') {  
-                                    // Заменяем на иконку из бокового меню  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-favorite"></use></svg>';  
                                 } else if (b.id === 'surs_history') {  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
