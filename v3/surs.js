@@ -358,11 +358,13 @@
         }  
     }  
     
-    function getAllButtons() {
-      if (window.surs_getAllButtons) {  
-        window.surs_getAllButtons();  
-    }        
-      }
+      
+      function getAllButtons() {  
+    if (typeof window.surs_getAllButtons === 'function') {  
+        return window.surs_getAllButtons();   
+    }  
+    return [];  
+}
     
         function addCustomButtonsRow(partsData) {  
     if (window.surs_getCustomButtonsRow) {  
