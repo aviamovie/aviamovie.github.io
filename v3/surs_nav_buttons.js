@@ -125,7 +125,7 @@
                   
                 /* Reduce row height */  
                 .items-line {  
-                      padding-bottom: 1.5em !important;  
+                      padding-bottom: 2.5em !important;  
             }  
             }  
               
