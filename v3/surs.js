@@ -359,8 +359,8 @@
     }  
     
     function getAllButtons() {
-      if (window.surs_allButton) {  
-        window.surs_allButton();  
+      if (window.surs_getAllButtons) {  
+        window.surs_getAllButtons();  
     }        
       }
     
