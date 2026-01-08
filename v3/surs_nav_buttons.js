@@ -136,10 +136,10 @@ function addStyles() {
         position: absolute;   !important;  
         top: 50%;  !important;  
         left: 50%;  !important;  
-        transform: none !important;  
+        transform: translate(-50%, -50%);   !important;  
         width: 50% !important;  
         height: 50% !important;  
-        margin: auto !important;  
+        align-items: center;   !important;  
     }  
 }
 
