@@ -359,8 +359,8 @@
     }  
     
         function addCustomButtonsRow(partsData) {  
-    if (window.getCustomButtonsRow) {  
-        window.getCustomButtonsRow(partsData);  
+    if (window.surs_getCustomButtonsRow) {  
+        window.surs_getCustomButtonsRow(partsData);  
     }  
 }
     
