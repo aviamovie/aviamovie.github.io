@@ -3962,7 +3962,9 @@ function loadSidePlugins() {
     setTimeout(function () {
         if (!window.SursSelect || !window.SursSelect.__initialized) {
             Lampa.Utils.putScriptAsync(
-                ['https://aviamovie.github.io/surs_select.js'],
+                ['https://aviamovie.github.io/surs_select.js',
+                  'https://aviamovie.github.io/v3/surs_nav_buttons.js'
+                ],
                 function () {
                     console.log('SursSelect плагин успешно загружен.');
                 }
@@ -3981,7 +3983,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    loadSidePlugins();
+
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
            addSettingMenu();
@@ -3992,7 +3994,6 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-            loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
@@ -4003,6 +4004,8 @@ if (window.appready) {
 }
 
 if (!window.plugin_surs_ready) startPlugin();
+
+loadSidePlugins();
 
 })( );
 
