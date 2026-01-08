@@ -1747,7 +1747,7 @@ function buildApiUrl(baseUrl) {
 function getStreamingWithGenres(serviceName, serviceId) {
     return function (callback) {
         var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
-        var genre = genres[Math.floor(Math.random() * genres.length)];
+        var genre = allGenres[Math.floor(Math.random() * genres.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
             '&with_genres=' + genre.id +
@@ -1824,7 +1824,7 @@ apiUrl += '&with_original_language=ru&region=RU';
     };
 }
 
-genres.forEach(function (genre) {
+allGenres.forEach(function (genre) {
     partsData.push(getMovies(genre));
 });
 
@@ -1845,7 +1845,7 @@ function getTVShows(genre) {
     };
 }
 
-genres.forEach(function (genre) {
+allGenres.forEach(function (genre) {
     partsData.push(getTVShows(genre));
 });
 
@@ -1871,7 +1871,7 @@ function getBestContentByGenre(genre, contentType) {
     };
 }
 
-genres.forEach(function (genre) {
+allGenres.forEach(function (genre) {
     partsData.push(getBestContentByGenre(genre, 'movie'));
     partsData.push(getBestContentByGenre(genre, 'tv'));
 });
@@ -1897,7 +1897,7 @@ function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
 }
 
 
-genres.forEach(function (genre) {
+allGenres.forEach(function (genre) {
     var period = getRandomPeriod();
     partsData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));  
     partsData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));  
