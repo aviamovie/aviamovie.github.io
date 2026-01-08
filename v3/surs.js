@@ -3968,7 +3968,7 @@ function loadSidePlugins() {
     setTimeout(function () {
         if (!window.SursSelect || !window.SursSelect.__initialized) {
             Lampa.Utils.putScriptAsync(
-                ['https://aviamovie.github.io/surs_select.js',]               ],
+                ['https://aviamovie.github.io/surs_select.js',]
                 function () {
                     console.log('SURS select  успешно загружен.');
                 }
