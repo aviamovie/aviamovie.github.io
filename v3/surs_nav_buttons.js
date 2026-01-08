@@ -256,6 +256,11 @@
           
         addStyles();  
           
+        // Экспортируем функцию для использования в других плагинах  
+        window.getCustomButtonsRow = function(partsData) {  
+            addCustomButtonsRow(partsData);  
+        };  
+          
         // Используем подход из рабочего примера  
         Lampa.ContentRows.add({  
             index: 0,  
