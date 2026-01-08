@@ -165,15 +165,15 @@ function addStyles() {
             /* Mobile styles - half size buttons */  
             @media screen and (max-width: 580px) {  
                 .card--button-compact {  
-                    width: 6.375em !important;  
+                    width: 8em !important;  
                 }  
                 .card--button-compact .card__view {  
                     padding-bottom: 56% !important;  
-                    border-radius: 0.5em;  
+                    border-radius: 0.7em;  
                 }  
                 .card__svg-icon {  
-                    width: 40% !important;  
-                    height: 40% !important;  
+                    width: 45% !important;  
+                    height: 45% !important;  
                 }  
                 .card__button-label {  
                     font-size: 0.8em;  
@@ -185,7 +185,7 @@ function addStyles() {
             /* Even smaller for very small phones */  
             @media screen and (max-width: 400px) {  
                 .card--button-compact {  
-                    width: 5.5em !important;  
+                    width: 7em !important;  
                 }  
                 .card__button-label {  
                     font-size: 0.7em;  
