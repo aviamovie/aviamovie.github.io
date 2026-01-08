@@ -277,7 +277,8 @@ function addStyles() {
         window.plugin_custom_buttons_ready = true;  
         addStyles();  
         // Экспортируем функцию для использования в других плагинах  
-        window.getCustomButtonsRow = function(partsData) {  
+        window.surs_getAllButtons = getAllButtons; 
+        window.surs_getCustomButtonsRow = function(partsData) {  
             addCustomButtonsRow(partsData);  
         };  
         // Используем подход из рабочего примера  
