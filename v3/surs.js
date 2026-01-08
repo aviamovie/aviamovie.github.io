@@ -1209,7 +1209,7 @@ function getStreaming(serviceName, serviceId) {
     };
 }
 
-var selectedStreamingServices = streamingServices.concat(streamingServicesRUS);
+var selectedStreamingServices = streamingServices.concat(allStreamingServicesRUS);
 
 selectedStreamingServices.forEach(function (service) {
     partsData.push(getStreamingWithGenres(service.title, service.id));
@@ -1788,7 +1788,7 @@ function getStreaming(serviceName, serviceId) {
 }
 
 // Используем только стриминговые сервисы RUS
-var selectedStreamingServices = streamingServicesRUS;
+var selectedStreamingServices = allStreamingServicesRUS;
 
 selectedStreamingServices.forEach(function (service) {
     partsData.push(getStreamingWithGenres(service.title, service.id));
