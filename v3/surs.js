@@ -3958,20 +3958,20 @@ surs_history: {
 }
 });
 
-/*
 function loadSidePlugins() {
-  Lampa.Utils.putScriptAsync(
-    'https://aviamovie.github.io/v3/surs_nav_buttons.js',
-    function () {
-        console.log('SURS nav buttons загружены.');
-    }
-);
+    Lampa.Utils.putScriptAsync(
+        'https://aviamovie.github.io/v3/surs_nav_buttons.js',
+        function () {
+            console.log('SURS nav buttons загружены.');
+        }
+    );
+    
     setTimeout(function () {
         if (!window.SursSelect || !window.SursSelect.__initialized) {
             Lampa.Utils.putScriptAsync(
-                ['https://aviamovie.github.io/surs_select.js',]
+                'https://aviamovie.github.io/surs_select.js',
                 function () {
-                    console.log('SURS select  успешно загружен.');
+                    console.log('SURS select успешно загружен.');
                 }
             );
         } else {
@@ -3981,14 +3981,12 @@ function loadSidePlugins() {
 }
 
 
-*/
-
 
 if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    //loadSidePlugins();
+    loadSidePlugins();
 
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -4000,7 +3998,7 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-            //loadSidePlugins();
+            loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
