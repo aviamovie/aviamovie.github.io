@@ -1,5 +1,4 @@
-(function() { 'use strict';  
-      
+function() { 'use strict';  
     // SVG иконки для кнопок  
     var buttonIcons = {  
         surs_select: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',  
@@ -10,13 +9,16 @@
   
     function getAllButtons() {  
         return [  
-            { id: 'surs_main', title: 'surs_main' },  
-            { id: 'surs_bookmarks', title: 'surs_bookmarks' },  
-            { id: 'surs_history', title: 'surs_history' },  
+            { id: 'surs_main', title: 'title_main' },  
+            { id: 'surs_bookmarks', title: 'settings_input_links' },  
+            { id: 'surs_history', title: 'menu_history' },  
             { id: 'surs_select', title: 'surs_select' },  
             { id: 'surs_new', title: 'surs_new' },  
             { id: 'surs_rus', title: 'surs_rus' },  
-            { id: 'surs_kids', title: 'surs_kids' }  
+            { id: 'surs_kids', title: 'surs_kids' },  
+            { id: 'surs_bookmarks_settings', title: 'title_settings' },  
+            { id: 'surs_history_settings', title: 'title_settings' },  
+            { id: 'surs_settings', title: 'title_settings' }  
         ];  
     }  
   
@@ -32,7 +34,7 @@
         surs_bookmarks: function() {  
             Lampa.Activity.push({  
                 url: '',  
-                title: Lampa.Lang.translate('surs_bookmarks'),  
+                title: Lampa.Lang.translate('settings_input_links'),  
                 component: 'bookmarks',  
                 page: 1  
             });  
@@ -40,7 +42,7 @@
         surs_history: function() {  
             Lampa.Activity.push({  
                 url: '',  
-                title: Lampa.Lang.translate('surs_history'),  
+                title: Lampa.Lang.translate('menu_history'),  
                 component: 'favorite',  
                 type: 'history',  
                 page: 1  
@@ -77,6 +79,30 @@
                 component: 'main',  
                 page: 1  
             });  
+        },  
+        surs_bookmarks_settings: function() {  
+            Lampa.Activity.push({  
+                url: '',  
+                title: Lampa.Lang.translate('title_settings') + ' - ' + Lampa.Lang.translate('settings_input_links'),  
+                component: 'settings',  
+                page: 1  
+            });  
+        },  
+        surs_history_settings: function() {  
+            Lampa.Activity.push({  
+                url: '',  
+                title: Lampa.Lang.translate('title_settings') + ' - ' + Lampa.Lang.translate('menu_history'),  
+                component: 'settings',  
+                page: 1  
+            });  
+        },  
+        surs_settings: function() {  
+            Lampa.Activity.push({  
+                url: '',  
+                title: Lampa.Lang.translate('title_settings'),  
+                component: 'settings',  
+                page: 1  
+            });  
         }  
     };  
   
@@ -108,87 +134,79 @@
     function addStyles() {  
         Lampa.Template.add('custom_buttons_compact_style', `  
             <style>  
-            .card--button-compact {  
-                width: 12.75em !important;  
-            }  
-              
-            /* Mobile styles */  
-            @media screen and (max-width: 767px) {  
                 .card--button-compact {  
-                    width: 9em !important;  
+                    width: 12.75em !important;  
                 }  
-                  
-                /* Hide button labels on mobile */  
-                .card__button-label {  
+                /* Mobile styles */  
+                @media screen and (max-width: 767px) {  
+                    .card--button-compact {  
+                        width: 9em !important;  
+                    }  
+                    /* Hide button labels on mobile */  
+                    .card__button-label {  
+                        display: none !important;  
+                    }  
+                    /* Reduce row height */  
+                    .items-line {  
+                        padding-bottom: 0.1em !important;  
+                    }  
+                    .card__svg-icon {  
+                        position: absolute;  
+                        top: 50%;  
+                        left: 50%;  
+                        transform: translate(-50%, -50%);  
+                        width: 55% !important;  
+                        height: 55% !important;  
+                        display: flex;  
+                        align-items: center;  
+                        justify-content: center;  
+                    }  
+                }  
+                .card--button-compact .card__view {  
+                    padding-bottom: 56% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
+                    background-color: rgba(0, 0, 0, 0.2);  
+                    border-radius: 1em;  
+                }  
+                .card--button-compact.hover .card__view, .card--button-compact.focus .card__view {  
+                    background-color: rgba(255, 255, 255, 0.1);  
+                }  
+                .card--button-compact .card__title, .card--button-compact .card__age {  
                     display: none !important;  
                 }  
-                  
-                /* Reduce row height */  
-                .items-line {  
-                      padding-bottom: 0.1em !important;  
+                .card__svg-icon {  
+                    position: absolute;  
+                    top: 45%;  
+                    left: 50%;  
+                    transform: translate(-50%, -50%);  
+                    width: 40% !important;  
+                    height: 40% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
                 }  
-                            .card__svg-icon {  
-                position: absolute;  
-                top: 50%;  
-                left: 50%;  
-                transform: translate(-50%, -50%);  
-                width: 55% !important;  
-                height: 55% !important;  
-                display: flex;  
-                align-items: center;  
-                justify-content: center;  
-            }  
-            }  
-              
-            .card--button-compact .card__view {  
-                padding-bottom: 56% !important;  
-                display: flex;  
-                align-items: center;  
-                justify-content: center;  
-                background-color: rgba(0, 0, 0, 0.2);  
-                border-radius: 1em;  
-            }  
-            .card--button-compact.hover .card__view,   
-            .card--button-compact.focus .card__view {  
-                background-color: rgba(255, 255, 255, 0.1);  
-            }  
-            .card--button-compact .card__title,   
-            .card--button-compact .card__age {  
-                display: none !important;  
-            }  
-            .card__svg-icon {  
-                position: absolute;  
-                top: 45%;  
-                left: 50%;  
-                transform: translate(-50%, -50%);  
-                width: 40% !important;  
-                height: 40% !important;  
-                display: flex;  
-                align-items: center;  
-                justify-content: center;  
-            }  
-            .card__svg-icon svg {  
-                width: 100% !important;  
-                height: 100% !important;  
-                fill: currentColor;  
-            }  
-            .card__svg-icon svg path,   
-            .card__svg-icon svg polygon,   
-            .card__svg-icon svg circle {  
-                fill: rgba(255, 255, 255, 0.8) !important;  
-            }  
-            .card__button-label {  
-                position: absolute;  
-                bottom: 0.4em;  
-                left: 0;  
-                right: 0;  
-                text-align: center;  
-                color: #fff;  
-                padding: 0.5em;  
-                font-size: 1.1em;  
-                font-weight: 500;  
-                z-index: 1;  
-            }  
+                .card__svg-icon svg {  
+                    width: 100% !important;  
+                    height: 100% !important;  
+                    fill: currentColor;  
+                }  
+                .card__svg-icon svg path, .card__svg-icon svg polygon, .card__svg-icon svg circle {  
+                    fill: rgba(255, 255, 255, 0.8) !important;  
+                }  
+                .card__button-label {  
+                    position: absolute;  
+                    bottom: 0.4em;  
+                    left: 0;  
+                    right: 0;  
+                    text-align: center;  
+                    color: #fff;  
+                    padding: 0.5em;  
+                    font-size: 1.1em;  
+                    font-weight: 500;  
+                    z-index: 1;  
+                }  
             </style>  
         `);  
         $('body').append(Lampa.Template.get('custom_buttons_compact_style', {}, true));  
@@ -219,9 +237,12 @@
                             if (b.id === 'surs_main') {  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-home"></use></svg>';  
                             } else if (b.id === 'surs_bookmarks') {  
-                                card.data.icon_svg = '<svg><use xlink:href="#sprite-book"></use></svg>';  
+                                // Заменяем на иконку из бокового меню  
+                                card.data.icon_svg = '<svg><use xlink:href="#sprite-favorite"></use></svg>';  
                             } else if (b.id === 'surs_history') {  
                                 card.data.icon_svg = '<svg><use xlink:href="#sprite-history"></use></svg>';  
+                            } else if (b.id === 'surs_bookmarks_settings' || b.id === 'surs_history_settings' || b.id === 'surs_settings') {  
+                                card.data.icon_svg = '<svg><use xlink:href="#sprite-settings"></use></svg>';  
                             } else if (buttonIcons[b.id]) {  
                                 card.data.icon_svg = buttonIcons[b.id];  
                             }  
@@ -237,9 +258,12 @@
                                 if (b.id === 'surs_main') {  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
                                 } else if (b.id === 'surs_bookmarks') {  
-                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-book"></use></svg>';  
+                                    // Заменяем на иконку из бокового меню  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-favorite"></use></svg>';  
                                 } else if (b.id === 'surs_history') {  
                                     svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
+                                } else if (b.id === 'surs_bookmarks_settings' || b.id === 'surs_history_settings' || b.id === 'surs_settings') {  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-settings"></use></svg>';  
                                 } else if (buttonIcons[b.id]) {  
                                     svgContainer.innerHTML = buttonIcons[b.id];  
                                 }  
@@ -275,12 +299,10 @@
     function startPlugin() {  
         window.plugin_custom_buttons_ready = true;  
         addStyles();  
-          
         // Экспортируем функцию для использования в других плагинах  
         window.getCustomButtonsRow = function(partsData) {  
             addCustomButtonsRow(partsData);  
         };  
-          
         // Используем подход из рабочего примера  
         Lampa.ContentRows.add({  
             index: 0,  
