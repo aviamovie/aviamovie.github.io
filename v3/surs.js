@@ -358,6 +358,12 @@
         }  
     }  
     
+    function getAllButtons() {
+      if (window.surs_allButton) {  
+        window.surs_allButton();  
+    }        
+      }
+    
         function addCustomButtonsRow(partsData) {  
     if (window.surs_getCustomButtonsRow) {  
         window.surs_getCustomButtonsRow(partsData);  
