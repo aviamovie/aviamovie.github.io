@@ -123,17 +123,10 @@
                     display: none !important;  
                 }  
                   
-                /* Custom row width reduction */  
-                .items-line[data-name="surs_buttons"] {  
-                    width: 85% !important;  
-                    margin: 0 auto !important;  
-                }  
-                  
-                /* Alternative targeting if above doesn't work */  
-                .items-line:first-child {  
-                    width: 85% !important;  
-                    margin: 0 auto !important;  
-                }  
+                /* Reduce row height */  
+                .items-line {  
+                      padding-bottom: 1.5em !important;  
+            }  
             }  
               
             .card--button-compact .card__view {  
