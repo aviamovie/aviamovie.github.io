@@ -117,7 +117,7 @@
                     width: 12.75em !important;  
                 }  
                  .items-line {  
-                    padding-bottom: 1em !important;  
+                    padding-bottom: 0.5em !important;  
                     }  
                 /* Mobile styles */  
                 @media screen and (max-width: 767px) {  
