@@ -136,8 +136,8 @@ function addStyles() {
                     top: 50% !important;  
                     left: 50% !important;  
                     transform: translate(-50%, -50%) !important;  
-                    width: 60% !important;  
-                    height: 60% !important;  
+                    width: 55% !important;  
+                    height: 55% !important;  
                     display: flex !important;  
                     align-items: center !important;  
                     justify-content: center !important;  
