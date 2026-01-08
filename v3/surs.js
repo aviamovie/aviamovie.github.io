@@ -74,6 +74,25 @@
         { id: 3031, title: 'Пятница' },  
         { id: 3882, title: 'More.TV' }  
     ];  
+    
+            var periods = [
+            { start: 1970, end: 1974 },
+            { start: 1975, end: 1979 },
+            { start: 1980, end: 1984 },
+            { start: 1985, end: 1989 },
+            { start: 1990, end: 1994 },
+            { start: 1995, end: 1999 },
+            { start: 2000, end: 2004 },
+            { start: 2005, end: 2009 },
+            { start: 2010, end: 2014 },
+            { start: 2015, end: 2019 },
+            { start: 2020, end: 2025 }
+        ];
+
+        function getRandomPeriod() {
+            var index = Math.floor(Math.random() * periods.length);
+            return periods[index];
+        }
   
     // Функция получения всех настроек  
     function getAllStoredSettings() {  
@@ -741,24 +760,6 @@
             };
         }
 
-        var periods = [
-            { start: 1970, end: 1974 },
-            { start: 1975, end: 1979 },
-            { start: 1980, end: 1984 },
-            { start: 1985, end: 1989 },
-            { start: 1990, end: 1994 },
-            { start: 1995, end: 1999 },
-            { start: 2000, end: 2004 },
-            { start: 2005, end: 2009 },
-            { start: 2010, end: 2014 },
-            { start: 2015, end: 2019 },
-            { start: 2020, end: 2025 }
-        ];
-
-        function getRandomPeriod() {
-            var index = Math.floor(Math.random() * periods.length);
-            return periods[index];
-        }
 
         genres.forEach(function (genre) {
             var useMovies = getStoredSetting('getBestContentByGenreAndPeriod_movie', true);
@@ -1073,15 +1074,6 @@ var SourceTMDBkids = function (parent) {
         var onError = arguments.length > 2 ? arguments[2] : undefined;
         var partsLimit = 9;
 
-        // Опции сортировки
-        var sortOptions = [
-            { key: 'vote_count.desc', title: 'Много голосов' },
-            { key: 'vote_average.desc', title: 'Высокий рейтинг' },
-            { key: 'first_air_date.desc', title: 'Новинки' },
-            { key: 'popularity.desc', title: 'Популярные' },
-            { key: 'revenue.desc', title: 'Интерес зрителей' }
-        ];
-
         // Жанры фильмов
       var genres = [
             { id: 28, title: 'боевики' },
@@ -1123,22 +1115,6 @@ var SourceTMDBkids = function (parent) {
 ];
 
           
-             var streamingServicesRUS = [
-            { id: 2493, title: 'Start' },
-            { id: 2859, title: 'Premier' },
-            { id: 4085, title: 'KION' },
-            { id: 3923, title: 'ИВИ' },
-            { id: 412, title: 'Россия 1' },
-            { id: 558, title: 'Первый канал' },
-            { id: 3827, title: 'Кинопоиск' },
-            { id: 5806, title: 'Wink' },
-
-            
-
-        ];
-        
-
-
 // Функции формирования url с доп параметрами
 
 function applyMinVotes(baseUrl) {
@@ -1448,22 +1424,6 @@ function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
     };
 }
 
-var periods = [
-    { start: 1985, end: 1989 },
-    { start: 1990, end: 2004 },
-    { start: 1995, end: 1999 },
-    { start: 2000, end: 2004 },
-    { start: 2005, end: 2009 },
-    { start: 2010, end: 2014 },
-    { start: 2015, end: 2019 },
-    { start: 2020, end: 2025 }
-];
-
-function getRandomPeriod() {
-    var index = Math.floor(Math.random() * periods.length);
-    return periods[index];
-}
-
 genres.forEach(function (genre) {
     var period = getRandomPeriod(); // Добавляем выбор случайного периода
     partsData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));
@@ -1507,7 +1467,7 @@ var forKids = [
     { id: 127, title: 'Зверополис' },
     { id: 128, title: 'Миньоны' },
     { id: 129, title: 'Шрэк' },
-     { id: 206, title: 'Маша и Медведь' },
+    { id: 206, title: 'Маша и Медведь' },
     { id: 207, title: 'Котенок по имени Гав' },
     { id: 208, title: 'Чебурашка' },
     { id: 209, title: 'Малыш и Карлсон' },
@@ -1743,64 +1703,9 @@ var SourceTMDBrus = function (parent) {
         var onError = arguments.length > 2 ? arguments[2] : undefined;
         var partsLimit = 9;
 
-        // Опции сортировки
-        var sortOptions = [
-            { key: 'vote_count.desc', title: 'Много голосов' },
-            { key: 'vote_average.desc', title: 'Высокий рейтинг' },
-            { key: 'first_air_date.desc', title: 'Новинки' },
-            { key: 'popularity.desc', title: 'Популярные' },
-            { key: 'revenue.desc', title: 'Интерес зрителей' }
-        ];
-
-        // Жанры фильмов
-      var genres = [
-    { id: 28, title: 'боевики' },
-    { id: 35, title: 'комедии' },
-    { id: 18, title: 'драмы' },
-    { id: 10749, title: 'мелодрамы' },
-    { id: 16, title: 'мультфильмы' },
-    { id: 10762, title: 'детское' },
-    { id: 12, title: 'приключения' },
-    { id: 80, title: 'криминал' },
-    { id: 9648, title: 'детективы' },
-    { id: 878, title: 'фантастика' },
-    { id: 10752, title: 'военные' },
-    { id: 37, title: 'вестерны' },
-    { id: 53, title: 'триллеры' },
-    { id: 10751, title: 'семейные' },
-    { id: 14, title: 'фэнтези' },
-    { id: 10764, title: 'реалити-шоу' },
-    { id: 10759, title: 'боевики и приключения' },
-    { id: 10766, title: 'мыльные оперы' },
-    { id: 10767, title: 'ток-шоу' }, 
-        ];
-
         // Стриминговые сервисы
 
           var streamingServices = [];
-
-          
-             var streamingServicesRUS = [
-    { id: 2493, title: 'Start' },
-    { id: 2859, title: 'Premier' },
-    { id: 4085, title: 'KION' },
-    { id: 3923, title: 'ИВИ' },
-    { id: 412, title: 'Россия 1' },
-    { id: 558, title: 'Первый канал' },
-    { id: 3871, title: 'Okko' },
-    { id: 3827, title: 'Кинопоиск' },
-    { id: 5806, title: 'Wink' },
-    { id: 806, title: 'СТС' },
-    { id: 1191, title: 'ТНТ' },
-    { id: 1119, title: 'НТВ' },
-    { id: 3031, title: 'Пятница'},
-    { id: 3882, title: 'More.TV' }
-            
-        ];
-        
-
-
-
 
 function applyMinVotes(baseUrl) {
     var minVotes = 10;
@@ -1991,22 +1896,6 @@ function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
     };
 }
 
-var periods = [
-    { start: 1975, end: 1979 },
-    { start: 1980, end: 1984 },
-    { start: 1985, end: 1989 },
-    { start: 1990, end: 1994 },
-    { start: 1995, end: 1999 },
-    { start: 2000, end: 2004 },
-    { start: 2005, end: 2009 },
-    { start: 2010, end: 2014 },
-    { start: 2015, end: 2019 },
-    { start: 2020, end: 2025 }
-];
-
-function getRandomPeriod() {
-    return periods[Math.floor(Math.random() * periods.length)];
-}
 
 genres.forEach(function (genre) {
     var period = getRandomPeriod();
