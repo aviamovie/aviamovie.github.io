@@ -125,7 +125,18 @@
                   
                 /* Reduce row height */  
                 .items-line {  
-                      padding-bottom: 0.5em !important;  
+                      padding-bottom: 0.1em !important;  
+                }  
+                            .card__svg-icon {  
+                position: absolute;  
+                top: 50%;  
+                left: 50%;  
+                transform: translate(-50%, -50%);  
+                width: 55% !important;  
+                height: 55% !important;  
+                display: flex;  
+                align-items: center;  
+                justify-content: center;  
             }  
             }  
               
