@@ -782,40 +782,6 @@
             });
         });
 
-function getPopularPersonsOld() {
-    return function (callback) {
-        owner.get('person/popular', params, function (json) {
-            json.title = Lampa.Lang.translate('surs_popular_persons');
-            callback(json);
-        }, callback);
-    };
-}
-
-function getPopularPersonsNew() {
-    return function (cb) {
-        owner.get('person/popular', params, function (json) {
-            json = Lampa.Utils.addSource(json, 'tmdb');
-            json.title = Lampa.Lang.translate('surs_popular_persons');
-
-            json.results.forEach(function(person) {
-                person.params = {
-                    module: Lampa.Maker.module('Card').only('Card', 'Release', 'Callback'),
-                    emit: {
-                        onFocus: function() {
-                            Lampa.Background.change(Lampa.Utils.cardImgBackground(person));
-                        },
-                        onEnter: function() {
-                            Lampa.Router.call('actor', person);
-                        }
-                    }
-                };
-            });
-
-            cb(json);
-        }, cb);
-    };
-}
-
 CustomData = CustomData.map(wrapWithWideFlag);  
                 CustomData.push(getPopularPersons());  
                 shuffleArray(CustomData);  
@@ -1747,7 +1713,7 @@ function buildApiUrl(baseUrl) {
 function getStreamingWithGenres(serviceName, serviceId) {
     return function (callback) {
         var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
-        var genre = allGenres[Math.floor(Math.random() * genres.length)];
+        var genre = allGenres[Math.floor(Math.random() * allGenres.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
             '&with_genres=' + genre.id +
