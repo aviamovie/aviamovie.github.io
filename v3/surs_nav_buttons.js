@@ -131,7 +131,7 @@ function addStyles() {
                 .items-line {  
                     padding-bottom: 0.1em !important;  
                 }  
-                .card--button-compact .card__svg-icon {  
+                .card--button-compact {  
                     position: absolute !important;  
                     top: 50% !important;  
                     left: 50% !important;  
