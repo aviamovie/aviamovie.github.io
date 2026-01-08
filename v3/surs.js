@@ -1167,7 +1167,7 @@ function buildApiUrl(baseUrl) {
 
     function getStreamingWithGenres(serviceName, serviceId) {
     return function (callback) {
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+        var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var genre = genres[Math.floor(Math.random() * genres.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
@@ -1191,7 +1191,7 @@ function buildApiUrl(baseUrl) {
 // Функция запроса только для стриминговых сервисов (без жанров)
 function getStreaming(serviceName, serviceId) {
     return function (callback) {
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+        var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
             '&sort_by=' + sort.key +
@@ -1223,7 +1223,7 @@ selectedStreamingServices.forEach(function (service) {
 function getMovies(genre, options) {
   options = options || {};
     return function (callback) {
-        var sort = adjustSortForMovies(sortOptions[Math.floor(Math.random() * sortOptions.length)]);
+        var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);
         var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;
 
         if (options.russian) {
@@ -1266,7 +1266,7 @@ genres.forEach(function (genre) {
 function getTVShows(genre, options) {
 options = options || {};
     return function (callback) {
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+        var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.key;
 
         if (options.russian) {
@@ -1301,8 +1301,8 @@ options = options || {};
     return function (callback) {
         var genreIds = ['16', '10751']; // 16 - анимация (мультфильм), 10751 - семейный (детское)
 
-        for (var i = 0; i < sortOptions.length; i++) {
-            var sort = sortOptions[i];
+        for (var i = 0; i < allSortOptions.length; i++) {
+            var sort = allSortOptions[i];
             var adjustedSort = adjustSortForMovies(sort);
             var apiUrl = 'discover/movie?with_genres=' + genreIds.join(',') + '&sort_by=' + adjustedSort.key;
 
@@ -1341,7 +1341,7 @@ options = options || {};
 }
 
 
-for (var j = 0; j < sortOptions.length; j++) {
+for (var j = 0; j < allSortOptions.length; j++) {
     partsData.push(getAnimatedMovies()); // Все мультфильмы и детские фильмы
     partsData.push(getAnimatedMovies({ russian: true })); // Только российские мультфильмы
 } 
@@ -1746,7 +1746,7 @@ function buildApiUrl(baseUrl) {
 // Функция запроса для стриминговых сервисов с жанрами
 function getStreamingWithGenres(serviceName, serviceId) {
     return function (callback) {
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+        var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var genre = genres[Math.floor(Math.random() * genres.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
@@ -1769,7 +1769,7 @@ function getStreamingWithGenres(serviceName, serviceId) {
 // Функция запроса только для стриминговых сервисов (без жанров)
 function getStreaming(serviceName, serviceId) {
     return function (callback) {
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+        var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var apiUrl = buildApiUrl(
             'discover/tv?with_networks=' + serviceId +
             '&sort_by=' + sort.key +
@@ -1802,7 +1802,7 @@ selectedStreamingServices.forEach(function (service) {
 
 function getMovies(genre) {
     return function (callback) {
-        var sort = adjustSortForMovies(sortOptions[Math.floor(Math.random() * sortOptions.length)]);
+        var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);
         var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;
 
 apiUrl += '&with_original_language=ru&region=RU';
@@ -1833,7 +1833,7 @@ genres.forEach(function (genre) {
 
 function getTVShows(genre) {
     return function (callback) {
-        var sort = sortOptions[Math.floor(Math.random() * sortOptions.length)];
+        var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
         var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.key + '&with_origin_country=RU';
 
         apiUrl = buildApiUrl(apiUrl);
