@@ -137,9 +137,9 @@ function addStyles() {
         top: 50%;  !important;  
         left: 50%;  !important;  
         transform: translate(-50%, -50%);   !important;  
-        width: 50% !important;  
-        height: 50% !important;  
-        align-items: center;   !important;  
+        width: 50%; !important;  
+        height: 50%; !important;  
+        align-items: center; !important;  
     }  
 }
 
