@@ -8,7 +8,7 @@
             function loadV3Plugins() {
                 // Загружаем nav_buttons
                 Lampa.Utils.putScriptAsync(
-                    'https://aviamovie.github.io/v3/surs_nav_buttons.js',
+                  //  'https://aviamovie.github.io/v3/surs_nav_buttons.js',
                     function () {
                         console.log('SURS nav buttons (v3) загружены.');
                     }
