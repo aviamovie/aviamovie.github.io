@@ -402,6 +402,12 @@
             }, cb);  
         };  
     }  
+    
+    function addCustomButtonsRow(partsData) {  
+    if (window.getCustomButtonsRow) {  
+        window.getCustomButtonsRow(partsData);  
+    }  
+}
   
     function startPlugin() {  
         window.plugin_surs_ready = true;  
