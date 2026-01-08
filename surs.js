@@ -16,7 +16,7 @@
                 
                 // Загружаем основной surs.js (v3)
                 Lampa.Utils.putScriptAsync(
-                    'https://aviamovie.github.io/v3/surs.js',
+                    'https://aviamovie.github.io/v2/surs.js',
                     function () {
                         console.log('SURS (v3) успешно загружен.');
                     }
