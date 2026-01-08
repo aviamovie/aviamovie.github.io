@@ -116,10 +116,10 @@ function addStyles() {
         /* Mobile styles - reduce button size to 10em and row width by 15% */  
         @media screen and (max-width: 767px) {  
             .card--button-compact {  
-                width: 10em !important;  
+                width: 8em !important;  
             }  
             .items-cards {  
-                width: 85% !important; /* Reduce row width by 15% */  
+                width: 65% !important; /* Reduce row width by 15% */  
                 margin: 0 auto !important;  
             }  
         }  
