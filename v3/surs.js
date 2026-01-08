@@ -3959,14 +3959,18 @@ surs_history: {
 });
 
 function loadSidePlugins() {
+  Lampa.Utils.putScriptAsync(
+    'https://aviamovie.github.io/v3/surs_nav_buttons.js',
+    function () {
+        console.log('SURS nav buttons загружены.');
+    }
+);
     setTimeout(function () {
         if (!window.SursSelect || !window.SursSelect.__initialized) {
             Lampa.Utils.putScriptAsync(
-                ['https://aviamovie.github.io/surs_select.js',
-                  'https://aviamovie.github.io/v3/surs_nav_buttons.js'
-                ],
+                ['https://aviamovie.github.io/surs_select.js',]               ],
                 function () {
-                    console.log('SursSelect плагин успешно загружен.');
+                    console.log('SURS select  успешно загружен.');
                 }
             );
         } else {
