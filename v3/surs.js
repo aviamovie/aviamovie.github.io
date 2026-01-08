@@ -3958,6 +3958,7 @@ surs_history: {
 }
 });
 
+/*
 function loadSidePlugins() {
   Lampa.Utils.putScriptAsync(
     'https://aviamovie.github.io/v3/surs_nav_buttons.js',
@@ -3980,14 +3981,14 @@ function loadSidePlugins() {
 }
 
 
-
+*/
 
 
 if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    loadSidePlugins();
+    //loadSidePlugins();
 
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -3999,7 +4000,7 @@ if (window.appready) {
             add();
             startProfileListener();
             addMainButton();
-            loadSidePlugins();
+            //loadSidePlugins();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
