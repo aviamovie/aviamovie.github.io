@@ -296,7 +296,7 @@
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
-            startDate.setFullYear(startDate.getFullYear() - 1);  
+            startDate.setMonth(startDate.getMonth() - 8);  
             startDate = startDate.toISOString().split('T')[0];  
   
             sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;  
@@ -305,14 +305,17 @@
         return sort;  
     }  
   
+    /* 
+     * Корректирует сортировку для сериалов, добавляет фильтры по датам (не старше 8 месяцев, до 10 дней назад) 
+     */
     function adjustSortForTVShows(sort) {  
         if (sort.id === 'first_air_date.desc') {  
             var endDate = new Date();  
-            endDate.setDate(endDate.getDate() - 10);  
+            endDate.setDate(endDate.getDate() - 5);  
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
-            startDate.setFullYear(startDate.getFullYear() - 1);  
+            startDate.setMonth(startDate.getMonth() - 8);  
             startDate = startDate.toISOString().split('T')[0];  
             sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;  
         }  
