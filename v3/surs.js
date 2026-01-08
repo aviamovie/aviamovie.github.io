@@ -339,6 +339,12 @@
         }  
     }  
     
+        function addCustomButtonsRow(partsData) {  
+    if (window.getCustomButtonsRow) {  
+        window.getCustomButtonsRow(partsData);  
+    }  
+}
+    
     function getPartsData() {  
         var partsData = [];  
         addCustomButtonsRow(partsData);  
@@ -403,11 +409,7 @@
         };  
     }  
     
-    function addCustomButtonsRow(partsData) {  
-    if (window.getCustomButtonsRow) {  
-        window.getCustomButtonsRow(partsData);  
-    }  
-}
+
   
     function startPlugin() {  
         window.plugin_surs_ready = true;  
@@ -423,8 +425,7 @@
                 var onError = arguments.length > 2 ? arguments[2] : undefined;  
                 var partsLimit = 9;  
   
-                //var partsData = getPartsData();  
-                var partsData = []
+                var partsData = getPartsData();  
                 var CustomData = [];  
                 var trendingsData = [];  
                   
