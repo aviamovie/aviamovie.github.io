@@ -865,19 +865,8 @@ var SourceTMDBnew = function (parent) {
         var onComplete = arguments.length > 1 ? arguments[1] : undefined;
         var onError = arguments.length > 2 ? arguments[2] : undefined;
         var partsLimit = 9;
-
-        // Функция для перемешивания массива
-        function shuffleArray(array) {
-            for (var i = array.length - 1; i > 0; i--) {
-                var j = Math.floor(Math.random() * (i + 1));
-                var temp = array[i];
-                array[i] = array[j];
-                array[j] = temp;
-            }
-        }
-
+ 
         var partsData = getPartsData();
-
         var CustomData = [];
 
         function getStreamingWithGenres(serviceName, serviceId, isRussian) {
