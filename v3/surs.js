@@ -972,9 +972,9 @@
                         apiUrl += '&with_origin_country=RU&region=RU';
                         // Для российских фильмов используем primary_release_date для региональных релизов
                         if (sort.extraParams) {
-                            sort.extraParams = sort.extraParams.replace(/release_date/g, 'primary_release_date');
-                        }
-                    } else if (isUkrainian) {
+                        apiUrl += sort.extraParams;
+                    }
+                     else if (isUkrainian) {
                         apiUrl += '&with_origin_country=UA&region=UA';
                     }
 
@@ -1062,9 +1062,7 @@
                     var apiUrl = 'discover/movie?with_origin_country=RU&region=RU&sort_by=' + sort.id;
 
                     if (sort.extraParams) {
-                        // Для российских фильмов используем primary_release_date
-                        var extraParams = sort.extraParams.replace(/release_date/g, 'primary_release_date');
-                        apiUrl += extraParams;
+                        apiUrl += sort.extraParams;
                     }
 
                     // Специально для фильмов: мин. 15 голосов
