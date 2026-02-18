@@ -291,7 +291,7 @@
                 }  
                 .streaming-card--button-compact.hover .card__view,  
                 .streaming-card--button-compact.focus .card__view {  
-                    background-color: rgba(255, 255, 255, 0.3);  
+                    background-color: rgba(255, 255, 255, 0.2);  
                 }  
                 .streaming-card--button-compact .card__title,  
                 .streaming-card--button-compact .card__age {  
