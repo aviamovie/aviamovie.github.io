@@ -288,7 +288,7 @@
                     background-color: rgba(0, 0, 0, 0.2);  
                     border-radius: 1em;  
                     /* Серый фон для карточек не в фокусе */  
-                    background: rgba(1, 1, 1, 0.1) !important;  
+                    background: rgba(1, 1, 1, 0.3) !important;  
                     transition: all 0.25s cubic-bezier(0.25,0.8,0.25,1);  
                 }  
                 .streaming-card--button-compact.hover .card__view,  
