@@ -288,7 +288,7 @@
                     background-color: rgba(0, 0, 0, 0.2);  
                     border-radius: 1em;  
                     /* Серый фон для карточек не в фокусе */  
-                    background: #333 !important;  
+                    background: rgba(1, 1, 1, 0.1) !important;  
                     transition: all 0.25s cubic-bezier(0.25,0.8,0.25,1);  
                 }  
                 .streaming-card--button-compact.hover .card__view,  
@@ -301,11 +301,11 @@
                 }  
                 .streaming-card__svg-icon {  
                     position: absolute;  
-                    top: 45%;  
+                    top: 50%;  
                     left: 50%;  
                     transform: translate(-50%, -50%);  
-                    width: 40% !important;  
-                    height: 40% !important;  
+                    width: 45% !important;  
+                    height: 45% !important;  
                     display: flex;  
                     align-items: center;  
                     justify-content: center;  
