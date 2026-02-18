@@ -234,7 +234,7 @@
             });  
             callback({  
                 results: enabledButtons,  
-                title: '',  
+                title: 'Глобальные стриминги',  
                 params: {  
                     items: {  
                         view: 20,  
@@ -289,7 +289,7 @@
             });  
             callback({  
                 results: enabledButtons,  
-                title: '',  
+                title: 'Российские стриминги',  
                 params: {  
                     items: {  
                         view: 20,  
