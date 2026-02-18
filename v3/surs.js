@@ -452,6 +452,14 @@
         return partsData;  
     }  
   
+	/* * Обертки для вставки строк стримингов в combinedData */  
+	function makeStreamingRowWrapper(getRowFn) {  
+		return function() {  
+			var data = [];  
+			getRowFn(data);  
+			return data[0] || function(cb) { cb({ results: [] }); };  
+		};  
+	}  
     /* 
      * Получает предстоящие эпизоды 
      */
@@ -504,7 +512,15 @@
                 var partsData = getPartsData();  
                 var CustomData = [];  
                 var trendingsData = [];  
-                    
+				
+				var globalStreamingRow = null;  
+				var russianStreamingRow = null;  
+				if (typeof window.streaming_getGlobalStreamingRow === 'function') {  
+					globalStreamingRow = makeStreamingRowWrapper(window.streaming_getGlobalStreamingRow);  
+				}  
+				if (typeof window.streaming_getRussianStreamingRow === 'function') {  
+					russianStreamingRow = makeStreamingRowWrapper(window.streaming_getRussianStreamingRow);  
+				}      
                 var trendingMovies = function(callback) {    
                     var baseUrl = 'trending/movie/week';    
                     baseUrl = applyAgeRestriction(baseUrl);    
@@ -861,8 +877,38 @@
                 shuffleArray(CustomData);    
                 CustomData.splice(4, 0, getUpcomingEpisodes());    
     
-                var combinedData = partsData.concat(trendingsData).concat(CustomData);    
-    
+                var combinedData = partsData.concat(trendingsData).concat(CustomData); 
+				
+	  
+				function randomIndex() {  
+				 
+					return Math.floor(Math.random() * 13) + 1;  
+				}  
+				  
+				if (globalStreamingRow) {  
+					var idx1 = randomIndex();  
+					combinedData.splice(idx1, 0, globalStreamingRow());  
+				}  
+				  
+				if (russianStreamingRow) {  
+					var idx2;  
+					var attempts = 0;  
+					do {  
+						idx2 = randomIndex();  
+					  
+						if (globalStreamingRow && Math.abs(idx2 - idx1) <= 1) {  
+							  
+							if (idx2 < idx1) {  
+								idx2 = Math.max(0, idx1 - 2);  
+							} else {  
+								idx2 = Math.min(combinedData.length - 1, idx1 + 2);  
+							}  
+						}  
+						attempts++;  
+					} while (globalStreamingRow && Math.abs(idx2 - idx1) <= 1 && attempts < 10);  
+					combinedData.splice(idx2, 0, russianStreamingRow());  
+				}
+						
                 function loadPart(partLoaded, partEmpty) {    
                     Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);    
                 }    
@@ -3828,7 +3874,7 @@ if (window.appready) {
     add();
     startProfileListener();
     addMainButton();
-    //loadSidePlugins();
+
 
 
         if (!Lampa.Storage.get('surs_disableMenu')) {
@@ -3839,8 +3885,7 @@ if (window.appready) {
         if (e.type == 'ready') {
             add();
             startProfileListener();
-            addMainButton();
-            //loadSidePlugins();
+            addMainButton();;
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
