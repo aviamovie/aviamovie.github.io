@@ -1,14 +1,16 @@
 (function () {  
     'use strict';  
   
-    // Проверяем версию Lampa и инициализируем плагин  
+
     function loadSursPlugin() {  
         if (Lampa.Manifest.app_digital >= 300) {  
-            // Для версии 300+ загружаем v3 плагины  
+
             function loadV3Plugins() {  
                 // Загружаем nav_buttons  
                 Lampa.Utils.putScriptAsync(  
-                    ['https://aviamovie.github.io/v3/surs_nav_buttons.js'], // Массив вместо строки  
+                    ['https://aviamovie.github.io/v3/surs_nav_buttons.js',
+                      'https://aviamovie.github.io/v3/surs_strmngs_row.js'
+                    ], // Массив вместо строки  
                     function () {  
                         console.log('SURS nav buttons (v3) загружены.');  
                     }  
