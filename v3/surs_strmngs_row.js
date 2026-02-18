@@ -114,14 +114,14 @@
                     width: 12.75em !important;  
                 }  
                 .items-line {  
-                    padding-bottom: 0.5em !important;  
+                    //padding-bottom: 0.5em !important;  
                 }  
                 @media screen and (max-width: 767px) {  
                     .card--button-compact {  
                         width: 9em !important;  
                     }  
                     .card--button-compact .card__button-label {  
-                        display: none !important;  
+                        //display: none !important;  
                     }  
                     .items-line {  
                         padding-bottom: 0.1em !important;  
