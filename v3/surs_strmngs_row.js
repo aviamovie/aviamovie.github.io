@@ -287,11 +287,10 @@
                     justify-content: center;  
                     background-color: rgba(0, 0, 0, 0.2);  
                     border-radius: 1em;  
-                    background: rgba(1, 1, 1, 0.3); 
                 }  
                 .streaming-card--button-compact.hover .card__view,  
                 .streaming-card--button-compact.focus .card__view {  
-                    background-color: rgba(255, 255, 255, 0.2);  
+                    rgba(211, 211, 211, 0.4);  
                 }  
                 .streaming-card--button-compact .card__title,  
                 .streaming-card--button-compact .card__age {  
