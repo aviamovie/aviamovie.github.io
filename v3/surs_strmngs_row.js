@@ -285,12 +285,12 @@
                     display: flex;  
                     align-items: center;  
                     justify-content: center;  
-                    background-color: rgba(0, 0, 0, 0.2);  
+                    background-color: rgba(1, 1, 1, 0.3);  
                     border-radius: 1em;  
                 }  
                 .streaming-card--button-compact.hover .card__view,  
                 .streaming-card--button-compact.focus .card__view {  
-                    rgba(211, 211, 211, 0.4);  
+                    rgba(211, 211, 211, 0.6);  
                 }  
                 .streaming-card--button-compact .card__title,  
                 .streaming-card--button-compact .card__age {  
