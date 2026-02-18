@@ -143,7 +143,7 @@
                 }  
                 .card--button-compact.hover .card__view,  
                 .card--button-compact.focus .card__view {  
-                    background-color: rgba(255, 255, 255, 0.1) !important;  
+                    background-color: rgba(255, 255, 255, 0.3) !important;  
                 }  
                 .card--button-compact .card__title,  
                 .card--button-compact .card__age {  
@@ -151,11 +151,11 @@
                 }  
                 .card__svg-icon {  
                     position: absolute;  
-                    top: 45%;  
+                    top: 50%;  
                     left: 50%;  
                     transform: translate(-50%, -50%);  
-                    width: 40% !important;  
-                    height: 40% !important;  
+                    width: 45% !important;  
+                    height: 45% !important;  
                     display: flex;  
                     align-items: center;  
                     justify-content: center;  
