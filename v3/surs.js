@@ -882,7 +882,7 @@
 	  
 				function randomIndex() {  
 				 
-					return Math.floor(Math.random() * 13) + 1;  
+					return Math.floor(Math.random() * 13) + 2;  
 				}  
 				  
 				if (globalStreamingRow) {  
