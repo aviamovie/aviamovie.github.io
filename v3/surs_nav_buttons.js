@@ -285,7 +285,7 @@ function addStyles() {
         Lampa.ContentRows.add({  
             index: 0,  
             name: 'surs_buttons',  
-            title: '',  
+            title: 'Навигационное меню',  
             screen: ['main'],  
             call: function(params, screen) {  
                 var partsData = [];  
