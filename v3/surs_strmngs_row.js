@@ -45,6 +45,42 @@
         { id: 3031, title: 'Пятница!' }  
     ];  
   
+    // ====================== ДОБАВЛЕНИЕ ЛОКАЛИЗАЦИИ ======================  
+    function addLocalization() {  
+        Lampa.Lang.add({  
+            surs_strmngs_global_title: {  
+                ru: 'Глобальные стриминги',  
+                en: 'Global Streaming',  
+                uk: 'Глобальні стрімінги'  
+            },  
+            surs_strmngs_russian_title: {  
+                ru: 'Российские стриминги',  
+                en: 'Russian Streaming',  
+                uk: 'Російські стрімінги'  
+            },  
+            surs_strmngs_new: {  
+                ru: 'Новинки',  
+                en: 'New',  
+                uk: 'Новинки'  
+            },  
+            surs_strmngs_top_rated: {  
+                ru: 'Высокий рейтинг',  
+                en: 'Top Rated',  
+                uk: 'Високий рейтинг'  
+            },  
+            surs_strmngs_popular: {  
+                ru: 'Популярные',  
+                en: 'Popular',  
+                uk: 'Популярні'  
+            },  
+            surs_strmngs_most_voted: {  
+                ru: 'Много голосов',  
+                en: 'Most Voted',  
+                uk: 'Багато голосів'  
+            }  
+        });  
+    }  
+  
     // ====================== ОБЩИЕ ФУНКЦИИ ======================  
     function getAllGlobalButtons() {  
         return globalStreaming.map(function (s) {  
@@ -72,10 +108,14 @@
     // ====================== ОТКРЫТИЕ СЕРВИСА ======================  
     function openStreamingService(service) {  
         var sorts = [  
-            { title: 'Новинки', sort: 'first_air_date.desc', params: BASE_PARAMS + DATE_FILTER },  
-            { title: 'Высокий рейтинг', sort: 'vote_average.desc', params: BASE_PARAMS + '&vote_count.gte=10' },  
-            { title: 'Популярные', sort: 'popularity.desc', params: BASE_PARAMS + '&vote_count.gte=20' },  
-            { title: 'Много голосов', sort: 'vote_count.desc', params: BASE_PARAMS + '&vote_count.gte=30' }  
+            {   
+                title: Lampa.Lang.translate('surs_strmngs_new'),   
+                sort: 'first_air_date.desc',   
+                params: BASE_PARAMS + DATE_FILTER + (globalStreaming.includes(service) ? '&vote_count.gte=10' : '')  
+            },  
+            { title: Lampa.Lang.translate('surs_strmngs_top_rated'), sort: 'vote_average.desc', params: BASE_PARAMS + '&vote_count.gte=10' },  
+            { title: Lampa.Lang.translate('surs_strmngs_popular'), sort: 'popularity.desc', params: BASE_PARAMS + '&vote_count.gte=20' },  
+            { title: Lampa.Lang.translate('surs_strmngs_most_voted'), sort: 'vote_count.desc', params: BASE_PARAMS + '&vote_count.gte=30' }  
         ];  
   
         var items = sorts.map(function (s) {  
@@ -106,71 +146,7 @@
         });  
     }  
   
-    // ====================== СТИЛИ ======================  
-    function addStyles() {  
-        Lampa.Template.add('streaming_buttons_compact_style', `  
-            <style>  
-                .card--button-compact {  
-                    width: 12.75em !important;  
-                }  
-                .items-line {  
-                    padding-bottom: 0.5em !important;  
-                }  
-                @media screen and (max-width: 767px) {  
-                    .card--button-compact {  
-                        width: 9em !important;  
-                    }  
-                    .items-line {  
-                        padding-bottom: 0.1em !important;  
-                    }  
-                    .card__svg-icon {  
-                        width: 60% !important;  
-                        height: 60% !important;  
-                        top: 50% !important;  
-                        left: 50% !important;  
-                        transform: translate(-50%, -50%) !important;  
-                    }  
-                }  
-                .card--button-compact .card__view {  
-                    padding-bottom: 56% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                    background-color: rgba(0, 0, 0, 0.2);  
-                    border-radius: 1em;  
-                    /* Серый фон для карточек не в фокусе */  
-                    background: #333 !important;  
-                }  
-                .card--button-compact.hover .card__view,  
-                .card--button-compact.focus .card__view {  
-                    background-color: rgba(255, 255, 255, 0.3) !important;  
-                }  
-                .card--button-compact .card__title,  
-                .card--button-compact .card__age {  
-                    display: none !important;  
-                }  
-                .card__svg-icon {  
-                    position: absolute;  
-                    top: 50%;  
-                    left: 50%;  
-                    transform: translate(-50%, -50%);  
-                    width: 45% !important;  
-                    height: 45% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                }  
-                .card__svg-icon svg {  
-                    width: 100% !important;  
-                    height: 100% !important;  
-                    fill: currentColor;  
-                }  
-            </style>  
-        `);  
-        $('body').append(Lampa.Template.get('streaming_buttons_compact_style', {}, true));  
-    }  
-  
-    // ====================== СОЗДАНИЕ КАРТОЧЕК ======================  
+    // ====================== СОЗДАНИЕ КАРТОЧКИ ======================  
     function createCard(data, type) {  
         return Lampa.Maker.make(type, data, function (module) {  
             return module.only('Card', 'Callback');  
@@ -194,10 +170,10 @@
                         },  
                         emit: {  
                             onCreate: function () {  
-                                this.html.addClass('card--button-compact');  
+                                this.html.addClass('streaming-card--button-compact');  
                                 var imgElement = this.html.find('.card__img');  
                                 var svgContainer = document.createElement('div');  
-                                svgContainer.classList.add('card__svg-icon');  
+                                svgContainer.classList.add('streaming-card__svg-icon');  
                                 getLogoUrl(b.service.id, b.title, function (logo) {  
                                     if (logo) {  
                                         svgContainer.innerHTML = '<img src="' + logo + '" style="width:100%;height:100%;object-fit:contain;">';  
@@ -206,7 +182,6 @@
                                     }  
                                 });  
                                 imgElement.replaceWith(svgContainer);  
-                                // УБРАЛИ ПОДПИСЬ - больше не создаем buttonLabel  
                             },  
                             onlyEnter: function () {  
                                 openStreamingService(b.service);  
@@ -218,7 +193,7 @@
             });  
             callback({  
                 results: enabledButtons,  
-                title: 'Глобальные стриминги',  
+                title: Lampa.Lang.translate('surs_strmngs_global_title'),  
                 params: {  
                     items: {  
                         view: 20,  
@@ -246,10 +221,10 @@
                         },  
                         emit: {  
                             onCreate: function () {  
-                                this.html.addClass('card--button-compact');  
+                                this.html.addClass('streaming-card--button-compact');  
                                 var imgElement = this.html.find('.card__img');  
                                 var svgContainer = document.createElement('div');  
-                                svgContainer.classList.add('card__svg-icon');  
+                                svgContainer.classList.add('streaming-card__svg-icon');  
                                 getLogoUrl(b.service.id, b.title, function (logo) {  
                                     if (logo) {  
                                         svgContainer.innerHTML = '<img src="' + logo + '" style="width:100%;height:100%;object-fit:contain;">';  
@@ -258,7 +233,6 @@
                                     }  
                                 });  
                                 imgElement.replaceWith(svgContainer);  
-                                // УБРАЛИ ПОДПИСЬ - больше не создаем buttonLabel  
                             },  
                             onlyEnter: function () {  
                                 openStreamingService(b.service);  
@@ -270,7 +244,7 @@
             });  
             callback({  
                 results: enabledButtons,  
-                title: 'Российские стриминги',  
+                title: Lampa.Lang.translate('surs_strmngs_russian_title'),  
                 params: {  
                     items: {  
                         view: 20,  
@@ -281,10 +255,77 @@
         });  
     }  
   
+    // ====================== СТИЛИ ======================  
+    function addStyles() {  
+        Lampa.Template.add('streaming_buttons_compact_style', `  
+            <style>  
+                .streaming-card--button-compact {  
+                    width: 12.75em !important;  
+                }  
+                .items-line {  
+                    padding-bottom: 0.5em !important;  
+                }  
+                @media screen and (max-width: 767px) {  
+                    .streaming-card--button-compact {  
+                        width: 9em !important;  
+                    }  
+                    .items-line {  
+                        padding-bottom: 0.1em !important;  
+                    }  
+                    .streaming-card__svg-icon {  
+                        width: 60% !important;  
+                        height: 60% !important;  
+                        top: 50% !important;  
+                        left: 50% !important;  
+                        transform: translate(-50%, -50%) !important;  
+                    }  
+                }  
+                .streaming-card--button-compact .card__view {  
+                    padding-bottom: 56% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
+                    background-color: rgba(0, 0, 0, 0.2);  
+                    border-radius: 1em;  
+                    /* Серый фон для карточек не в фокусе */  
+                    background: #333 !important;  
+                    transition: all 0.25s cubic-bezier(0.25,0.8,0.25,1);  
+                }  
+                .streaming-card--button-compact.hover .card__view,  
+                .streaming-card--button-compact.focus .card__view {  
+                    background-color: rgba(255, 255, 255, 0.1);  
+                }  
+                .streaming-card--button-compact .card__title,  
+                .streaming-card--button-compact .card__age {  
+                    display: none !important;  
+                }  
+                .streaming-card__svg-icon {  
+                    position: absolute;  
+                    top: 45%;  
+                    left: 50%;  
+                    transform: translate(-50%, -50%);  
+                    width: 40% !important;  
+                    height: 40% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
+                }  
+                .streaming-card__svg-icon svg {  
+                    width: 100% !important;  
+                    height: 100% !important;  
+                    fill: currentColor;  
+                }  
+            </style>  
+        `);  
+        $('body').append(Lampa.Template.get('streaming_buttons_compact_style', {}, true));  
+    }  
+  
     // ====================== ЗАПУСК ======================  
     function startPlugin() {  
         window.plugin_streaming_buttons_ready = true;  
         addStyles();  
+        addLocalization();  
+          
         // Глобальный экспорт  
         window.streaming_getAllGlobalButtons = getAllGlobalButtons;  
         window.streaming_getAllRussianButtons = getAllRussianButtons;  
@@ -294,11 +335,12 @@
         window.streaming_getRussianStreamingRow = function (rusStreamingData) {  
             addRussianStreamingRow(rusStreamingData);  
         };  
+          
         // Регистрация рядов через ContentRows  
         Lampa.ContentRows.add({  
             index: 3,  
             name: 'streaming_global',  
-            title: 'Глобальные стриминги',  
+            title: Lampa.Lang.translate('surs_strmngs_global_title'),  
             screen: ['main'],  
             call: function (params, screen) {  
                 var globalStreamingData = [];  
@@ -314,7 +356,7 @@
         Lampa.ContentRows.add({  
             index: 7,  
             name: 'streaming_russian',  
-            title: 'Российские стриминги',  
+            title: Lampa.Lang.translate('surs_strmngs_russian_title'),  
             screen: ['main'],  
             call: function (params, screen) {  
                 var rusStreamingData = [];  
