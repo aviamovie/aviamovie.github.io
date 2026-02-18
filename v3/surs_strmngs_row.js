@@ -114,7 +114,7 @@
                 params: BASE_PARAMS + DATE_FILTER + (globalStreaming.includes(service) ? '&vote_count.gte=10' : '')  
             },  
             { title: Lampa.Lang.translate('surs_strmngs_top_rated'), sort: 'vote_average.desc', params: BASE_PARAMS + '&vote_count.gte=10' },  
-            { title: Lampa.Lang.translate('surs_strmngs_popular'), sort: 'popularity.desc', params: BASE_PARAMS + '&vote_count.gte=20' },  
+            { title: Lampa.Lang.translate('surs_strmngs_popular'), sort: 'popularity.desc', params: BASE_PARAMS + '&vote_count.gte=10' },  
             { title: Lampa.Lang.translate('surs_strmngs_most_voted'), sort: 'vote_count.desc', params: BASE_PARAMS + '&vote_count.gte=30' }  
         ];  
   
