@@ -257,63 +257,72 @@
   
     // ====================== СТИЛИ ======================  
     function addStyles() {  
-        Lampa.Template.add('streaming_buttons_compact_style', `  
-            <style>  
-                .streaming-card--button-compact {  
-                    width: 12.75em !important;  
-                }  
-                .items-line {  
-                    padding-bottom: 0.5em !important;  
-                }  
-                @media screen and (max-width: 767px) {  
-                    .streaming-card--button-compact {  
-                        width: 9em !important;  
-                    }  
-                    .items-line {  
-                        padding-bottom: 0.1em !important;  
-                    }  
-                    .streaming-card__svg-icon {  
-                        width: 60% !important;  
-                        height: 60% !important;  
-                        top: 50% !important;  
-                        left: 50% !important;  
-                        transform: translate(-50%, -50%) !important;  
-                    }  
-                }  
-                .streaming-card--button-compact .card__view {  
-                    padding-bottom: 56% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                    background-color: rgba(1, 1, 1, 0.3);  
-                    border-radius: 1em;  
-                }  
-                .streaming-card--button-compact.hover .card__view,  
-                .streaming-card--button-compact.focus .card__view {  
-                    rgba(211, 211, 211, 0.6);  
-                }  
-                .streaming-card--button-compact .card__title,  
-                .streaming-card--button-compact .card__age {  
-                    display: none !important;  
-                }  
-                .streaming-card__svg-icon {  
-                    position: absolute;  
-                    top: 50%;  
-                    left: 50%;  
-                    transform: translate(-50%, -50%);  
-                    width: 45% !important;  
-                    height: 45% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                }  
-                .streaming-card__svg-icon svg {  
-                    width: 100% !important;  
-                    height: 100% !important;  
-                    fill: currentColor;  
-                }  
-            </style>  
-        `);  
+        Lampa.Template.add('streaming_buttons_compact_style', `
+<style>
+    .streaming-card--button-compact {
+        width: 12.75em !important;
+    }
+    .items-line {
+        padding-bottom: 0.5em !important;
+    }
+    @media screen and (max-width: 767px) {
+        .streaming-card--button-compact {
+            width: 9em !important;
+        }
+        .items-line {
+            padding-bottom: 0.1em !important;
+        }
+        .streaming-card__svg-icon {
+            width: 60% !important;
+            height: 60% !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+        }
+    }
+
+    .streaming-card--button-compact .card__view {
+        padding-bottom: 56% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(200, 200, 200, 0.18);
+        border-radius: 1em;
+        transition: background-color 0.18s ease;
+    }
+
+    .streaming-card--button-compact.hover .card__view,
+    .streaming-card--button-compact.focus .card__view,
+    .streaming-card--button-compact:hover .card__view,
+    .streaming-card--button-compact:focus .card__view {
+        background-color: rgba(240, 240, 240, 0.35);
+    }
+
+    .streaming-card--button-compact .card__title,
+    .streaming-card--button-compact .card__age {
+        display: none !important;
+    }
+
+    .streaming-card__svg-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 45% !important;
+        height: 45% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .streaming-card__svg-icon img,
+    .streaming-card__svg-icon div {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+</style>
+`);
         $('body').append(Lampa.Template.get('streaming_buttons_compact_style', {}, true));  
     }  
   
