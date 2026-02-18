@@ -287,7 +287,7 @@
                     justify-content: center;  
                     background-color: rgba(0, 0, 0, 0.2);  
                     border-radius: 1em;  
-                    background: rgba(1, 1, 1, 0.3) 
+                    background: rgba(1, 1, 1, 0.3); 
                 }  
                 .streaming-card--button-compact.hover .card__view,  
                 .streaming-card--button-compact.focus .card__view {  
