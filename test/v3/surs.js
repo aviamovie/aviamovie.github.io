@@ -2206,7 +2206,7 @@ function add() {
     Lampa.Api.sources.surs_mod_new = surs_mod_new;
     Lampa.Api.sources.surs_mod_kids = surs_mod_kids;
     Lampa.Api.sources.surs_mod_rus = surs_mod_rus;
-	Lampa.Api.sources.surs_mod_rus = surs_mod_new_rus;
+	Lampa.Api.sources.surs_mod_new_rus = surs_mod_new_rus;
 
     // Динамическое определение источников с использованием Object.defineProperty (для IE9+)
     try {
