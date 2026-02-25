@@ -2018,7 +2018,7 @@ var SourceTMDBNewRus = function (parent) {
         // Russian streaming services — new TV shows (by air_date)  
         function getStreamingWithGenres(serviceName, serviceId) {  
             return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var sort = { id: 'vote_average.desc', title: 'surs_vote_average_desc' };  
                 var genre = allGenres[Math.floor(Math.random() * allGenres.length)];  
                 var apiUrl =  
                     'discover/tv?with_networks=' + serviceId +  
@@ -2043,7 +2043,7 @@ var SourceTMDBNewRus = function (parent) {
   
         function getStreaming(serviceName, serviceId) {  
             return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var sort = { id: 'vote_average.desc', title: 'surs_vote_average_desc' };  
                 var apiUrl =  
                     'discover/tv?with_networks=' + serviceId +  
                     '&sort_by=' + sort.id +  
@@ -2075,7 +2075,7 @@ var SourceTMDBNewRus = function (parent) {
         // Russian new movies  
         function getMovies(genre) {  
             return function (callback) {  
-                var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);  
+                var sort = adjustSortForMovies({ id: 'release_date.desc', title: 'surs_first_air_date_desc' });  
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
                 apiUrl += '&with_original_language=RU';  
@@ -2110,7 +2110,7 @@ var SourceTMDBNewRus = function (parent) {
         // Russian new TV shows (with date filter to ensure “new”)  
         function getTVShows(genre) {  
             return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var sort = { id: 'vote_average.desc', title: 'surs_vote_average_desc' }; 
                 var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';  
   
                 // Ensure we only get recent/new content  
@@ -2150,7 +2150,6 @@ var SourceTMDBNewRus = function (parent) {
         return loadPart;  
     };  
 };
-
 
 
 function add() {
