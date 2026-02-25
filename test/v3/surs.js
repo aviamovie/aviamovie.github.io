@@ -2171,6 +2171,7 @@ function add() {
     var sourceNameNew = sourceName + ' NEW';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
+	var sourceNameNewRus = sourceName + ' NEW RUS';
 
     // Функция для копирования свойств объекта (замена Object.assign для ES5)
     function assign(target) {
@@ -2192,9 +2193,10 @@ function add() {
     var surs_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
     var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
     var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+	var surs_mod_new_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBNewRus(Lampa.Api.sources.tmdb));
 
     // Проверка на успешное создание источников
-    if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
+    if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus || !surs_mod_new_rus) {
         console.error('Failed to create one or more TMDB sources');
         return;
     }
@@ -2204,6 +2206,7 @@ function add() {
     Lampa.Api.sources.surs_mod_new = surs_mod_new;
     Lampa.Api.sources.surs_mod_kids = surs_mod_kids;
     Lampa.Api.sources.surs_mod_rus = surs_mod_rus;
+	Lampa.Api.sources.surs_mod_new_rus = surs_mod_new_rus;
 
     // Динамическое определение источников с использованием Object.defineProperty (для IE9+)
     try {
@@ -2227,6 +2230,11 @@ function add() {
                 return surs_mod_rus;
             }
         });
+		Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
+            get: function() {
+                return surs_mod_new_rus;
+            }
+        });
     } catch (e) {
         console.warn('Object.defineProperty not supported, using direct assignment: ', e);
         // Запасной вариант для IE8
@@ -2234,6 +2242,7 @@ function add() {
         Lampa.Api.sources[sourceNameNew] = surs_mod_new;
         Lampa.Api.sources[sourceNameKids] = surs_mod_kids;
         Lampa.Api.sources[sourceNameRus] = surs_mod_rus;
+		Lampa.Api.sources[sourceNameNewRus] = surs_mod_new_rus;
     }
 
     // Обновление параметров меню
@@ -2242,6 +2251,7 @@ function add() {
     newSourceOptions[sourceNameNew] = sourceNameNew;
     newSourceOptions[sourceNameKids] = sourceNameKids;
     newSourceOptions[sourceNameRus] = sourceNameRus;
+	newSourceOptions[sourceNameNewRus] = sourceNameNewRus;
 
     var mergedOptions = assign({}, Lampa.Params.values['source'], newSourceOptions);
 
