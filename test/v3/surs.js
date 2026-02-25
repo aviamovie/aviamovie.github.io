@@ -1847,17 +1847,10 @@ var SourceTMDBrus = function (parent) {
                 var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);  
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
-                apiUrl += 'with_original_language=ru';  
-  
-                if (sort.id === 'release_date.desc') {  
-                    var today = new Date().toISOString().split('T')[0];  
-                    apiUrl += '&release_date.lte=' + today;  
+                apiUrl += '&with_original_language=ru';  
+
                 }  
-  
-                if (sort.extraParams) {  
-                    apiUrl += sort.extraParams;  
-                }  
-                apiUrl = buildApiUrl(apiUrl);  
+                apiUrl = ''&vote_count.gte=1;  
                   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
