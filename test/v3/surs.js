@@ -2193,7 +2193,7 @@ function add() {
     var surs_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
     var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
     var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
-	var surs_new_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBNEWrus(Lampa.Api.sources.tmdb));
+	var surs_mod_new_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBNewRus(Lampa.Api.sources.tmdb));
 
     // Проверка на успешное создание источников
     if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
