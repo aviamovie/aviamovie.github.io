@@ -2072,7 +2072,7 @@ var SourceTMDBNewRus = function (parent) {
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
                 
 				apiUrl += sort.extraParams || '';
-                apiUrl += '&with_original_language=ru';  
+                apiUrl += '&with_origin_country=RU';  
 				apiUrl = applyWithoutKeywords(apiUrl); 
 				apiUrl = applyAgeRestriction(apiUrl);  
 				apiUrl = applyMinVotes(apiUrl);
