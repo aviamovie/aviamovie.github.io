@@ -349,7 +349,7 @@
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
-            startDate.setMonth(startDate.getMonth() - 8);  
+            startDate.setMonth(startDate.getMonth() - 26);  
             startDate = startDate.toISOString().split('T')[0];  
   
             sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;  
@@ -368,7 +368,7 @@
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
-            startDate.setMonth(startDate.getMonth() - 8);  
+            startDate.setMonth(startDate.getMonth() - 18);  
             startDate = startDate.toISOString().split('T')[0];  
             sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;  
         }  
