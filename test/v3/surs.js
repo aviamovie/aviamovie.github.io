@@ -2015,7 +2015,8 @@ var SourceTMDBNewRus = function (parent) {
                     'discover/tv?with_networks=' + serviceId +  
                     '&with_genres=' + genre.id +  
                     '&sort_by=' + sort.id +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10);  
+                 
+				apiUrl += sort.extraParams;  
                 apiUrl = applyAgeRestriction(apiUrl);  
                 apiUrl = applyWithoutKeywords(apiUrl);  
   
@@ -2038,7 +2039,8 @@ var SourceTMDBNewRus = function (parent) {
                 var apiUrl =  
                     'discover/tv?with_networks=' + serviceId +  
                     '&sort_by=' + sort.id +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10);  
+               
+				apiUrl += sort.extraParams;
                 apiUrl = applyAgeRestriction(apiUrl);  
                 apiUrl = applyWithoutKeywords(apiUrl);  
   
@@ -2068,7 +2070,8 @@ var SourceTMDBNewRus = function (parent) {
             return function (callback) {  
                 var sort = adjustSortForMovies({ id: 'release_date.desc', title: 'surs_first_air_date_desc' });  
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
-  
+                
+				apiUrl += sort.extraParams;
                 apiUrl += '&with_original_language=ru';  
 				apiUrl = applyWithoutKeywords(apiUrl); 
   
@@ -2094,7 +2097,7 @@ var SourceTMDBNewRus = function (parent) {
             return function (callback) {  
                 var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc'});   
                 var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';    
-  
+				apiUrl += sort.extraParams;
                 apiUrl = applyWithoutKeywords(apiUrl);  
   
                 owner.get(apiUrl, params, function (json) {  
