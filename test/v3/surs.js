@@ -927,7 +927,7 @@
                 var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};  
                 var onComplete = arguments.length > 1 ? arguments[1] : undefined;  
                 var onError = arguments.length > 2 ? arguments[2] : undefined;  
-                var partsLimit = 6;  
+                var partsLimit = 9;  
        
                 var partsData = getPartsData();  
                 var CustomData = [];  
@@ -999,7 +999,7 @@
                     options = options || {};  
   
                     return function (callback) {  
-                        var sort = adjustSortForMovies({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
+                        var sort = adjustSortForMovies({ id: 'release_date.desc', title: 'surs_first_air_date_desc' });  
                         var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
                         if (options.russian) {  
