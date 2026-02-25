@@ -2078,7 +2078,7 @@ var SourceTMDBNewRus = function (parent) {
                 var sort = adjustSortForMovies({ id: 'release_date.desc', title: 'surs_first_air_date_desc' });  
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
-                apiUrl += '&with_original_language=RU';  
+                apiUrl += 'with_original_language=ru';  
 				apiUrl = applyWithoutKeywords(apiUrl); 
   
                 owner.get(apiUrl, params, function (json) {  
