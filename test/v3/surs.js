@@ -2079,16 +2079,7 @@ var SourceTMDBNewRus = function (parent) {
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
                 apiUrl += '&with_original_language=RU';  
-  
-                if (sort.id === 'release_date.desc') {  
-                    var today = new Date().toISOString().split('T')[0];  
-                    apiUrl += '&release_date.lte=' + today;  
-                }  
-  
-                if (sort.extraParams) {  
-                    apiUrl += sort.extraParams;  
-                }  
-                apiUrl = buildApiUrl(apiUrl);  
+				apiUrl = applyWithoutKeywords(apiUrl); 
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -2111,13 +2102,8 @@ var SourceTMDBNewRus = function (parent) {
         function getTVShows(genre) {  
             return function (callback) {  
                 var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc'});   
-                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';  
+                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';    
   
-                // Ensure we only get recent/new content  
-                var today = new Date().toISOString().split('T')[0];  
-                apiUrl += '&first_air_date.lte=' + today;  
-  
-                apiUrl = applyAgeRestriction(apiUrl);  
                 apiUrl = applyWithoutKeywords(apiUrl);  
   
                 owner.get(apiUrl, params, function (json) {  
