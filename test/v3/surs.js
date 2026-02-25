@@ -2242,7 +2242,7 @@ function add() {
         Lampa.Api.sources[sourceNameNew] = surs_mod_new;
         Lampa.Api.sources[sourceNameKids] = surs_mod_kids;
         Lampa.Api.sources[sourceNameRus] = surs_mod_rus;
-		Lampa.Api.sources[sourceNameRus] = surs_mod_new_rus;
+		Lampa.Api.sources[sourceNameNewRus] = surs_mod_new_rus;
     }
 
     // Обновление параметров меню
@@ -2251,7 +2251,7 @@ function add() {
     newSourceOptions[sourceNameNew] = sourceNameNew;
     newSourceOptions[sourceNameKids] = sourceNameKids;
     newSourceOptions[sourceNameRus] = sourceNameRus;
-	newSourceOptions[sourceNameRus] = sourceNameNewRus;
+	newSourceOptions[sourceNameNewRus] = sourceNameNewRus;
 
     var mergedOptions = assign({}, Lampa.Params.values['source'], newSourceOptions);
 
