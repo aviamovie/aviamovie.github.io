@@ -2153,67 +2153,103 @@ var SourceTMDBNewRus = function (parent) {
 
 
 
-function add() {  
-    // Basic checks  
-    if (typeof Lampa === 'undefined' || !Lampa.Storage || !Lampa.Api || !Lampa.Params || !Lampa.Api.sources.tmdb) {  
-        console.error('Lampa API or tmdb source not available');  
-        return;  
-    }  
-  
-    var baseName = Lampa.Storage.get('surs_name') || 'SURS';  
-    var names = {  
-        base: baseName,  
-        new: baseName + ' NEW',  
-        kids: baseName + ' KIDS',  
-        rus: baseName + ' RUS',  
-        newRus: baseName + ' NEW RUS'  
-    };  
-  
-    // Helper to extend objects (Lampa 3 has Utils.extend)  
-    function extend(target) {  
-        for (var i = 1; i < arguments.length; i++) {  
-            var source = arguments[i];  
-            if (source) {  
-                for (var key in source) {  
-                    if (Object.prototype.hasOwnProperty.call(source, key)) {  
-                        target[key] = source[key];  
-                    }  
-                }  
-            }  
-        }  
-        return target;  
-    }  
-  
-    // Create source instances by extending base tmdb  
-    var sources = {  
-        base: extend({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb)),  
-        new: extend({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb)),  
-        kids: extend({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb)),  
-        rus: extend({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb)),  
-        newRus: extend({}, Lampa.Api.sources.tmdb, new SourceTMDBNewRus(Lampa.Api.sources.tmdb))  
-    };  
-  
-    // Register sources directly (no need for Object.defineProperty in Lampa 3)  
-    Lampa.Api.sources[names.base] = sources.base;  
-    Lampa.Api.sources[names.new] = sources.new';  
-    Lampa.Api.sources[names.kids] = sources.kids;  
-    Lampa.Api.sources[names.rus] = sources.rus;  
-    Lampa.Api.sources[names.newRus] = sources.newRus;  
-  
-    // Update source selector options  
-    var newOptions = {};  
-    newOptions[names.base] = names.base;  
-    newOptions[names['new']] = names.new;  
-    newOptions[names.kids] = names.kids;  
-    newOptions[names.rus] = names.rus;  
-    newOptions[names.newRus] = names.newRus;  
-  
-    var merged = extend({}, Lampa.Params.values.source || {}, newOptions);  
-    try {  
-        Lampa.Params.select('source', merged, 'tmdb');  
-    } catch (e) {  
-        console.error('Failed to update source options:', e);  
-    }  
+function add() {
+    // Проверка наличия Lampa API
+    if (typeof Lampa === 'undefined' || !Lampa.Storage || !Lampa.Api || !Lampa.Params) {
+        console.error('Lampa API is not available');
+        return;
+    }
+
+    // Проверка наличия Lampa.Api.sources.tmdb
+    if (!Lampa.Api.sources || !Lampa.Api.sources.tmdb) {
+        console.error('Lampa.Api.sources.tmdb is not defined');
+        return;
+    }
+
+    // Получаем значение из Storage
+    var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
+    var sourceNameNew = sourceName + ' NEW';
+    var sourceNameKids = sourceName + ' KIDS';
+    var sourceNameRus = sourceName + ' RUS';
+
+    // Функция для копирования свойств объекта (замена Object.assign для ES5)
+    function assign(target) {
+        for (var i = 1; i < arguments.length; i++) {
+            var source = arguments[i];
+            if (source) {
+                for (var key in source) {
+                    if (Object.prototype.hasOwnProperty.call(source, key)) {
+                        target[key] = source[key];
+                    }
+                }
+            }
+        }
+        return target;
+    }
+
+    // Создаем источники
+    var surs_mod = assign({}, Lampa.Api.sources.tmdb, new SourceTMDB(Lampa.Api.sources.tmdb));
+    var surs_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
+    var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
+    var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+
+    // Проверка на успешное создание источников
+    if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
+        console.error('Failed to create one or more TMDB sources');
+        return;
+    }
+
+    // Присваиваем источники напрямую (для совместимости с IE8)
+    Lampa.Api.sources.surs_mod = surs_mod;
+    Lampa.Api.sources.surs_mod_new = surs_mod_new;
+    Lampa.Api.sources.surs_mod_kids = surs_mod_kids;
+    Lampa.Api.sources.surs_mod_rus = surs_mod_rus;
+
+    // Динамическое определение источников с использованием Object.defineProperty (для IE9+)
+    try {
+        Object.defineProperty(Lampa.Api.sources, sourceName, {
+            get: function() {
+                return surs_mod;
+            }
+        });
+        Object.defineProperty(Lampa.Api.sources, sourceNameNew, {
+            get: function() {
+                return surs_mod_new;
+            }
+        });
+        Object.defineProperty(Lampa.Api.sources, sourceNameKids, {
+            get: function() {
+                return surs_mod_kids;
+            }
+        });
+        Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
+            get: function() {
+                return surs_mod_rus;
+            }
+        });
+    } catch (e) {
+        console.warn('Object.defineProperty not supported, using direct assignment: ', e);
+        // Запасной вариант для IE8
+        Lampa.Api.sources[sourceName] = surs_mod;
+        Lampa.Api.sources[sourceNameNew] = surs_mod_new;
+        Lampa.Api.sources[sourceNameKids] = surs_mod_kids;
+        Lampa.Api.sources[sourceNameRus] = surs_mod_rus;
+    }
+
+    // Обновление параметров меню
+    var newSourceOptions = {};
+    newSourceOptions[sourceName] = sourceName;
+    newSourceOptions[sourceNameNew] = sourceNameNew;
+    newSourceOptions[sourceNameKids] = sourceNameKids;
+    newSourceOptions[sourceNameRus] = sourceNameRus;
+
+    var mergedOptions = assign({}, Lampa.Params.values['source'], newSourceOptions);
+
+    try {
+        Lampa.Params.select('source', mergedOptions, 'tmdb');
+    } catch (e) {
+        console.error('Error updating Lampa.Params.select: ', e);
+    }
 }
 
 function startProfileListener() {
@@ -2299,7 +2335,7 @@ Lampa.Settings.listener.follow('open', function (e) {
             var sourceNameKids = sourceName + ' KIDS';
             var sourceNameRus = sourceName + ' RUS'; // Новый источник
             var sourceNameNew = sourceName + ' NEW'; // Новый источник
-			var sourceNameNew = sourceName + 'NEW RUS';
+			var sourceNameNew = sourceName + ' NEW RUS';
 
            var paramsToHide = [
     'surs_cirillic',
