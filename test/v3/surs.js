@@ -1973,6 +1973,184 @@ var SourceTMDBrus = function (parent) {
 };
 
 
+var TMDBNewRus = function (parent) {  
+    this.network = new Lampa.Reguest();  
+    this.discovery = false;  
+  
+    this.main = function () {  
+        var owner = this;  
+        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};  
+        var onComplete = arguments.length > 1 ? arguments[1] : undefined;  
+        var onError = arguments.length > 2 ? arguments[2] : undefined;  
+        var partsLimit = 9;  
+  
+        // Helpers  
+        function applyMinVotes(baseUrl) {  
+            var minVotes = 10;  
+            baseUrl += '&vote_count.gte=' + minVotes;  
+            return baseUrl;  
+        }  
+  
+        function applyAgeRestriction(baseUrl) {  
+            return baseUrl;  
+        }  
+  
+        function applyWithoutKeywords(baseUrl) {  
+            var baseExcludedKeywords = [  
+                '346488',  
+                '158718',  
+                '41278'  
+            ];  
+            baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));  
+            return baseUrl;  
+        }  
+  
+        function buildApiUrl(baseUrl) {  
+            baseUrl = applyMinVotes(baseUrl);  
+            baseUrl = applyAgeRestriction(baseUrl);  
+            baseUrl = applyWithoutKeywords(baseUrl);  
+            return baseUrl;  
+        }  
+  
+        var buttonsData = getPartsData();  
+        var partsData = [];  
+  
+        // Russian streaming services — new TV shows (by air_date)  
+        function getStreamingWithGenres(serviceName, serviceId) {  
+            return function (callback) {  
+                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var genre = allGenres[Math.floor(Math.random() * allGenres.length)];  
+                var apiUrl =  
+                    'discover/tv?with_networks=' + serviceId +  
+                    '&with_genres=' + genre.id +  
+                    '&sort_by=' + sort.id +  
+                    '&air_date.lte=' + new Date().toISOString().substr(0, 10);  
+                apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl);  
+  
+                owner.get(apiUrl, params, function (json) {  
+                    if (!json || !Array.isArray(json.results)) {  
+                        return callback({ results: [] });  
+                    }  
+                    json.results = applyFilters(json.results);  
+                    json.title = Lampa.Lang.translate(sort.title) + ' (' + Lampa.Lang.translate(genre.title) + ') ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;  
+                    callback(json);  
+                }, function () {  
+                    callback({ results: [] });  
+                });  
+            };  
+        }  
+  
+        function getStreaming(serviceName, serviceId) {  
+            return function (callback) {  
+                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var apiUrl =  
+                    'discover/tv?with_networks=' + serviceId +  
+                    '&sort_by=' + sort.id +  
+                    '&air_date.lte=' + new Date().toISOString().substr(0, 10);  
+                apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl);  
+  
+                owner.get(apiUrl, params, function (json) {  
+                    if (!json || !Array.isArray(json.results)) {  
+                        return callback({ results: [] });  
+                    }  
+                    json.results = applyFilters(json.results);  
+                    json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;  
+                    callback(json);  
+                }, function () {  
+                    callback({ results: [] });  
+                });  
+            };  
+        }  
+  
+        var selectedStreamingServices = allStreamingServicesRUS;  
+        selectedStreamingServices.forEach(function (service) {  
+            partsData.push(getStreamingWithGenres(service.title, service.id));  
+        });  
+        selectedStreamingServices.forEach(function (service) {  
+            partsData.push(getStreaming(service.title, service.id));  
+        });  
+  
+        // Russian new movies  
+        function getMovies(genre) {  
+            return function (callback) {  
+                var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);  
+                var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
+  
+                apiUrl += '&with_original_language=RU';  
+  
+                if (sort.id === 'release_date.desc') {  
+                    var today = new Date().toISOString().split('T')[0];  
+                    apiUrl += '&release_date.lte=' + today;  
+                }  
+  
+                if (sort.extraParams) {  
+                    apiUrl += sort.extraParams;  
+                }  
+                apiUrl = buildApiUrl(apiUrl);  
+  
+                owner.get(apiUrl, params, function (json) {  
+                    if (!json || !Array.isArray(json.results)) {  
+                        return callback({ results: [] });  
+                    }  
+                    var titlePrefix = Lampa.Lang.translate('surs_russian');  
+                    json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';  
+                    callback(json);  
+                }, function () {  
+                    callback({ results: [] });  
+                });  
+            };  
+        }  
+  
+        allGenres.forEach(function (genre) {  
+            partsData.push(getMovies(genre));  
+        });  
+  
+        // Russian new TV shows (with date filter to ensure “new”)  
+        function getTVShows(genre) {  
+            return function (callback) {  
+                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';  
+  
+                // Ensure we only get recent/new content  
+                var today = new Date().toISOString().split('T')[0];  
+                apiUrl += '&first_air_date.lte=' + today;  
+  
+                apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl);  
+  
+                owner.get(apiUrl, params, function (json) {  
+                    if (!json || !Array.isArray(json.results)) {  
+                        return callback({ results: [] });  
+                    }  
+                    json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';  
+                    callback(json);  
+                }, function () {  
+                    callback({ results: [] });  
+                });  
+            };  
+        }  
+  
+        allGenres.forEach(function (genre) {  
+            partsData.push(getTVShows(genre));  
+        });  
+  
+        // Shuffle and wide-flag wrappers  
+        partsData = partsData.map(wrapWithWideFlag);  
+        shuffleArray(partsData);  
+  
+        var combinedData = buttonsData.concat(partsData);  
+  
+        function loadPart(partLoaded, partEmpty) {  
+            Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);  
+        }  
+  
+        loadPart(onComplete, onError);  
+        return loadPart;  
+    };  
+};
+
 
 
 function add() {
@@ -1993,6 +2171,7 @@ function add() {
     var sourceNameNew = sourceName + ' NEW';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
+	var sourceNameNEWRus = sourceName + ' NEW RUS';
 
     // Функция для копирования свойств объекта (замена Object.assign для ES5)
     function assign(target) {
@@ -2014,6 +2193,7 @@ function add() {
     var surs_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
     var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
     var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
+	var surs_new_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBNEWus(Lampa.Api.sources.tmdb));
 
     // Проверка на успешное создание источников
     if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
@@ -2026,6 +2206,7 @@ function add() {
     Lampa.Api.sources.surs_mod_new = surs_mod_new;
     Lampa.Api.sources.surs_mod_kids = surs_mod_kids;
     Lampa.Api.sources.surs_mod_rus = surs_mod_rus;
+	Lampa.Api.sources.surs_mod_rus = surs_mod_new_rus;
 
     // Динамическое определение источников с использованием Object.defineProperty (для IE9+)
     try {
@@ -2049,6 +2230,11 @@ function add() {
                 return surs_mod_rus;
             }
         });
+		        Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
+            get: function() {
+                return surs_mod_new_rus;
+            }
+        });
     } catch (e) {
         console.warn('Object.defineProperty not supported, using direct assignment: ', e);
         // Запасной вариант для IE8
@@ -2056,6 +2242,7 @@ function add() {
         Lampa.Api.sources[sourceNameNew] = surs_mod_new;
         Lampa.Api.sources[sourceNameKids] = surs_mod_kids;
         Lampa.Api.sources[sourceNameRus] = surs_mod_rus;
+		Lampa.Api.sources[sourceNameRus] = surs_mod_new_rus;
     }
 
     // Обновление параметров меню
@@ -2064,6 +2251,7 @@ function add() {
     newSourceOptions[sourceNameNew] = sourceNameNew;
     newSourceOptions[sourceNameKids] = sourceNameKids;
     newSourceOptions[sourceNameRus] = sourceNameRus;
+	newSourceOptions[sourceNameRus] = sourceNameNewRus;
 
     var mergedOptions = assign({}, Lampa.Params.values['source'], newSourceOptions);
 
@@ -2078,6 +2266,7 @@ function startProfileListener() {
     var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
     var sourceNameKids = sourceName + ' KIDS';
     var sourceNameRus = sourceName + ' RUS';
+	var sourceNameRus = sourceName + ' NEW RUS';
     var sourceNameNew = sourceName + ' NEW';
 
     Lampa.Listener.follow('profile', function(event) {
@@ -2096,14 +2285,14 @@ function startProfileListener() {
 
     Lampa.Storage.listener.follow('change', function(event) {
         if (event.name === "source" && !sourceChangedByProfile) {
-            if (event.value === sourceName || event.value === sourceNameKids || event.value === sourceNameRus || event.value === sourceNameNew) {
+            if (event.value === sourceName || event.value === sourceNameKids || event.value === sourceNameRus || event.value === sourceNameNewRus || event.value === sourceNameNew) {
                 softRefresh(event.value, true);
             }
         }
     });
 
     var initialSource = Lampa.Storage.get('source');
-    if (initialSource === sourceName || initialSource === sourceNameKids || initialSource === sourceNameRus) {
+    if (initialSource === sourceName || initialSource === sourceNameKids || initialSource === sourceNameRus || initialSource === sourceNameNewRus) {
         setTimeout(function() {
 if (!Lampa.Storage.get('start_page') || Lampa.Storage.get('start_page') === 'main') {
     softRefresh(initialSource, false);
@@ -2155,7 +2344,8 @@ Lampa.Settings.listener.follow('open', function (e) {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             var sourceNameKids = sourceName + ' KIDS';
             var sourceNameRus = sourceName + ' RUS'; // Новый источник
-               var sourceNameNew = sourceName + ' NEW'; // Новый источник
+            var sourceNameNew = sourceName + ' NEW'; // Новый источник
+			var sourceNameNew = sourceName + 'NEW RUS';
 
            var paramsToHide = [
     'surs_cirillic',
