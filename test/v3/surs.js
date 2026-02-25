@@ -2230,7 +2230,7 @@ function add() {
                 return surs_mod_rus;
             }
         });
-		        Object.defineProperty(Lampa.Api.sources, sourceNameRus, {
+		        Object.defineProperty(Lampa.Api.sources, sourceNameNewRus, {
             get: function() {
                 return surs_mod_new_rus;
             }
