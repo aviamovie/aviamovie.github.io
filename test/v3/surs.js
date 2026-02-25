@@ -1973,7 +1973,7 @@ var SourceTMDBrus = function (parent) {
 };
 
 
-var TMDBNewRus = function (parent) {  
+var SourceTMDBNewRus = function (parent) {  
     this.network = new Lampa.Reguest();  
     this.discovery = false;  
   
@@ -2193,7 +2193,7 @@ function add() {
     var surs_mod_new = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBnew(Lampa.Api.sources.tmdb));
     var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
     var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
-	var surs_new_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBNEWus(Lampa.Api.sources.tmdb));
+	var surs_new_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBNEWrus(Lampa.Api.sources.tmdb));
 
     // Проверка на успешное создание источников
     if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
