@@ -1848,7 +1848,7 @@ var SourceTMDBrus = function (parent) {
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
                 apiUrl += '&with_original_language=ru';   
-                apiUrl = ''&vote_count.gte=1;  
+                apiUrl = '&vote_count.gte=1';  
                   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
