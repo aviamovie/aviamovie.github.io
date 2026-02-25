@@ -2066,10 +2066,10 @@ var SourceTMDBNewRus = function (parent) {
   
         var selectedStreamingServices = allStreamingServicesRUS;  
         selectedStreamingServices.forEach(function (service) {  
-            partsData.push(getStreamingWithGenres(service.title, service.id));  
+           // partsData.push(getStreamingWithGenres(service.title, service.id));  
         });  
         selectedStreamingServices.forEach(function (service) {  
-            partsData.push(getStreaming(service.title, service.id));  
+           // partsData.push(getStreaming(service.title, service.id));  
         });  
   
         // Russian new movies  
@@ -2133,7 +2133,7 @@ var SourceTMDBNewRus = function (parent) {
         }  
   
         allGenres.forEach(function (genre) {  
-            partsData.push(getTVShows(genre));  
+            //partsData.push(getTVShows(genre));  
         });  
   
         // Shuffle and wide-flag wrappers  
