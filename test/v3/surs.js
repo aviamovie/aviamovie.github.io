@@ -1977,7 +1977,7 @@ var SourceTMDBNewRus = function (parent) {
   
         // Helpers  
         function applyMinVotes(baseUrl) {  
-            var minVotes = 10;  
+            var minVotes = 2;  
             baseUrl += '&vote_count.gte=' + minVotes;  
             return baseUrl;  
         }  
@@ -2074,6 +2074,8 @@ var SourceTMDBNewRus = function (parent) {
 				apiUrl += sort.extraParams || '';
                 apiUrl += '&with_original_language=ru';  
 				apiUrl = applyWithoutKeywords(apiUrl); 
+				apiUrl = applyAgeRestriction(apiUrl);  
+				apiUrl = applyMinVotes(apiUrl);
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
