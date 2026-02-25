@@ -345,7 +345,7 @@
   
         if (sort.id === 'release_date.desc') {  
             var endDate = new Date();  
-            endDate.setDate(endDate.getDate() - 10);  
+            endDate.setDate(endDate.getDate() - 40);  
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
