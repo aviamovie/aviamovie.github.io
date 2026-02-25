@@ -928,6 +928,8 @@
                 var onComplete = arguments.length > 1 ? arguments[1] : undefined;  
                 var onError = arguments.length > 2 ? arguments[2] : undefined;  
                 var partsLimit = 9;  
+				var minVotesMoviesRU = 1;
+				var minVotesTVShowsRU = 0;
        
                 var partsData = getPartsData();  
                 var CustomData = [];  
@@ -995,88 +997,106 @@
                     return streamingServices.concat(streamingServicesRUS);  
                 }  
   
-                function getMovies(genre, options) {  
-                    options = options || {};  
-  
-                    return function (callback) {  
-                        var sort = adjustSortForMovies({ id: 'release_date.desc', title: 'surs_first_air_date_desc' });  
-                        var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
-  
-                        if (options.russian) {  
-                            apiUrl += '&with_origin_country=RU';  
-                        }  
-                          
-                        if (options.ukrainian) {  
-                            apiUrl += '&with_origin_country=UA';  
-                        }  
-  
-                        if (sort.extraParams) {  
-                            apiUrl += sort.extraParams;  
-                        }  
-  
-                        apiUrl = buildApiUrl(apiUrl);  
-  
-                        owner.get(apiUrl, params, function (json) {  
-                            if (!json || !Array.isArray(json.results)) {  
-                                return callback({ results: [] });  
-                            }  
-                            if (!options.russian && !options.ukrainian) {  
-                                json.results = applyFilters(json.results);  
-                            }  
-                            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
-                                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
-                            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';  
-                            callback(json);  
-                        }, function() {  
-                            callback({ results: [] });  
-                        });  
-                    };  
-                }  
+				function getMovies(genre, options) {  
+				    options = options || {};  
+				  
+				    return function (callback) {  
+				        var sort = adjustSortForMovies({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
+				        var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
+				  
+				        if (options.russian) {  
+				            apiUrl += '&with_origin_country=RU';  
+				        }  
+				           
+				        if (options.ukrainian) {  
+				            apiUrl += '&with_origin_country=UA';  
+				        }  
+				  
+				        if (sort.extraParams) {  
+				            apiUrl += sort.extraParams;  
+				        }  
+				  
+				          
+						if (options.russian) {  
+						    if (minVotesMoviesRU > 0) {  
+						        apiUrl += '&vote_count.gte=' + minVotesMoviesRU;  
+						    }  
+						    apiUrl = applyAgeRestriction(apiUrl);  
+						    apiUrl = applyWithoutKeywords(apiUrl);  
+						} else {  
+						    apiUrl = buildApiUrl(apiUrl);  
+						}  
+				  
+				        owner.get(apiUrl, params, function (json) {  
+				            if (!json || !Array.isArray(json.results)) {  
+				                return callback({ results: [] });  
+				            }  
+				            if (!options.russian && !options.ukrainian) {  
+				                json.results = applyFilters(json.results);  
+				            }  
+				            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
+				                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
+				            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';  
+				            callback(json);  
+				        }, function() {  
+				            callback({ results: [] });  
+				        });  
+				    };  
+				}  
   
                 function getTVShows(genre, options) {  
-                    options = options || {};  
-  
-                    return function (callback) {  
-                        var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
-                        var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;  
-  
-                        if (options.russian) {  
-                            apiUrl += '&with_origin_country=RU';  
-                        }  
-                        if (options.korean) {  
-                            apiUrl += '&with_origin_country=KR';  
-                        }  
-                        if (options.turkish) {  
-                            apiUrl += '&with_origin_country=TR';  
-                        }  
-                        if (options.ukrainian) {  
-                            apiUrl += '&with_origin_country=UA';  
-                        }  
-  
-                        if (sort.extraParams) {  
-                            apiUrl += sort.extraParams;  
-                        }  
-  
-                        apiUrl = buildApiUrl(apiUrl);  
-  
-                        owner.get(apiUrl, params, function (json) {  
-                            if (!json || !Array.isArray(json.results)) {  
-                                return callback({ results: [] });  
-                            }  
-                            if (!options.russian && !options.ukrainian) {  
-                                json.results = applyFilters(json.results);  
-                            }  
-                            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
-                                             options.korean ? Lampa.Lang.translate('surs_korean') :  
-                                             options.turkish ? Lampa.Lang.translate('surs_turkish') :  
-                                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
-                            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';  
-                            callback(json);  
-                        }, function() {  
-                            callback({ results: [] });  
-                        });  
-                    };  
-                }  
+				    options = options || {};  
+				  
+				    return function (callback) {  
+				        var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
+				        var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;  
+				  
+				        if (options.russian) {  
+				            apiUrl += '&with_origin_country=RU';  
+				        }  
+				        if (options.korean) {  
+				            apiUrl += '&with_origin_country=KR';  
+				        }  
+				        if (options.turkish) {  
+				            apiUrl += '&with_origin_country=TR';  
+				        }  
+				        if (options.ukrainian) {  
+				            apiUrl += '&with_origin_country=UA';  
+				        }  
+				  
+				        if (sort.extraParams) {  
+				            apiUrl += sort.extraParams;  
+				        }  
+				  
+				        // Apply filters: use Russian-specific vote filter for Russian TV shows  
+				        if (options.russian) {  
+				            if (minVotesTVShowsRU > 0) {  
+				                apiUrl += '&vote_count.gte=' + minVotesTVShowsRU;  
+				            }  
+				            apiUrl = applyAgeRestriction(apiUrl);  
+				            apiUrl = applyWithoutKeywords(apiUrl);  
+				        } else {  
+				            apiUrl = buildApiUrl(apiUrl);  
+				        }  
+				  
+				        owner.get(apiUrl, params, function (json) {  
+				            if (!json || !Array.isArray(json.results)) {  
+				                return callback({ results: [] });  
+				            }  
+				            if (!options.russian && !options.ukrainian) {  
+				                json.results = applyFilters(json.results);  
+				            }  
+				            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
+				                             options.korean ? Lampa.Lang.translate('surs_korean') :  
+				                             options.turkish ? Lampa.Lang.translate('surs_turkish') :  
+				                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
+				            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';  
+				            callback(json);  
+				        }, function() {  
+				            callback({ results: [] });  
+				        });  
+				    };  
+				}
   
                 var genres = getGenres();  
   
