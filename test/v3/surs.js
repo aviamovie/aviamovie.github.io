@@ -1788,12 +1788,13 @@ var SourceTMDBrus = function (parent) {
             return function (callback) {  
                 var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
                 var genre = allGenres[Math.floor(Math.random() * allGenres.length)];  
-                var apiUrl = buildApiUrl(  
+                var apiUrl =   
                     'discover/tv?with_networks=' + serviceId +  
                     '&with_genres=' + genre.id +  
                     '&sort_by=' + sort.id +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)  
-                );  
+                    '&air_date.lte=' + new Date().toISOString().substr(0, 10);  
+				apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl); 
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -1811,11 +1812,12 @@ var SourceTMDBrus = function (parent) {
         function getStreaming(serviceName, serviceId) {  
             return function (callback) {  
                 var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
-                var apiUrl = buildApiUrl(  
+                var apiUrl =   
                     'discover/tv?with_networks=' + serviceId +  
                     '&sort_by=' + sort.id +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)  
-                );  
+                    '&air_date.lte=' + new Date().toISOString().substr(0, 10);  
+				apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl); 
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -1845,7 +1847,7 @@ var SourceTMDBrus = function (parent) {
                 var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);  
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
   
-                apiUrl += '&with_original_language=ru®ion=RU';  
+                apiUrl += '&with_original_language=RU';  
   
                 if (sort.id === 'release_date.desc') {  
                     var today = new Date().toISOString().split('T')[0];  
@@ -1879,7 +1881,8 @@ var SourceTMDBrus = function (parent) {
                 var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
                 var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';  
   
-                apiUrl = buildApiUrl(apiUrl);  
+                apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl);  
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -1929,7 +1932,7 @@ var SourceTMDBrus = function (parent) {
             return function (callback) {  
                 var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +   
                               '&sort_by=vote_average.desc' +   
-                              '&vote_count.gte=10' +   
+                              '&vote_count.gte=20' +   
                               '&with_origin_country=RU' +   
                               '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +  
                               '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';  
