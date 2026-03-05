@@ -204,9 +204,9 @@ function clearExternalButtons() {
   
 // Функция для обновления отображения кнопок  
 function refreshButtons() {  
-    // Перерисовываем контент-ряд с кнопками  
-    Lampa.ContentRows.update('surs_buttons');  
-}  
+    // Обновляем контент-ряд с кнопками  
+    Lampa.ContentRows.call('surs_buttons', {}, []);  
+} 
   
 // Функция для получения всех внешних кнопок  
 function getExternalButtons() {  
