@@ -10,17 +10,17 @@ surs_new: '<svg fill="#ffffff" version="1.1" id="Capa_1" xmlns="http://www.w3.or
         surs_kids: '<svg fill="#ffffff" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64px" height="64px" viewBox="0 0 300 300" enable-background="new 0 0 300 300" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M213,163v-48l8.2-2.8l29.1,37.8L213,163z M176.5,55.5c0-25.8-20.9-46.7-46.7-46.7S83.1,29.7,83.1,55.5s20.9,46.7,46.7,46.7 C155.6,102.3,176.5,81.3,176.5,55.5z M203.7,135.5c-2.4-9.9-12.4-16-22.4-13.5l-35.1,8.6c0,0-47-28.4-47.8-28.8 c-16.9-7.7-37.2-1.1-46.3,15.4l-34.3,62.4c-6.9,12.6-5.5,27.5,2.4,38.4c0.2,0.3,30.4,34.9,30.4,34.9H27.5 c-11.4,0-20.4,9.7-19.4,21.3C9,284.4,17.8,292,28,292h66.5c5.7,0,14.5-2.6,18.7-12c4-8.8,0.6-17.4-4.5-23l-31.5-36.1l36.7-66.7 l19.8,12c3.7,2.2,9.6,3.2,14,2.1c10.7-2.5,42.5-10.4,42.5-10.4C200.1,155.5,206.1,145.5,203.7,135.5z M268.5,222l-7.6-23H214 l-7.6,23H268.5z M272.5,234h-70.1l-7.6,23h85.4L272.5,234z M284.1,269h-93.4l-7.6,23h108.7L284.1,269z"></path> </g></svg>',                  };  
       
     function getAllButtons() {  
-        return [  
-            { id: 'surs_main', title: 'surs_main' },  
-            { id: 'surs_bookmarks', title: 'surs_bookmarks' },  
-            { id: 'surs_history', title: 'surs_history' },  
-            { id: 'surs_select', title: 'surs_select' },  
-            { id: 'surs_new', title: 'surs_new' },  
-            { id: 'surs_rus', title: 'surs_rus' },  
-            { id: 'surs_kids', title: 'surs_kids' },  
-            { id: 'surs_settings', title: 'title_settings' }  
-        ];  
-    }  
+    return [  
+        { id: 'surs_main', title: 'surs_main' },  
+        { id: 'surs_bookmarks', title: 'surs_bookmarks' },  
+        { id: 'surs_history', title: 'surs_history' },  
+        { id: 'surs_select', title: 'surs_select' },  
+        { id: 'surs_new', title: 'surs_btns_new' },  
+        { id: 'surs_rus', title: 'surs_btns_rus' }, 
+        { id: 'surs_kids', title: 'surs_kids' },  
+        { id: 'surs_settings', title: 'title_settings' }  
+    ];  
+} 
       
     var buttonActions = {  
         surs_main: function() {  
@@ -299,6 +299,19 @@ function addStyles() {
             }  
         });  
     }  
+
+    Lampa.Lang.add({  
+    surs_btns_new: {  
+        ru: 'Новинки Мир',  
+        uk: 'Новинки Світ',   
+        en: 'World News'  
+    },  
+    surs_btns_rus: {  
+        ru: 'Новинки Россия',  
+        uk: 'Новинки Росія',  
+        en: 'Russia News'  
+    }  
+})
       
     // Проверяем версию Lampa и инициализируем плагин  
     if (Lampa.Manifest.app_digital >= 300) {  
