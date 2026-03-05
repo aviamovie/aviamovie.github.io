@@ -312,8 +312,8 @@ function addStyles() {
         }).map(function(b) {  
             var cardData = {  
                 source: 'custom',  
-                title: Lampa.Lang.translate(b.title), // Всегда используем перевод  
-                name: Lampa.Lang.translate(b.title),   // Всегда используем перевод  
+                title: Lampa.Lang.translate(b.title),  
+                name: Lampa.Lang.translate(b.title),  
                 id: b.id,  
                 params: {  
                     createInstance: function() {  
@@ -345,9 +345,12 @@ function addStyles() {
                             var svgContainer = document.createElement('div');  
                             svgContainer.classList.add('card__svg-icon');  
                               
-                            // Используем иконку из данных карточки  
+                            // Используем иконку из данных карточки или напрямую из объекта кнопки  
                             if (this.data.icon_svg) {  
                                 svgContainer.innerHTML = this.data.icon_svg;  
+                            } else if (b.icon) {  
+                                // Прямое использование иконки для внешних кнопок  
+                                svgContainer.innerHTML = b.icon;  
                             } else {  
                                 // Fallback для стандартных иконок  
                                 if (b.id === 'surs_main') {  
