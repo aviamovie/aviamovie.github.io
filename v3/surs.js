@@ -345,11 +345,11 @@
   
         if (sort.id === 'release_date.desc') {  
             var endDate = new Date();  
-            endDate.setDate(endDate.getDate() - 10);  
+            endDate.setDate(endDate.getDate() - 40);  
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
-            startDate.setMonth(startDate.getMonth() - 8);  
+            startDate.setMonth(startDate.getMonth() - 26);  
             startDate = startDate.toISOString().split('T')[0];  
   
             sort.extraParams = '&release_date.gte=' + startDate + '&release_date.lte=' + endDate;  
@@ -368,7 +368,7 @@
             endDate = endDate.toISOString().split('T')[0];  
   
             var startDate = new Date();  
-            startDate.setMonth(startDate.getMonth() - 8);  
+            startDate.setMonth(startDate.getMonth() - 18);  
             startDate = startDate.toISOString().split('T')[0];  
             sort.extraParams = '&first_air_date.gte=' + startDate + '&first_air_date.lte=' + endDate;  
         }  
@@ -927,7 +927,9 @@
                 var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};  
                 var onComplete = arguments.length > 1 ? arguments[1] : undefined;  
                 var onError = arguments.length > 2 ? arguments[2] : undefined;  
-                var partsLimit = 6;  
+                var partsLimit = 9;  
+				var minVotesMoviesRU = 1;
+				var minVotesTVShowsRU = 0;
        
                 var partsData = getPartsData();  
                 var CustomData = [];  
@@ -995,88 +997,106 @@
                     return streamingServices.concat(streamingServicesRUS);  
                 }  
   
-                function getMovies(genre, options) {  
-                    options = options || {};  
-  
-                    return function (callback) {  
-                        var sort = adjustSortForMovies({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
-                        var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
-  
-                        if (options.russian) {  
-                            apiUrl += '&with_origin_country=RU';  
-                        }  
-                          
-                        if (options.ukrainian) {  
-                            apiUrl += '&with_origin_country=UA';  
-                        }  
-  
-                        if (sort.extraParams) {  
-                            apiUrl += sort.extraParams;  
-                        }  
-  
-                        apiUrl = buildApiUrl(apiUrl);  
-  
-                        owner.get(apiUrl, params, function (json) {  
-                            if (!json || !Array.isArray(json.results)) {  
-                                return callback({ results: [] });  
-                            }  
-                            if (!options.russian && !options.ukrainian) {  
-                                json.results = applyFilters(json.results);  
-                            }  
-                            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
-                                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
-                            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';  
-                            callback(json);  
-                        }, function() {  
-                            callback({ results: [] });  
-                        });  
-                    };  
-                }  
+				function getMovies(genre, options) {  
+				    options = options || {};  
+				  
+				    return function (callback) {  
+				        var sort = adjustSortForMovies({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
+				        var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
+				  
+				        if (options.russian) {  
+				            apiUrl += '&with_origin_country=RU';  
+				        }  
+				           
+				        if (options.ukrainian) {  
+				            apiUrl += '&with_origin_country=UA';  
+				        }  
+				  
+				        if (sort.extraParams) {  
+				            apiUrl += sort.extraParams;  
+				        }  
+				  
+				          
+						if (options.russian) {  
+						    if (minVotesMoviesRU > 0) {  
+						        apiUrl += '&vote_count.gte=' + minVotesMoviesRU;  
+						    }  
+						    apiUrl = applyAgeRestriction(apiUrl);  
+						    apiUrl = applyWithoutKeywords(apiUrl);  
+						} else {  
+						    apiUrl = buildApiUrl(apiUrl);  
+						}  
+				  
+				        owner.get(apiUrl, params, function (json) {  
+				            if (!json || !Array.isArray(json.results)) {  
+				                return callback({ results: [] });  
+				            }  
+				            if (!options.russian && !options.ukrainian) {  
+				                json.results = applyFilters(json.results);  
+				            }  
+				            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
+				                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
+				            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';  
+				            callback(json);  
+				        }, function() {  
+				            callback({ results: [] });  
+				        });  
+				    };  
+				}  
   
                 function getTVShows(genre, options) {  
-                    options = options || {};  
-  
-                    return function (callback) {  
-                        var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
-                        var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;  
-  
-                        if (options.russian) {  
-                            apiUrl += '&with_origin_country=RU';  
-                        }  
-                        if (options.korean) {  
-                            apiUrl += '&with_origin_country=KR';  
-                        }  
-                        if (options.turkish) {  
-                            apiUrl += '&with_origin_country=TR';  
-                        }  
-                        if (options.ukrainian) {  
-                            apiUrl += '&with_origin_country=UA';  
-                        }  
-  
-                        if (sort.extraParams) {  
-                            apiUrl += sort.extraParams;  
-                        }  
-  
-                        apiUrl = buildApiUrl(apiUrl);  
-  
-                        owner.get(apiUrl, params, function (json) {  
-                            if (!json || !Array.isArray(json.results)) {  
-                                return callback({ results: [] });  
-                            }  
-                            if (!options.russian && !options.ukrainian) {  
-                                json.results = applyFilters(json.results);  
-                            }  
-                            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
-                                             options.korean ? Lampa.Lang.translate('surs_korean') :  
-                                             options.turkish ? Lampa.Lang.translate('surs_turkish') :  
-                                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
-                            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';  
-                            callback(json);  
-                        }, function() {  
-                            callback({ results: [] });  
-                        });  
-                    };  
-                }  
+				    options = options || {};  
+				  
+				    return function (callback) {  
+				        var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });  
+				        var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;  
+				  
+				        if (options.russian) {  
+				            apiUrl += '&with_origin_country=RU';  
+				        }  
+				        if (options.korean) {  
+				            apiUrl += '&with_origin_country=KR';  
+				        }  
+				        if (options.turkish) {  
+				            apiUrl += '&with_origin_country=TR';  
+				        }  
+				        if (options.ukrainian) {  
+				            apiUrl += '&with_origin_country=UA';  
+				        }  
+				  
+				        if (sort.extraParams) {  
+				            apiUrl += sort.extraParams;  
+				        }  
+				  
+				        // Apply filters: use Russian-specific vote filter for Russian TV shows  
+				        if (options.russian) {  
+				            if (minVotesTVShowsRU > 0) {  
+				                apiUrl += '&vote_count.gte=' + minVotesTVShowsRU;  
+				            }  
+				            apiUrl = applyAgeRestriction(apiUrl);  
+				            apiUrl = applyWithoutKeywords(apiUrl);  
+				        } else {  
+				            apiUrl = buildApiUrl(apiUrl);  
+				        }  
+				  
+				        owner.get(apiUrl, params, function (json) {  
+				            if (!json || !Array.isArray(json.results)) {  
+				                return callback({ results: [] });  
+				            }  
+				            if (!options.russian && !options.ukrainian) {  
+				                json.results = applyFilters(json.results);  
+				            }  
+				            var titlePrefix = options.russian ? Lampa.Lang.translate('surs_russian') :  
+				                             options.korean ? Lampa.Lang.translate('surs_korean') :  
+				                             options.turkish ? Lampa.Lang.translate('surs_turkish') :  
+				                             options.ukrainian ? Lampa.Lang.translate('surs_ukrainian') : '';  
+				            json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';  
+				            callback(json);  
+				        }, function() {  
+				            callback({ results: [] });  
+				        });  
+				    };  
+				}
   
                 var genres = getGenres();  
   
@@ -1135,592 +1155,589 @@
     
 /* для детей */
 
-var SourceTMDBkids = function (parent) {  
-    this.network = new Lampa.Reguest();  
-    this.discovery = false;  
-  
-    this.main = function () {  
-        var owner = this;  
-        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};  
-        var onComplete = arguments.length > 1 ? arguments[1] : undefined;  
-        var onError = arguments.length > 2 ? arguments[2] : undefined;  
-        var partsLimit = 9;  
-  
-        var genres = [  
-            { id: 28, title: 'боевики' },  
-            { id: 35, title: 'комедии' },  
-            { id: 16, title: 'мультфильмы' },  
-            { id: 10762, title: 'детское' },  
-            { id: 12, title: 'приключения' },  
-            { id: 878, title: 'фантастика' },  
-            { id: 10751, title: 'семейные' },  
-            { id: 14, title: 'фэнтези' },  
-        ];  
-  
-        var streamingServices = [  
-            { id: 49, title: 'HBO' },  
-            { id: 77, title: 'SyFy' },  
-            { id: 2552, title: 'Apple TV+' },  
-            { id: 453, title: 'Hulu' },  
-            { id: 1024, title: 'Amazon Prime' },  
-            { id: 213, title: 'Netflix' },  
-            { id: 3186, title: 'HBO Max' },  
-            { id: 2076, title: 'Paramount+' },  
-            { id: 4330, title: 'Paramount+' },  
-            { id: 3353, title: 'Peacock' },  
-            { id: 2739, title: 'Disney+' },  
-            { id: 44, title: 'Disney XD' },  
-            { id: 281, title: 'Disney XD' },  
-            { id: 2, title: 'ABC' },  
-            { id: 6, title: 'NBC' },  
-            { id: 16, title: 'CBS' },  
-            { id: 318, title: 'Starz' },  
-            { id: 174, title: 'BBC' },  
-            { id: 56, title: 'Cartoon Network' },  
-            { id: 19, title: 'FOX' },  
-            { id: 2686, title: 'FOX kids' },  
-            { id: 13, title: 'Nicelodeon' },  
-        ];  
-  
-        function applyMinVotes(baseUrl) {  
-            var minVotes = 5;  
-            baseUrl += '&vote_count.gte=' + minVotes;  
-            return baseUrl;  
-        }  
-  
-        function applyAgeRestriction(baseUrl) {  
-            var certification = '6+';  
-            baseUrl += '&certification_country=RU&certification=' + encodeURIComponent(certification);  
-            return baseUrl;  
-        }  
-  
-        function applyWithoutKeywords(baseUrl) {  
-            var baseExcludedKeywords = [  
-                '346488',  
-                '158718',  
-                '41278',  
-                '13141',  
-                '345822',  
-                '315535',  
-                '290667',  
-                '323477',  
-                '290609'  
-            ];  
-            baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));  
-            return baseUrl;  
-        }  
-  
-        function buildApiUrl(baseUrl) {  
-            baseUrl = applyMinVotes(baseUrl);  
-            baseUrl = applyAgeRestriction(baseUrl);  
-            baseUrl = applyWithoutKeywords(baseUrl);  
-            return baseUrl;  
-        }  
-  
-        var buttonsData = getPartsData();  
-        var partsData = [];  
-  
-        function getStreamingWithGenres(serviceName, serviceId) {  
-            return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
-                var genre = genres[Math.floor(Math.random() * genres.length)];  
-                var apiUrl = buildApiUrl(  
-                    'discover/tv?with_networks=' + serviceId +  
-                    '&with_genres=' + genre.id +  
-                    '&sort_by=' + sort.key +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)  
-                );  
-  
-                owner.get(apiUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    json.results = applyFilters(json.results);  
-                    json.title = Lampa.Lang.translate(sort.title + ' (' + genre.title + ') на ' + serviceName);  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        function getStreaming(serviceName, serviceId) {  
-            return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
-                var apiUrl = buildApiUrl(  
-                    'discover/tv?with_networks=' + serviceId +  
-                    '&sort_by=' + sort.key +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)  
-                );  
-  
-                owner.get(apiUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    json.results = applyFilters(json.results);  
-                    json.title = Lampa.Lang.translate(sort.title + ' на ' + serviceName);  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        var selectedStreamingServices = streamingServices.concat(allStreamingServicesRUS);  
-  
-        selectedStreamingServices.forEach(function (service) {  
-            partsData.push(getStreamingWithGenres(service.title, service.id));  
-            partsData.push(getStreaming(service.title, service.id));  
-        });  
-  
-        function getMovies(genre, options) {  
-            options = options || {};  
-            return function (callback) {  
-                var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);  
-                var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;  
-  
-                if (options.russian) {  
-                    apiUrl += '&with_original_language=ru';  
-                }  
-  
-                if (sort.key === 'release_date.desc') {  
-                    var today = new Date().toISOString().split('T')[0];  
-                    apiUrl += '&release_date.lte=' + today;  
-                    if (options.russian) {  
-                        apiUrl += '&region=RU';  
-                    }  
-                }  
-  
-                if (sort.extraParams) {  
-                    apiUrl += sort.extraParams;  
-                }  
-                  
-                apiUrl = buildApiUrl(apiUrl);  
-  
-                owner.get(apiUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    if (!options.russian) {  
-                        json.results = applyFilters(json.results);  
-                    }  
-                    var titlePrefix = options.russian ? ' - российские' : '';  
-                    json.title = Lampa.Lang.translate(sort.title + titlePrefix + ' (' + genre.title + ')');  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        genres.forEach(function (genre) {  
-            partsData.push(getMovies(genre));  
-            partsData.push(getMovies(genre, { russian: true }));  
-        });  
-  
-        function getTVShows(genre, options) {  
-            options = options || {};  
-            return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
-                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.key;  
-  
-                if (options.russian) {  
-                    apiUrl += '&with_origin_country=RU';  
-                }  
-                  
-                apiUrl = buildApiUrl(apiUrl);  
-  
-                owner.get(apiUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    if (!options.russian) {  
-                        json.results = applyFilters(json.results);  
-                    }  
-                    var titlePrefix = options.russian ? ' - российские' : '';  
-                    json.title = Lampa.Lang.translate(sort.title + titlePrefix + ' сериалы (' + genre.title + ')');  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        genres.forEach(function (genre) {  
-            partsData.push(getTVShows(genre));  
-            partsData.push(getTVShows(genre, { russian: true }));  
-        });  
-  
-        function getAnimatedMovies(options) {  
-            options = options || {};  
-            return function (callback) {  
-                var genreIds = ['16', '10751'];  
-  
-                for (var i = 0; i < allSortOptions.length; i++) {  
-                    var sort = allSortOptions[i];  
-                    var adjustedSort = adjustSortForMovies(sort);  
-                    var apiUrl = 'discover/movie?with_genres=' + genreIds.join(',') + '&sort_by=' + adjustedSort.key;  
-  
-                    if (options && options.russian) {  
-                        apiUrl += '&with_original_language=ru';  
-                    }  
-  
-                    if (adjustedSort.key === 'release_date.desc') {  
-                        var today = new Date().toISOString().split('T')[0];  
-                        apiUrl += '&release_date.lte=' + today;  
-                        if (options && options.russian) {  
-                            apiUrl += '&region=RU';  
-                        }  
-                    }  
-  
-                    if (adjustedSort.extraParams) {  
-                        apiUrl += adjustedSort.extraParams;  
-                    }  
-  
-                    apiUrl = buildApiUrl(apiUrl);  
-  
-                    owner.get(apiUrl, params, (function (sortOption) {  
-                        return function (json) {  
-                            if (!json || !Array.isArray(json.results)) {  
-                                return callback({ results: [] });  
-                            }  
-                            json.results = applyFilters(json.results);  
-                            var titlePrefix = options && options.russian ? ' - российские' : '';  
-                            json.title = Lampa.Lang.translate(sortOption.title + titlePrefix + ' (Мультфильмы, Детское)');  
-                            callback(json);  
-                        };  
-                    })(sort), function() {  
-                        callback({ results: [] });  
-                    });  
-                }  
-            };  
-        }  
-  
-        for (var j = 0; j < allSortOptions.length; j++) {  
-            partsData.push(getAnimatedMovies());  
-            partsData.push(getAnimatedMovies({ russian: true }));  
-        }  
-  
-        function getBestContentByGenre(genre, contentType) {  
-            return function (callback) {  
-                var apiUrl = 'discover/' + contentType + '?with_genres=' + genre.id +   
-                             '&sort_by=vote_average.desc' +   
-                             '&vote_count.gte=200';  
-  
-                var russianApiUrl = apiUrl + '&with_origin_country=RU';  
-  
-                apiUrl = applyAgeRestriction(apiUrl);  
-                apiUrl = applyWithoutKeywords(apiUrl);  
-  
-                russianApiUrl = applyAgeRestriction(russianApiUrl);  
-                russianApiUrl = applyWithoutKeywords(russianApiUrl);  
-  
-                owner.get(apiUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    json.results = filterCyrillic(json.results);  
-                    json.title = Lampa.Lang.translate(contentType === 'movie'   
-                        ? 'Топ фильмы (' + genre.title + ')'  
-                        : 'Топ сериалы (' + genre.title + ')');  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-  
-                owner.get(russianApiUrl, params, function (russianJson) {  
-                    if (!russianJson || !Array.isArray(russianJson.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    russianJson.results = filterCyrillic(russianJson.results);  
-                    russianJson.title = Lampa.Lang.translate(contentType === 'movie'   
-                        ? 'Лучшие российские фильмы (' + genre.title + ')'  
-                        : 'Лучшие российские сериалы (' + genre.title + ')');  
-                    callback(russianJson);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        genres.forEach(function (genre) {  
-            partsData.push(getBestContentByGenre(genre, 'movie'));  
-            partsData.push(getBestContentByGenre(genre, 'tv'));  
-        });  
-  
-        function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {  
-            return function (callback) {  
-                var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +   
-                              '&sort_by=vote_average.desc' +   
-                              '&vote_count.gte=100' +  
-                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +  
-                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';  
-  
-                baseUrl = applyAgeRestriction(baseUrl);  
-                baseUrl = applyWithoutKeywords(baseUrl);  
-  
-                owner.get(baseUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    json.results = applyFilters(json.results).filter(function (content) {  
-                        var dateField = type === 'movie' ? 'release_date' : 'first_air_date';  
-                        return content[dateField] &&  
-                               parseInt(content[dateField].substring(0, 4)) >= startYear &&  
-                               parseInt(content[dateField].substring(0, 4)) <= endYear;  
-                    });  
-                    json.title = Lampa.Lang.translate('Топ ' + (type === 'movie' ? 'фильмы' : 'сериалы') +   
-                                 ' (' + genre.title + ') за ' + startYear + '-' + endYear);  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        genres.forEach(function (genre) {  
+var SourceTMDBkids = function (parent) {
+    this.network = new Lampa.Reguest();
+    this.discovery = false;
+
+    this.main = function () {
+        var owner = this;
+        var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var onComplete = arguments.length > 1 ? arguments[1] : undefined;
+        var onError = arguments.length > 2 ? arguments[2] : undefined;
+        var partsLimit = 9;
+
+        var genres = [
+            { id: 28,  title: Lampa.Lang.translate('surs_genre_action') },
+            { id: 35,  title: Lampa.Lang.translate('surs_genre_comedy') },
+            { id: 16,  title: Lampa.Lang.translate('surs_genre_animation') },
+            { id: 10762,title: Lampa.Lang.translate('surs_genre_kids') },
+            { id: 12,  title: Lampa.Lang.translate('surs_genre_adventure') },
+            { id: 878, title: Lampa.Lang.translate('surs_genre_sci_fi') },
+            { id: 10751,title: Lampa.Lang.translate('surs_genre_family') },
+            { id: 14,  title: Lampa.Lang.translate('surs_genre_fantasy') },
+        ];
+
+        var streamingServices = [
+            { id: 49,    title: 'HBO' },
+            { id: 77,    title: 'SyFy' },
+            { id: 2552,  title: 'Apple TV+' },
+            { id: 453,   title: 'Hulu' },
+            { id: 1024,  title: 'Amazon Prime' },
+            { id: 213,   title: 'Netflix' },
+            { id: 3186,  title: 'HBO Max' },
+            { id: 2076,  title: 'Paramount+' },
+            { id: 4330,  title: 'Paramount+' },
+            { id: 3353,  title: 'Peacock' },
+            { id: 2739,  title: 'Disney+' },
+            { id: 44,    title: 'Disney XD' },
+            { id: 281,   title: 'Disney XD' },
+            { id: 2,     title: 'ABC' },
+            { id: 6,     title: 'NBC' },
+            { id: 16,    title: 'CBS' },
+            { id: 318,   title: 'Starz' },
+            { id: 174,   title: 'BBC' },
+            { id: 56,    title: 'Cartoon Network' },
+            { id: 19,    title: 'FOX' },
+            { id: 2686,  title: 'FOX kids' },
+            { id: 13,    title: 'Nickelodeon' },
+        ];
+
+        function applyMinVotes(baseUrl) {
+            var minVotes = 5;
+            baseUrl += '&vote_count.gte=' + minVotes;
+            return baseUrl;
+        }
+
+        function applyAgeRestriction(baseUrl) {
+            var certification = '6+';
+            baseUrl += '&certification_country=RU&certification=' + encodeURIComponent(certification);
+            return baseUrl;
+        }
+
+        function applyWithoutKeywords(baseUrl) {
+            var baseExcludedKeywords = [
+                '346488','158718','41278','13141','345822',
+                '315535','290667','323477','290609'
+            ];
+            baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
+            return baseUrl;
+        }
+
+        function buildApiUrl(baseUrl) {
+            baseUrl = applyMinVotes(baseUrl);
+            baseUrl = applyAgeRestriction(baseUrl);
+            baseUrl = applyWithoutKeywords(baseUrl);
+            return baseUrl;
+        }
+
+        var buttonsData = getPartsData();  // предполагается, что эта функция определена где-то выше
+        var partsData = [];
+
+        function getStreamingWithGenres(serviceName, serviceId) {
+            return function (callback) {
+                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
+                var genre = genres[Math.floor(Math.random() * genres.length)];
+                var apiUrl = buildApiUrl(
+                    'discover/tv?with_networks=' + serviceId +
+                    '&with_genres=' + genre.id +
+                    '&sort_by=' + sort.key +
+                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)
+                );
+
+                owner.get(apiUrl, params, function (json) {
+                    if (!json || !Array.isArray(json.results)) {
+                        return callback({ results: [] });
+                    }
+                    json.results = applyFilters(json.results);
+                    json.title = Lampa.Lang.translate(sort.title) + ' (' + genre.title + ') ' +
+                                 Lampa.Lang.translate('surs_on') + ' ' + serviceName;
+                    callback(json);
+                }, function() {
+                    callback({ results: [] });
+                });
+            };
+        }
+
+        function getStreaming(serviceName, serviceId) {
+            return function (callback) {
+                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
+                var apiUrl = buildApiUrl(
+                    'discover/tv?with_networks=' + serviceId +
+                    '&sort_by=' + sort.key +
+                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)
+                );
+
+                owner.get(apiUrl, params, function (json) {
+                    if (!json || !Array.isArray(json.results)) {
+                        return callback({ results: [] });
+                    }
+                    json.results = applyFilters(json.results);
+                    json.title = Lampa.Lang.translate(sort.title) + ' ' +
+                                 Lampa.Lang.translate('surs_on') + ' ' + serviceName;
+                    callback(json);
+                }, function() {
+                    callback({ results: [] });
+                });
+            };
+        }
+
+        var selectedStreamingServices = streamingServices.concat(allStreamingServicesRUS || []);
+
+        selectedStreamingServices.forEach(function (service) {
+            partsData.push(getStreamingWithGenres(service.title, service.id));
+            partsData.push(getStreaming(service.title, service.id));
+        });
+
+        function getMovies(genre, options) {
+            options = options || {};
+            return function (callback) {
+                var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);
+                var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.key;
+
+                if (options.russian) {
+                    apiUrl += '&with_original_language=ru';
+                }
+
+                if (sort.key === 'release_date.desc') {
+                    var today = new Date().toISOString().split('T')[0];
+                    apiUrl += '&release_date.lte=' + today;
+                    if (options.russian) {
+                        apiUrl += '&region=RU';
+                    }
+                }
+
+                if (sort.extraParams) {
+                    apiUrl += sort.extraParams;
+                }
+
+                apiUrl = buildApiUrl(apiUrl);
+
+                owner.get(apiUrl, params, function (json) {
+                    if (!json || !Array.isArray(json.results)) {
+                        return callback({ results: [] });
+                    }
+                    if (!options.russian) {
+                        json.results = applyFilters(json.results);
+                    }
+                    var titlePrefix = options.russian ? ' — ' + Lampa.Lang.translate('surs_russian') : '';
+                    json.title = Lampa.Lang.translate(sort.title) + titlePrefix + ' (' + genre.title + ')';
+                    callback(json);
+                }, function() {
+                    callback({ results: [] });
+                });
+            };
+        }
+
+        genres.forEach(function (genre) {
+            partsData.push(getMovies(genre));
+            partsData.push(getMovies(genre, { russian: true }));
+        });
+
+        function getTVShows(genre, options) {
+            options = options || {};
+            return function (callback) {
+                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];
+                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.key;
+
+                if (options.russian) {
+                    apiUrl += '&with_origin_country=RU';
+                }
+
+                apiUrl = buildApiUrl(apiUrl);
+
+                owner.get(apiUrl, params, function (json) {
+                    if (!json || !Array.isArray(json.results)) {
+                        return callback({ results: [] });
+                    }
+                    if (!options.russian) {
+                        json.results = applyFilters(json.results);
+                    }
+                    var titlePrefix = options.russian ? ' — ' + Lampa.Lang.translate('surs_russian') : '';
+                    json.title = Lampa.Lang.translate(sort.title) + titlePrefix + ' ' +
+                                 Lampa.Lang.translate('surs_tv_shows') + ' (' + genre.title + ')';
+                    callback(json);
+                }, function() {
+                    callback({ results: [] });
+                });
+            };
+        }
+
+        genres.forEach(function (genre) {
+            partsData.push(getTVShows(genre));
+            partsData.push(getTVShows(genre, { russian: true }));
+        });
+
+        function getAnimatedMovies(options) {
+            options = options || {};
+            return function (callback) {
+                var genreIds = ['16', '10751'];
+
+                for (var i = 0; i < allSortOptions.length; i++) {
+                    var sort = allSortOptions[i];
+                    var adjustedSort = adjustSortForMovies(sort);
+                    var apiUrl = 'discover/movie?with_genres=' + genreIds.join(',') + '&sort_by=' + adjustedSort.key;
+
+                    if (options.russian) {
+                        apiUrl += '&with_original_language=ru';
+                    }
+
+                    if (adjustedSort.key === 'release_date.desc') {
+                        var today = new Date().toISOString().split('T')[0];
+                        apiUrl += '&release_date.lte=' + today;
+                        if (options.russian) {
+                            apiUrl += '&region=RU';
+                        }
+                    }
+
+                    if (adjustedSort.extraParams) {
+                        apiUrl += adjustedSort.extraParams;
+                    }
+
+                    apiUrl = buildApiUrl(apiUrl);
+
+                    owner.get(apiUrl, params, (function (sortOption) {
+                        return function (json) {
+                            if (!json || !Array.isArray(json.results)) {
+                                return callback({ results: [] });
+                            }
+                            json.results = applyFilters(json.results);
+                            var titlePrefix = options.russian ? ' — ' + Lampa.Lang.translate('surs_russian') : '';
+                            json.title = Lampa.Lang.translate(sortOption.title) + titlePrefix +
+                                         ' (' + Lampa.Lang.translate('surs_genre_animation') + ', ' +
+                                         Lampa.Lang.translate('surs_genre_kids') + ')';
+                            callback(json);
+                        };
+                    })(sort), function() {
+                        callback({ results: [] });
+                    });
+                }
+            };
+        }
+
+        for (var j = 0; j < allSortOptions.length; j++) {
+            partsData.push(getAnimatedMovies());
+            partsData.push(getAnimatedMovies({ russian: true }));
+        }
+
+        function getBestContentByGenre(genre, contentType) {
+            return function (callback) {
+                var apiUrl = 'discover/' + contentType + '?with_genres=' + genre.id +
+                             '&sort_by=vote_average.desc' +
+                             '&vote_count.gte=200';
+
+                var russianApiUrl = apiUrl + '&with_origin_country=RU';
+
+                apiUrl = applyAgeRestriction(apiUrl);
+                apiUrl = applyWithoutKeywords(apiUrl);
+
+                russianApiUrl = applyAgeRestriction(russianApiUrl);
+                russianApiUrl = applyWithoutKeywords(russianApiUrl);
+
+                owner.get(apiUrl, params, function (json) {
+                    if (!json || !Array.isArray(json.results)) return callback({ results: [] });
+                    json.results = filterCyrillic(json.results);
+                    json.title = Lampa.Lang.translate(contentType === 'movie' ? 'surs_top_movies' : 'surs_top_tv') +
+                                 ' (' + genre.title + ')';
+                    callback(json);
+                }, function() { callback({ results: [] }); });
+
+                owner.get(russianApiUrl, params, function (russianJson) {
+                    if (!russianJson || !Array.isArray(russianJson.results)) return callback({ results: [] });
+                    russianJson.results = filterCyrillic(russianJson.results);
+                    russianJson.title = Lampa.Lang.translate('surs_rus') + ' ' +
+                                       Lampa.Lang.translate(contentType === 'movie' ? 'surs_top_movies' : 'surs_top_tv') +
+                                       ' (' + genre.title + ')';
+                    callback(russianJson);
+                }, function() { callback({ results: [] }); });
+            };
+        }
+
+        genres.forEach(function (genre) {
+            partsData.push(getBestContentByGenre(genre, 'movie'));
+            partsData.push(getBestContentByGenre(genre, 'tv'));
+        });
+
+		function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
+		            return function (callback) {
+		                var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +
+		                              '&sort_by=vote_average.desc' +
+		                              '&vote_count.gte=100' +
+		                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +
+		                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';
+		
+		                baseUrl = applyAgeRestriction(baseUrl);
+		                baseUrl = applyWithoutKeywords(baseUrl);
+		
+		                owner.get(baseUrl, params, function (json) {
+		                    if (!json || !Array.isArray(json.results)) return callback({ results: [] });
+		
+		                    json.results = applyFilters(json.results).filter(function (content) {
+		                        var dateField = type === 'movie' ? 'release_date' : 'first_air_date';
+		                        return content[dateField] &&
+		                               content[dateField] &&
+		                               parseInt(content[dateField].substring(0, 4)) >= startYear &&
+		                               parseInt(content[dateField].substring(0, 4)) <= endYear;
+		                    });
+		
+		                    // ←←← ИСПРАВЛЕНИЕ ЗДЕСЬ ←←←
+		                    json.title = Lampa.Lang.translate(type === 'movie' ? 'surs_top_movies' : 'surs_top_tv') +
+		                                 ' (' + genre.title + ') ' +
+		                                 Lampa.Lang.translate('surs_for_period') +
+		                                 startYear + '–' + endYear;
+		
+		                    callback(json);
+		                }, function() { callback({ results: [] }); });
+		            };
+		        }
+
+        genres.forEach(function (genre) {
             var period = getRandomPeriod();  
-            partsData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));  
-            partsData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));  
-        });  
-  
-        var forKids = [  
-            { id: 1, title: 'Спанч Боб' },  
-            { id: 2, title: 'Губка Боб' },  
-            { id: 3, title: 'Teenage Mutant Ninja Turtles' },  
-            { id: 4, title: 'Черепашки-ниндзя' },  
-            { id: 5, title: 'Fairly OddParents' },  
-            { id: 6, title: 'Джимми Нейтрон' },  
-            { id: 8, title: 'Аватар: Легенда об Аанге' },  
-            { id: 9, title: 'Аватар: Легенда о Корре' },  
-            { id: 101, title: 'Lego' },  
-            { id: 102, title: 'Том и Джерри' },  
-            { id: 103, title: 'Микки Маус' },  
-            { id: 104, title: 'Гуфи' },  
-            { id: 105, title: 'Снупи' },  
-            { id: 106, title: 'Простоквашино' },  
-            { id: 107, title: 'Ну, погоди!' },  
-            { id: 108, title: 'Чип и Дейл' },  
-            { id: 109, title: 'DuckTales' },  
-            { id: 110, title: 'Looney Tunes' },  
-            { id: 111, title: 'Покемон' },  
-            { id: 112, title: 'Даша-путешественница' },  
-            { id: 113, title: 'Свинка Пеппа' },  
-            { id: 114, title: 'Барбоскины' },  
-            { id: 115, title: 'Смешарики' },  
-            { id: 116, title: 'Фиксики' },  
-            { id: 120, title: 'Гравити Фолз' },  
-            { id: 121, title: 'Чудеса на виражах' },  
-            { id: 122, title: 'Пингвины из Мадагаскара' },  
-            { id: 123, title: 'Король Лев' },  
-            { id: 124, title: 'Холодное сердце' },  
-            { id: 126, title: 'Как приручить дракона' },  
-            { id: 127, title: 'Зверополис' },  
-            { id: 128, title: 'Миньоны' },  
-            { id: 129, title: 'Шрэк' },  
-            { id: 206, title: 'Маша и Медведь' },  
-            { id: 207, title: 'Котенок по имени Гав' },  
-            { id: 208, title: 'Чебурашка' },  
-            { id: 209, title: 'Малыш и Карлсон' },  
-            { id: 210, title: 'Лунтик' },  
-            { id: 211, title: 'Три богатыря' },  
-            { id: 212, title: 'Иван Царевич и Серый Волк' },  
-            { id: 213, title: 'Кот Леопольд' },  
-            { id: 215, title: 'Варежка' },  
-            { id: 217, title: 'Каникулы Бонифация' },  
-            {id: 219, title: 'Сказка о царе Салтане' },  
-            { id: 220, title: 'Алеша Попович' },  
-            { id: 251, title: 'Илья муромец' },  
-            { id: 233, title: 'Оранжевая корова' },  
-            { id: 222, title: 'Малышарики' },  
-            { id: 223, title: 'Winnie-the-Pooh' },  
-            { id: 225, title: 'Щенячий патруль' },  
-            { id: 226, title: 'Tiny Toon' },  
-            { id: 227, title: 'Обезьянки' },  
-            { id: 229, title: 'Буратино' },  
-        ];  
-  
-        function searchByKeyword(keyword) {  
-            return function (callback) {  
-                var movieApiUrl = 'search/movie?query=' + encodeURIComponent(keyword.title);  
-                var tvApiUrl = 'search/tv?query=' + encodeURIComponent(keyword.title);  
-  
-                movieApiUrl = buildApiUrl(movieApiUrl);  
-                tvApiUrl = buildApiUrl(tvApiUrl);  
-  
-                var movieResults = null;  
-                var tvResults = null;  
-  
-                function processResults() {  
-                    if (movieResults !== null && tvResults !== null) {  
-                        var combinedResults = movieResults.concat(tvResults);  
-  
-                        combinedResults = filterCyrillic(combinedResults);  
-  
-                        combinedResults = combinedResults.filter(function (item) {  
-                            return (item.vote_average || 0) >= 6.1;  
-                        });  
-  
-                        combinedResults.sort(function (a, b) {  
-                            return (b.vote_average || 0) - (a.vote_average || 0);  
-                        });  
-  
-                        var json = {  
-                            results: combinedResults,  
-                            title: Lampa.Lang.translate(keyword.title)  
-                        };  
-  
-                        callback(json);  
-                    }  
-                }  
-  
-                owner.get(movieApiUrl, {}, function (json) {  
-                    movieResults = json && Array.isArray(json.results) ? json.results : [];  
-                    processResults();  
-                }, function () {  
-                    movieResults = [];  
-                    processResults();  
-                });  
-  
-                owner.get(tvApiUrl, {}, function (json) {  
-                    tvResults = json && Array.isArray(json.results) ? json.results : [];  
-                    processResults();  
-                }, function () {  
-                    tvResults = [];  
-                    processResults();  
-                });  
-            };  
-        }  
-  
-        forKids.forEach(function (keyword) {  
-            partsData.push(searchByKeyword(keyword));  
-        });  
-  
-        var kidsStudios = [  
-            { id: 2, title: 'Disney' },  
-            { id: 3, title: 'Pixar' },  
-            { id: 7501, title: 'Союзмультфильм(РФ)' },  
-            { id: 14599, title: 'Союзмультфильм(СССР)' },  
-            { id: 521, title: 'DreamWorks Animation' },  
-            { id: 9383, title: 'Blue Sky Studios' },  
-            { id: 6704, title: 'Illumination Entertainment' },  
-            { id: 2251, title: 'Sony Pictures Animation' },  
-            { id: 10342, title: 'Studio Ghibli' },  
-        ];  
-  
-        function getStudioMovies(studio) {  
-            return function (callback) {  
-                var movieApiUrl = 'discover/movie?with_companies=' + studio.id +   
-                                  '&sort_by=vote_average.desc';  
-  
-                movieApiUrl = applyWithoutKeywords(movieApiUrl);  
-  
-                owner.get(movieApiUrl, {}, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [], title: Lampa.Lang.translate('Фильмы от студии - ' + studio.title) });  
-                    }  
-                    var movieResults = filterCyrillic(json.results);  
-                    var response = {  
-                        results: movieResults,  
-                        title: Lampa.Lang.translate('Фильмы от студии - ' + studio.title)  
-                    };  
-                    callback(response);  
-                }, function() {  
-                    callback({ results: [], title: Lampa.Lang.translate('Фильмы от студии - ' + studio.title) });  
-                });  
-            };  
-        }  
-  
-        function getStudioTVShows(studio) {  
-            return function (callback) {  
-                var tvApiUrl = 'discover/tv?with_companies=' + studio.id +   
-                               '&sort_by=vote_average.desc';  
-  
-                tvApiUrl = applyWithoutKeywords(tvApiUrl);  
-  
-                owner.get(tvApiUrl, {}, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [], title: Lampa.Lang.translate('Сериалы от студии - ' + studio.title) });  
-                    }  
-                    var tvResults = filterCyrillic(json.results);  
-                    var response = {  
-                        results: tvResults,  
-                        title: Lampa.Lang.translate('Сериалы от студии - ' + studio.title)  
-                    };  
-                    callback(response);  
-                }, function() {  
-                    callback({ results: [], title: Lampa.Lang.translate('Сериалы от студии - ' + studio.title) });  
-                });  
-            };  
-        }  
-  
-        kidsStudios.forEach(function (studio) {  
-            partsData.push(getStudioMovies(studio));  
-            partsData.push(getStudioTVShows(studio));  
-        });  
-  
-        function getNickelodeonContent() {  
-            return function (callback) {  
-                var movieApiUrl = 'discover/movie?with_companies=4';  
-                var tvApiUrl = 'discover/tv?with_networks=13';  
-  
-                movieApiUrl = buildApiUrl(movieApiUrl);  
-                tvApiUrl = buildApiUrl(tvApiUrl);  
-  
-                var movieResults = null;  
-                var tvResults = null;  
-  
-                function processResults() {  
-                    if (movieResults !== null && tvResults !== null) {  
-                        var combinedResults = movieResults.concat(tvResults);  
-                        combinedResults = filterCyrillic(combinedResults);  
-                        combinedResults.sort(function(a, b) {  
-                            return (b.vote_average || 0) - (a.vote_average || 0);  
-                        });  
-  
-                        var json = {  
-                            results: combinedResults,  
-                            title: Lampa.Lang.translate('Nickelodeon')  
-                        };  
-  
-                        callback(json);  
-                    }  
-                }  
-  
-                owner.get(movieApiUrl, {}, function (json) {  
-                    movieResults = json && Array.isArray(json.results) ? json.results : [];  
-                    processResults();  
-                }, function () {  
-                    movieResults = [];  
-                    processResults();  
-                });  
-  
-                owner.get(tvApiUrl, {}, function (json) {  
-                    tvResults = json && Array.isArray(json.results) ? json.results : [];  
-                    processResults();  
-                }, function () {  
-                    tvResults = [];  
-                    processResults();  
-                });  
-            };  
-        }  
-  
-        partsData.push(getNickelodeonContent());  
-  
-        partsData = partsData.map(wrapWithWideFlag);  
-        shuffleArray(partsData);  
-  
-        var combinedData = buttonsData.concat(partsData);  
-  
-        function loadPart(partLoaded, partEmpty) {  
-            Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);  
-        }  
-  
-        loadPart(onComplete, onError);  
-        return loadPart;  
-    };  
-};  
-  
+            partsData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));
+            partsData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));
+        });
+
+        var forKids = [
+            { id: 1, title: 'Спанч Боб' },
+            { id: 2, title: 'Губка Боб' },
+            { id: 3, title: 'Teenage Mutant Ninja Turtles' },
+            { id: 4, title: 'Черепашки-ниндзя' },
+            { id: 5, title: 'Fairly OddParents' },
+            { id: 6, title: 'Джимми Нейтрон' },
+            { id: 8, title: 'Аватар: Легенда об Аанге' },
+            { id: 9, title: 'Аватар: Легенда о Корре' },
+            { id: 101, title: 'Lego' },
+            { id: 102, title: 'Том и Джерри' },
+            { id: 103, title: 'Микки Маус' },
+            { id: 104, title: 'Гуфи' },
+            { id: 105, title: 'Снупи' },
+            { id: 106, title: 'Простоквашино' },
+            { id: 107, title: 'Ну, погоди!' },
+            { id: 108, title: 'Чип и Дейл' },
+            { id: 109, title: 'DuckTales' },
+            { id: 110, title: 'Looney Tunes' },
+            { id: 111, title: 'Покемон' },
+            { id: 112, title: 'Даша-путешественница' },
+            { id: 113, title: 'Свинка Пеппа' },
+            { id: 114, title: 'Барбоскины' },
+            { id: 115, title: 'Смешарики' },
+            { id: 116, title: 'Фиксики' },
+            { id: 120, title: 'Гравити Фолз' },
+            { id: 121, title: 'Чудеса на виражах' },
+            { id: 122, title: 'Пингвины из Мадагаскара' },
+            { id: 123, title: 'Король Лев' },
+            { id: 124, title: 'Холодное сердце' },
+            { id: 126, title: 'Как приручить дракона' },
+            { id: 127, title: 'Зверополис' },
+            { id: 128, title: 'Миньоны' },
+            { id: 129, title: 'Шрэк' },
+            { id: 206, title: 'Маша и Медведь' },
+            { id: 207, title: 'Котенок по имени Гав' },
+            { id: 208, title: 'Чебурашка' },
+            { id: 209, title: 'Малыш и Карлсон' },
+            { id: 210, title: 'Лунтик' },
+            { id: 211, title: 'Три богатыря' },
+            { id: 212, title: 'Иван Царевич и Серый Волк' },
+            { id: 213, title: 'Кот Леопольд' },
+            { id: 215, title: 'Варежка' },
+            { id: 217, title: 'Каникулы Бонифация' },
+            {id: 219, title: 'Сказка о царе Салтане' },
+            { id: 220, title: 'Алеша Попович' },
+            { id: 251, title: 'Илья муромец' },
+            { id: 233, title: 'Оранжевая корова' },
+            { id: 222, title: 'Малышарики' },
+            { id: 223, title: 'Winnie-the-Pooh' },
+            { id: 225, title: 'Щенячий патруль' },
+            { id: 226, title: 'Tiny Toon' },
+            { id: 227, title: 'Обезьянки' },
+            { id: 229, title: 'Буратино' },
+        ];
+
+        function searchByKeyword(keyword) {
+            return function (callback) {
+                var movieApiUrl = 'search/movie?query=' + encodeURIComponent(keyword.title);
+                var tvApiUrl   = 'search/tv?query=' + encodeURIComponent(keyword.title);
+
+                movieApiUrl = buildApiUrl(movieApiUrl);
+                tvApiUrl    = buildApiUrl(tvApiUrl);
+
+                var movieResults = null;
+                var tvResults    = null;
+
+                function processResults() {
+                    if (movieResults !== null && tvResults !== null) {
+                        var combinedResults = movieResults.concat(tvResults);
+                        combinedResults = filterCyrillic(combinedResults);
+                        combinedResults = combinedResults.filter(function (item) {
+                            return (item.vote_average || 0) >= 6.1;
+                        });
+                        combinedResults.sort(function (a, b) {
+                            return (b.vote_average || 0) - (a.vote_average || 0);
+                        });
+
+                        var json = {
+                            results: combinedResults,
+                            title: keyword.title   // здесь обычно уже русское название
+                        };
+                        callback(json);
+                    }
+                }
+
+                owner.get(movieApiUrl, {}, function (json) {
+                    movieResults = json && Array.isArray(json.results) ? json.results : [];
+                    processResults();
+                }, function () {
+                    movieResults = [];
+                    processResults();
+                });
+
+                owner.get(tvApiUrl, {}, function (json) {
+                    tvResults = json && Array.isArray(json.results) ? json.results : [];
+                    processResults();
+                }, function () {
+                    tvResults = [];
+                    processResults();
+                });
+            };
+        }
+
+        forKids.forEach(function (keyword) {
+            partsData.push(searchByKeyword(keyword));
+        });
+
+        var kidsStudios = [
+            { id: 2,     title: 'Disney' },
+            { id: 3,     title: 'Pixar' },
+            { id: 7501,  title: 'Союзмультфильм' },
+            { id: 14599, title: 'Союзмультфильм (СССР)' },
+            { id: 521,   title: 'DreamWorks Animation' },
+            { id: 9383,  title: 'Blue Sky Studios' },
+            { id: 6704,  title: 'Illumination Entertainment' },
+            { id: 2251,  title: 'Sony Pictures Animation' },
+            { id: 10342, title: 'Studio Ghibli' },
+        ];
+
+        function getStudioMovies(studio) {
+            return function (callback) {
+                var movieApiUrl = 'discover/movie?with_companies=' + studio.id +
+                                  '&sort_by=vote_average.desc';
+                movieApiUrl = applyWithoutKeywords(movieApiUrl);
+
+                owner.get(movieApiUrl, {}, function (json) {
+                    if (!json || !Array.isArray(json.results)) {
+                        return callback({
+                            results: [],
+                            title: Lampa.Lang.translate('surs_movies') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + studio.title
+                        });
+                    }
+                    var movieResults = filterCyrillic(json.results);
+                    callback({
+                        results: movieResults,
+                        title: Lampa.Lang.translate('surs_movies') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + studio.title
+                    });
+                }, function() {
+                    callback({
+                        results: [],
+                        title: Lampa.Lang.translate('surs_movies') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + studio.title
+                    });
+                });
+            };
+        }
+
+        function getStudioTVShows(studio) {
+            return function (callback) {
+                var tvApiUrl = 'discover/tv?with_companies=' + studio.id +
+                               '&sort_by=vote_average.desc';
+                tvApiUrl = applyWithoutKeywords(tvApiUrl);
+
+                owner.get(tvApiUrl, {}, function (json) {
+                    if (!json || !Array.isArray(json.results)) {
+                        return callback({
+                            results: [],
+                            title: Lampa.Lang.translate('surs_tv_shows') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + studio.title
+                        });
+                    }
+                    var tvResults = filterCyrillic(json.results);
+                    callback({
+                        results: tvResults,
+                        title: Lampa.Lang.translate('surs_tv_shows') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + studio.title
+                    });
+                }, function() {
+                    callback({
+                        results: [],
+                        title: Lampa.Lang.translate('surs_tv_shows') + ' ' + Lampa.Lang.translate('surs_from') + ' ' + studio.title
+                    });
+                });
+            };
+        }
+
+        kidsStudios.forEach(function (studio) {
+            partsData.push(getStudioMovies(studio));
+            partsData.push(getStudioTVShows(studio));
+        });
+
+        function getNickelodeonContent() {
+            return function (callback) {
+                var movieApiUrl = 'discover/movie?with_companies=4';
+                var tvApiUrl    = 'discover/tv?with_networks=13';
+
+                movieApiUrl = buildApiUrl(movieApiUrl);
+                tvApiUrl    = buildApiUrl(tvApiUrl);
+
+                var movieResults = null;
+                var tvResults    = null;
+
+                function processResults() {
+                    if (movieResults !== null && tvResults !== null) {
+                        var combinedResults = movieResults.concat(tvResults);
+                        combinedResults = filterCyrillic(combinedResults);
+                        combinedResults.sort(function(a, b) {
+                            return (b.vote_average || 0) - (a.vote_average || 0);
+                        });
+
+                        var json = {
+                            results: combinedResults,
+                            title: 'Nickelodeon'
+                        };
+                        callback(json);
+                    }
+                }
+
+                owner.get(movieApiUrl, {}, function (json) {
+                    movieResults = json && Array.isArray(json.results) ? json.results : [];
+                    processResults();
+                }, function () {
+                    movieResults = [];
+                    processResults();
+                });
+
+                owner.get(tvApiUrl, {}, function (json) {
+                    tvResults = json && Array.isArray(json.results) ? json.results : [];
+                    processResults();
+                }, function () {
+                    tvResults = [];
+                    processResults();
+                });
+            };
+        }
+
+        partsData.push(getNickelodeonContent());
+
+        partsData = partsData.map(wrapWithWideFlag);   
+        shuffleArray(partsData);                      
+
+        var combinedData = buttonsData.concat(partsData);
+
+        function loadPart(partLoaded, partEmpty) {
+            Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);
+        }
+
+        loadPart(onComplete, onError);
+        return loadPart;
+    };
+};
+
+	
+	
 var SourceTMDBrus = function (parent) {  
     this.network = new Lampa.Reguest();  
     this.discovery = false;  
@@ -1732,10 +1749,9 @@ var SourceTMDBrus = function (parent) {
         var onError = arguments.length > 2 ? arguments[2] : undefined;  
         var partsLimit = 9;  
   
-        var streamingServices = [];  
-  
+        // Helpers  
         function applyMinVotes(baseUrl) {  
-            var minVotes = 10;  
+            var minVotes = 2;  
             baseUrl += '&vote_count.gte=' + minVotes;  
             return baseUrl;  
         }  
@@ -1764,16 +1780,19 @@ var SourceTMDBrus = function (parent) {
         var buttonsData = getPartsData();  
         var partsData = [];  
   
+        // Russian streaming services — new TV shows (by air_date)  
         function getStreamingWithGenres(serviceName, serviceId) {  
             return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
+                var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc'});    
                 var genre = allGenres[Math.floor(Math.random() * allGenres.length)];  
-                var apiUrl = buildApiUrl(  
-                    'discover/tv?with_networks=' + serviceId +  
-                    '&with_genres=' + genre.id +  
-                    '&sort_by=' + sort.id +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)  
-                );  
+                var apiUrl = 'discover/tv?' +
+				    'with_networks=' + serviceId +
+				    '&with_genres=' + genre.id +
+				    '&sort_by=' + sort.id;
+				
+				apiUrl += sort.extraParams || '';
+                apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl);  
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -1782,7 +1801,7 @@ var SourceTMDBrus = function (parent) {
                     json.results = applyFilters(json.results);  
                     json.title = Lampa.Lang.translate(sort.title) + ' (' + Lampa.Lang.translate(genre.title) + ') ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;  
                     callback(json);  
-                }, function() {  
+                }, function () {  
                     callback({ results: [] });  
                 });  
             };  
@@ -1790,12 +1809,14 @@ var SourceTMDBrus = function (parent) {
   
         function getStreaming(serviceName, serviceId) {  
             return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
-                var apiUrl = buildApiUrl(  
+                var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc'});   
+                var apiUrl =  
                     'discover/tv?with_networks=' + serviceId +  
-                    '&sort_by=' + sort.id +  
-                    '&air_date.lte=' + new Date().toISOString().substr(0, 10)  
-                );  
+                    '&sort_by=' + sort.id;  
+               
+				apiUrl += sort.extraParams || '';
+                apiUrl = applyAgeRestriction(apiUrl);  
+                apiUrl = applyWithoutKeywords(apiUrl);  
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -1804,39 +1825,32 @@ var SourceTMDBrus = function (parent) {
                     json.results = applyFilters(json.results);  
                     json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_on') + ' ' + serviceName;  
                     callback(json);  
-                }, function() {  
+                }, function () {  
                     callback({ results: [] });  
                 });  
             };  
         }  
   
         var selectedStreamingServices = allStreamingServicesRUS;  
-  
         selectedStreamingServices.forEach(function (service) {  
             partsData.push(getStreamingWithGenres(service.title, service.id));  
         });  
-  
         selectedStreamingServices.forEach(function (service) {  
             partsData.push(getStreaming(service.title, service.id));  
         });  
   
+        // Russian new movies  
         function getMovies(genre) {  
             return function (callback) {  
-                var sort = adjustSortForMovies(allSortOptions[Math.floor(Math.random() * allSortOptions.length)]);  
+                var sort = adjustSortForMovies({ id: 'release_date.desc', title: 'surs_first_air_date_desc' });  
                 var apiUrl = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;  
+                
+				apiUrl += sort.extraParams || '';
+                apiUrl += '&with_origin_country=RU';  
+				apiUrl = applyWithoutKeywords(apiUrl); 
+				apiUrl = applyAgeRestriction(apiUrl);  
+				apiUrl = applyMinVotes(apiUrl);
   
-                apiUrl += '&with_original_language=ru®ion=RU';  
-  
-                if (sort.id === 'release_date.desc') {  
-                    var today = new Date().toISOString().split('T')[0];  
-                    apiUrl += '&release_date.lte=' + today;  
-                }  
-  
-                if (sort.extraParams) {  
-                    apiUrl += sort.extraParams;  
-                }  
-                apiUrl = buildApiUrl(apiUrl);  
-                  
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
                         return callback({ results: [] });  
@@ -1844,7 +1858,7 @@ var SourceTMDBrus = function (parent) {
                     var titlePrefix = Lampa.Lang.translate('surs_russian');  
                     json.title = Lampa.Lang.translate(sort.title) + ' ' + titlePrefix + ' (' + Lampa.Lang.translate(genre.title) + ')';  
                     callback(json);  
-                }, function() {  
+                }, function () {  
                     callback({ results: [] });  
                 });  
             };  
@@ -1854,12 +1868,13 @@ var SourceTMDBrus = function (parent) {
             partsData.push(getMovies(genre));  
         });  
   
+        // Russian new TV shows (with date filter to ensure “new”)  
         function getTVShows(genre) {  
             return function (callback) {  
-                var sort = allSortOptions[Math.floor(Math.random() * allSortOptions.length)];  
-                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';  
-  
-                apiUrl = buildApiUrl(apiUrl);  
+                var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc'});   
+                var apiUrl = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU';    
+				apiUrl += sort.extraParams || '';
+                apiUrl = applyWithoutKeywords(apiUrl);  
   
                 owner.get(apiUrl, params, function (json) {  
                     if (!json || !Array.isArray(json.results)) {  
@@ -1867,7 +1882,7 @@ var SourceTMDBrus = function (parent) {
                     }  
                     json.title = Lampa.Lang.translate(sort.title) + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate('surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')';  
                     callback(json);  
-                }, function() {  
+                }, function () {  
                     callback({ results: [] });  
                 });  
             };  
@@ -1877,64 +1892,7 @@ var SourceTMDBrus = function (parent) {
             partsData.push(getTVShows(genre));  
         });  
   
-        function getBestContentByGenre(genre, contentType) {  
-            return function (callback) {  
-                var apiUrl = 'discover/' + contentType + '?with_genres=' + genre.id +   
-                             '&sort_by=vote_average.desc' +   
-                             '&vote_count.gte=50' +   
-                             '&with_origin_country=RU';  
-  
-                apiUrl = applyWithoutKeywords(apiUrl);  
-  
-                owner.get(apiUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    json.title = (contentType === 'movie'   
-                        ? Lampa.Lang.translate('surs_top_movies') + ' ' + Lampa.Lang.translate('surs_russian')  
-                        : Lampa.Lang.translate('surs_top_tv') + ' ' + Lampa.Lang.translate('surs_russian')) + ' (' + Lampa.Lang.translate(genre.title) + ')';  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        allGenres.forEach(function (genre) {  
-            partsData.push(getBestContentByGenre(genre, 'movie'));  
-            partsData.push(getBestContentByGenre(genre, 'tv'));  
-        });  
-  
-        function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {  
-            return function (callback) {  
-                var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +   
-                              '&sort_by=vote_average.desc' +   
-                              '&vote_count.gte=10' +   
-                              '&with_origin_country=RU' +   
-                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +  
-                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';  
-  
-                baseUrl = applyAgeRestriction(baseUrl);  
-                baseUrl = applyWithoutKeywords(baseUrl);  
-  
-                owner.get(baseUrl, params, function (json) {  
-                    if (!json || !Array.isArray(json.results)) {  
-                        return callback({ results: [] });  
-                    }  
-                    json.title = Lampa.Lang.translate('surs_top_' + (type === 'movie' ? 'movies' : 'tv')) + ' ' + Lampa.Lang.translate('surs_russian') + ' ' + Lampa.Lang.translate(type === 'movie' ? 'surs_movies' : 'surs_tv_shows') + ' (' + Lampa.Lang.translate(genre.title) + ')' + Lampa.Lang.translate('surs_for_period') + startYear + '-' + endYear;  
-                    callback(json);  
-                }, function() {  
-                    callback({ results: [] });  
-                });  
-            };  
-        }  
-  
-        allGenres.forEach(function (genre) {  
-            var period = getRandomPeriod();  
-            partsData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));  
-            partsData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));  
-        });  
-  
+        // Shuffle and wide-flag wrappers  
         partsData = partsData.map(wrapWithWideFlag);  
         shuffleArray(partsData);  
   
@@ -1947,10 +1905,11 @@ var SourceTMDBrus = function (parent) {
         loadPart(onComplete, onError);  
         return loadPart;  
     };  
+
+	
 };
 
-
-
+	
 
 function add() {
     // Проверка наличия Lampa API
@@ -1992,6 +1951,7 @@ function add() {
     var surs_mod_kids = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBkids(Lampa.Api.sources.tmdb));
     var surs_mod_rus = assign({}, Lampa.Api.sources.tmdb, new SourceTMDBrus(Lampa.Api.sources.tmdb));
 
+
     // Проверка на успешное создание источников
     if (!surs_mod || !surs_mod_new || !surs_mod_kids || !surs_mod_rus) {
         console.error('Failed to create one or more TMDB sources');
@@ -2026,6 +1986,7 @@ function add() {
                 return surs_mod_rus;
             }
         });
+		
     } catch (e) {
         console.warn('Object.defineProperty not supported, using direct assignment: ', e);
         // Запасной вариант для IE8
@@ -2073,7 +2034,7 @@ function startProfileListener() {
 
     Lampa.Storage.listener.follow('change', function(event) {
         if (event.name === "source" && !sourceChangedByProfile) {
-            if (event.value === sourceName || event.value === sourceNameKids || event.value === sourceNameRus || event.value === sourceNameNew) {
+            if (event.value === sourceName || event.value === sourceNameKids || event.value === sourceNameRus ||  event.value === sourceNameNew) {
                 softRefresh(event.value, true);
             }
         }
@@ -2131,8 +2092,9 @@ Lampa.Settings.listener.follow('open', function (e) {
             var currentSource = Lampa.Storage.get('source');
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             var sourceNameKids = sourceName + ' KIDS';
-            var sourceNameRus = sourceName + ' RUS'; // Новый источник
-               var sourceNameNew = sourceName + ' NEW'; // Новый источник
+            var sourceNameRus = sourceName + ' RUS'; 
+            var sourceNameNew = sourceName + ' NEW'; 
+			
 
            var paramsToHide = [
     'surs_cirillic',
@@ -3885,7 +3847,7 @@ if (window.appready) {
         if (e.type == 'ready') {
             add();
             startProfileListener();
-            addMainButton();;
+            addMainButton();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
@@ -3900,4 +3862,3 @@ if (!window.plugin_surs_ready) startPlugin();
 
 
 })( );
-
