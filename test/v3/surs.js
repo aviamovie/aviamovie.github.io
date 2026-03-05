@@ -918,7 +918,9 @@
             };    
         };  
   
-var SourceTMDBnew = function (parent) {    
+/* новинки */
+
+		var SourceTMDBnew = function (parent) {    
     this.network = new Lampa.Reguest();    
     this.discovery = false;    
     
@@ -931,6 +933,25 @@ var SourceTMDBnew = function (parent) {
          
         var partsData = getPartsData();    
         var CustomData = [];    
+    
+        // Новая функция применения кастомных фильтров  
+        function applyCustomFilters(baseUrl) {    
+            var minVotes = 10;                  
+			baseUrl += '&vote_count.gte=' + minVotes;      
+    
+            var excludedKeywords = [    
+                '13141',    
+                '345822',    
+                '315535',    
+                '290667',    
+                '323477',    
+                '290609'    
+            ];    
+    
+            baseUrl += '&without_keywords=' + encodeURIComponent(excludedKeywords.join(','));    
+    
+            return baseUrl;    
+        }    
     
         function getStreamingWithGenres(serviceName, serviceId) {    
             return function (callback) {    
@@ -946,7 +967,7 @@ var SourceTMDBnew = function (parent) {
                     apiUrl += sort.extraParams;    
                 }    
     
-                apiUrl = buildApiUrl(apiUrl);    
+                apiUrl = applyCustomFilters(apiUrl);    
     
                 owner.get(apiUrl, params, function (json) {    
                     if (!json || !Array.isArray(json.results)) {    
@@ -972,7 +993,7 @@ var SourceTMDBnew = function (parent) {
                     apiUrl += sort.extraParams;    
                 }    
     
-                apiUrl = buildApiUrl(apiUrl);    
+                apiUrl = applyCustomFilters(apiUrl);    
     
                 owner.get(apiUrl, params, function (json) {    
                     if (!json || !Array.isArray(json.results)) {    
@@ -998,7 +1019,7 @@ var SourceTMDBnew = function (parent) {
                     apiUrl += sort.extraParams;    
                 }    
             
-                apiUrl = buildApiUrl(apiUrl);    
+                apiUrl = applyCustomFilters(apiUrl);    
             
                 owner.get(apiUrl, params, function (json) {    
                     if (!json || !Array.isArray(json.results)) {    
@@ -1024,7 +1045,7 @@ var SourceTMDBnew = function (parent) {
                     apiUrl += sort.extraParams;    
                 }    
             
-                apiUrl = buildApiUrl(apiUrl);    
+                apiUrl = applyCustomFilters(apiUrl);    
             
                 owner.get(apiUrl, params, function (json) {    
                     if (!json || !Array.isArray(json.results)) {    
@@ -1041,7 +1062,7 @@ var SourceTMDBnew = function (parent) {
     
         var genres = getGenres();    
     
-        
+        // Глобальные фильмы и сериалы  
         genres.forEach(function (genre) {    
             CustomData.push(getMovies(genre));    
         });    
@@ -1049,9 +1070,8 @@ var SourceTMDBnew = function (parent) {
         genres.forEach(function (genre) {    
             CustomData.push(getTVShows(genre));    
         });    
-    
-         
-        var streamingServices = getStreamingServices();
+     
+        var streamingServices = getStreamingServices();  
     
         streamingServices.forEach(function (service) {    
             CustomData.push(getStreamingWithGenres(service.title, service.id));    
@@ -1074,7 +1094,7 @@ var SourceTMDBnew = function (parent) {
         loadPart(onComplete, onError);    
         return loadPart;    
     };    
-};  
+};
     
 /* для детей */
 
