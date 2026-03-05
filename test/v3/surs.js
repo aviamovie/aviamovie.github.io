@@ -918,9 +918,7 @@
             };    
         };  
   
-
-
-		var SourceTMDBnew = function (parent) {    
+var SourceTMDBnew = function (parent) {    
     this.network = new Lampa.Reguest();    
     this.discovery = false;    
     
@@ -937,12 +935,16 @@
         function getStreamingWithGenres(serviceName, serviceId) {    
             return function (callback) {    
                 var genres = getGenres();    
-                var sort = { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' };    
+                var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });    
                 var genre = genres[Math.floor(Math.random() * genres.length)];    
     
                 var apiUrl = 'discover/tv?with_networks=' + serviceId +    
                              '&with_genres=' + genre.id +    
                              '&sort_by=' + sort.id;    
+    
+                if (sort.extraParams) {    
+                    apiUrl += sort.extraParams;    
+                }    
     
                 apiUrl = buildApiUrl(apiUrl);    
     
@@ -961,10 +963,14 @@
     
         function getStreaming(serviceName, serviceId) {    
             return function (callback) {    
-                var sort = { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' };    
+                var sort = adjustSortForTVShows({ id: 'first_air_date.desc', title: 'surs_first_air_date_desc' });    
     
                 var apiUrl = 'discover/tv?with_networks=' + serviceId +    
                              '&sort_by=' + sort.id;    
+    
+                if (sort.extraParams) {    
+                    apiUrl += sort.extraParams;    
+                }    
     
                 apiUrl = buildApiUrl(apiUrl);    
     
@@ -1035,7 +1041,7 @@
     
         var genres = getGenres();    
     
-       
+        
         genres.forEach(function (genre) {    
             CustomData.push(getMovies(genre));    
         });    
@@ -1044,8 +1050,8 @@
             CustomData.push(getTVShows(genre));    
         });    
     
-       
-        var streamingServices = getStreamingServices();  
+         
+        var streamingServices = getStreamingServices();
     
         streamingServices.forEach(function (service) {    
             CustomData.push(getStreamingWithGenres(service.title, service.id));    
@@ -1068,9 +1074,7 @@
         loadPart(onComplete, onError);    
         return loadPart;    
     };    
-};
-  
-    
+};  
     
 /* для детей */
 
