@@ -1957,6 +1957,7 @@ var SourceTMDBrus = function (parent) {
         return loadPart;  
     };  
 	
+	
 var SourceTMDBNewRus = function (parent) {  
     this.network = new Lampa.Reguest();  
     this.discovery = false;  
