@@ -312,8 +312,8 @@ function addStyles() {
         }).map(function(b) {  
             var cardData = {  
                 source: 'custom',  
-                title: b.title || Lampa.Lang.translate(b.title),  
-                name: b.title || Lampa.Lang.translate(b.title),  
+                title: Lampa.Lang.translate(b.title), // Всегда используем перевод  
+                name: Lampa.Lang.translate(b.title),   // Всегда используем перевод  
                 id: b.id,  
                 params: {  
                     createInstance: function() {  
@@ -345,26 +345,29 @@ function addStyles() {
                             var svgContainer = document.createElement('div');  
                             svgContainer.classList.add('card__svg-icon');  
                               
-                            if (b.id === 'surs_main') {  
-                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
-                            } else if (b.id === 'surs_bookmarks') {  
-                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-favorite"></use></svg>';  
-                            } else if (b.id === 'surs_history') {  
-                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
-                            } else if (b.id === 'surs_settings') {  
-                                svgContainer.innerHTML = '<svg><use xlink:href="#sprite-settings"></use></svg>';  
-                            } else if (buttonIcons[b.id]) {  
-                                svgContainer.innerHTML = buttonIcons[b.id];  
-                            } else if (b.icon) {  
-                                // Используем внешнюю иконку  
-                                svgContainer.innerHTML = b.icon;  
+                            // Используем иконку из данных карточки  
+                            if (this.data.icon_svg) {  
+                                svgContainer.innerHTML = this.data.icon_svg;  
+                            } else {  
+                                // Fallback для стандартных иконок  
+                                if (b.id === 'surs_main') {  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-home"></use></svg>';  
+                                } else if (b.id === 'surs_bookmarks') {  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-favorite"></use></svg>';  
+                                } else if (b.id === 'surs_history') {  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-history"></use></svg>';  
+                                } else if (b.id === 'surs_settings') {  
+                                    svgContainer.innerHTML = '<svg><use xlink:href="#sprite-settings"></use></svg>';  
+                                } else if (buttonIcons[b.id]) {  
+                                    svgContainer.innerHTML = buttonIcons[b.id];  
+                                }  
                             }  
                               
                             imgElement.replaceWith(svgContainer);  
                               
                             var buttonLabel = document.createElement('div');  
                             buttonLabel.classList.add('card__button-label');  
-                            buttonLabel.innerText = b.title || Lampa.Lang.translate(b.title);  
+                            buttonLabel.innerText = Lampa.Lang.translate(b.title);  
                             this.html.find('.card__view').append(buttonLabel);  
                         },  
                         onlyEnter: function() {  
@@ -392,7 +395,7 @@ function addStyles() {
             }  
         });  
     });  
-}  
+}
       
     function startPlugin() {  
     window.plugin_custom_buttons_ready = true;  
