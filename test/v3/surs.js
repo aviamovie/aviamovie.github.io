@@ -4080,7 +4080,7 @@ if (window.appready) {
         if (e.type == 'ready') {
             add();
             startProfileListener();
-            addMainButton();;
+            addMainButton();
 
             if (!Lampa.Storage.get('surs_disableMenu')) {
                addSettingMenu();
