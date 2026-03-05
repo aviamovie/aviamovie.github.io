@@ -304,12 +304,12 @@ function addStyles() {
     surs_btns_new: {  
         ru: 'Новинки Мир',  
         uk: 'Новинки Світ',   
-        en: 'World News'  
+        en: 'New Globe'  
     },  
     surs_btns_rus: {  
         ru: 'Новинки Россия',  
         uk: 'Новинки Росія',  
-        en: 'Russia News'  
+        en: 'New Russia '  
     }  
 })
       
