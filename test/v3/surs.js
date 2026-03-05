@@ -1457,37 +1457,41 @@ var SourceTMDBkids = function (parent) {
             partsData.push(getBestContentByGenre(genre, 'tv'));
         });
 
-        function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
-            return function (callback) {
-                var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +
-                              '&sort_by=vote_average.desc' +
-                              '&vote_count.gte=100' +
-                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +
-                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';
-
-                baseUrl = applyAgeRestriction(baseUrl);
-                baseUrl = applyWithoutKeywords(baseUrl);
-
-                owner.get(baseUrl, params, function (json) {
-                    if (!json || !Array.isArray(json.results)) return callback({ results: [] });
-
-                    json.results = applyFilters(json.results).filter(function (content) {
-                        var dateField = type === 'movie' ? 'release_date' : 'first_air_date';
-                        return content[dateField] &&
-                               parseInt(content[dateField].substring(0, 4)) >= startYear &&
-                               parseInt(content[dateField].substring(0, 4)) <= endYear;
-                    });
-
-                    json.title = Lampa.Lang.translate('surs_top_' + (type === 'movie' ? 'movies' : 'tv')) +
-                                 ' (' + genre.title + ') ' + Lampa.Lang.translate('surs_for_period') +
-                                 startYear + '–' + endYear;
-                    callback(json);
-                }, function() { callback({ results: [] }); });
-            };
-        }
+		function getBestContentByGenreAndPeriod(type, genre, startYear, endYear) {
+		            return function (callback) {
+		                var baseUrl = 'discover/' + type + '?with_genres=' + genre.id +
+		                              '&sort_by=vote_average.desc' +
+		                              '&vote_count.gte=100' +
+		                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.gte=' + startYear + '-01-01' +
+		                              '&' + (type === 'movie' ? 'primary_release_date' : 'first_air_date') + '.lte=' + endYear + '-12-31';
+		
+		                baseUrl = applyAgeRestriction(baseUrl);
+		                baseUrl = applyWithoutKeywords(baseUrl);
+		
+		                owner.get(baseUrl, params, function (json) {
+		                    if (!json || !Array.isArray(json.results)) return callback({ results: [] });
+		
+		                    json.results = applyFilters(json.results).filter(function (content) {
+		                        var dateField = type === 'movie' ? 'release_date' : 'first_air_date';
+		                        return content[dateField] &&
+		                               content[dateField] &&
+		                               parseInt(content[dateField].substring(0, 4)) >= startYear &&
+		                               parseInt(content[dateField].substring(0, 4)) <= endYear;
+		                    });
+		
+		                    // ←←← ИСПРАВЛЕНИЕ ЗДЕСЬ ←←←
+		                    json.title = Lampa.Lang.translate(type === 'movie' ? 'surs_top_movies' : 'surs_top_tv') +
+		                                 ' (' + genre.title + ') ' +
+		                                 Lampa.Lang.translate('surs_for_period') +
+		                                 startYear + '–' + endYear;
+		
+		                    callback(json);
+		                }, function() { callback({ results: [] }); });
+		            };
+		        }
 
         genres.forEach(function (genre) {
-            var period = getRandomPeriod();  // предполагается, что функция определена где-то
+            var period = getRandomPeriod();  
             partsData.push(getBestContentByGenreAndPeriod('movie', genre, period.start, period.end));
             partsData.push(getBestContentByGenreAndPeriod('tv', genre, period.start, period.end));
         });
