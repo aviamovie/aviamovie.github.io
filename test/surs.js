@@ -7,7 +7,7 @@
 
             function loadV3Plugins() {  
                 Lampa.Utils.putScriptAsync(  
-                    ['https://aviamovie.github.io/v3/surs_nav_buttons.js',
+                    ['https://aviamovie.github.io/test/surs_nav_buttons_test.js',
                       'https://aviamovie.github.io/v3/surs_strmngs_row.js'
                     ],   
                     function () {  
