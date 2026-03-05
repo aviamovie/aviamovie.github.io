@@ -426,6 +426,10 @@ function addStyles() {
             };  
         }  
     });  
+      
+    // Отправляем уведомление о готовности плагина  
+    Lampa.Listener.send('custom_buttons', {type: 'ready'});  
+        
 }
 
     Lampa.Lang.add({  
