@@ -408,7 +408,7 @@ function addStyles() {
     });  
       
     // Отправляем уведомление о готовности плагина  
-    Lampa.Listener.send('custom_buttons', {type: 'ready'});  
+    Lampa.Listener.send('surs_custom_buttons', {type: 'ready'});  
         
 }
 
