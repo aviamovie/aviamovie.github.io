@@ -9,7 +9,7 @@
 
     // ====================== ПОЛУЧЕНИЕ ИНФОРМАЦИИ О ПОЛЬЗОВАТЕЛЕ ======================
     function fetchUserInfo(callback) {
-        if (!window.alcopac) {
+        if (window.alcopac) {
             console.log('SURS Expiration Plugin: это НЕ alcopac (window.alcopac отсутствует), пропускаем');
             if (callback) callback(null);
             return;
