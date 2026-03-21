@@ -9,7 +9,7 @@
 
     // ====================== ЗАПРОС ЧЕРЕЗ $.ajax (надёжно в Lampa) ======================
     function fetchUserInfo(callback) {
-        if (!window.alcopac) return callback(null);
+        if (window.alcopac) return callback(null);
 
         var host = Lampa.Storage.get('lampac_host', '').trim() || window.location.origin || '';
         if (host && !host.endsWith('/')) host += '/';
