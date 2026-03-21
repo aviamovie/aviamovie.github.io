@@ -1,13 +1,22 @@
 (function() {  
     'use strict';  
   
+    // Локальная копия функции declOfNum  
+    function declOfNum(n, text_forms) {    
+        n = Math.abs(n) % 100;   
+        var n1 = n % 10;  
+        if (n > 10 && n < 20) { return text_forms[2]; }  
+        if (n1 > 1 && n1 < 5) { return text_forms[1]; }  
+        if (n1 == 1) { return text_forms[0]; }  
+        return text_forms[2];  
+    }  
+  
     var buttonId = 'surs_expiration';  
     var userDataCache = null;  
     var expirationIcon = '<svg fill="#ffcc00" width="64px" height="64px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';  
   
     // Проверка платформы alcopac  
     function isAlcopacPlatform() {  
-        // Способ 1: проверка через API (сначала)  
         return new Promise(function(resolve) {  
             var host = Lampa.Storage.get('lampac_host', '').trim() || window.location.origin || '';  
             if (host && !host.endsWith('/')) host += '/';  
@@ -16,11 +25,9 @@
                 if (data && data.platform === 'alcopac') {  
                     resolve(true);  
                 } else {  
-                    // Способ 2: проверка глобальной переменной (если API не alcopac)  
                     resolve(!!window.alcopac);  
                 }  
             }, function() {  
-                // Если запрос упал, проверяем глобальную переменную  
                 resolve(!!window.alcopac);  
             });  
         });  
@@ -52,7 +59,7 @@
         }  
   
         userDataCache = data;  
-        var daysText = Lampa.Utils.declOfNum(data.days_left, ['день', 'дня', 'дней']);  
+        var daysText = declOfNum(data.days_left, ['день', 'дня', 'дней']); // Используем локальную функцию  
         var title = data.days_left === 0 ? '❌ Подписка истекла!' : `⏳ Осталось ${data.days_left} ${daysText}`;  
   
         if (window.surs_removeExternalButton) {  
@@ -83,7 +90,7 @@
               })  
             : '—';  
   
-        var daysText = Lampa.Utils.declOfNum(userDataCache.days_left, ['день', 'дня', 'дней']);  
+        var daysText = declOfNum(userDataCache.days_left, ['день', 'дня', 'дней']); // Используем локальную функцию  
   
         var html = $('<div style="padding: 1.8em; color: #fff; font-size: 1.05em; line-height: 1.5;">' +  
             '<h3 style="text-align: center; color: #ffcc00; margin-bottom: 1.2em;">📅 Информация о подписке Alcopac</h3>' +  
@@ -123,7 +130,6 @@
   
     // Запуск плагина  
     function startPlugin() {  
-        // Сначала проверяем через API  
         isAlcopacPlatform().then(function(isAlcopac) {  
             if (isAlcopac) {  
                 fetchUserInfo(updateExpirationButton);  
