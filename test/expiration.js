@@ -5,10 +5,29 @@
     var userDataCache = null;  
     var expirationIcon = '<svg fill="#ffcc00" width="64px" height="64px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';  
   
+    // Проверка платформы alcopac  
+    function isAlcopacPlatform() {  
+        // Способ 1: проверка через API (сначала)  
+        return new Promise(function(resolve) {  
+            var host = Lampa.Storage.get('lampac_host', '').trim() || window.location.origin || '';  
+            if (host && !host.endsWith('/')) host += '/';  
+              
+            Lampa.Network.silent(host + 'api/user/info', function(data) {  
+                if (data && data.platform === 'alcopac') {  
+                    resolve(true);  
+                } else {  
+                    // Способ 2: проверка глобальной переменной (если API не alcopac)  
+                    resolve(!!window.alcopac);  
+                }  
+            }, function() {  
+                // Если запрос упал, проверяем глобальную переменную  
+                resolve(!!window.alcopac);  
+            });  
+        });  
+    }  
+  
     // Запрос данных через Lampa.Network  
     function fetchUserInfo(callback) {  
-        if (window.alcopac) return callback(null);  
-  
         var host = Lampa.Storage.get('lampac_host', '').trim() || window.location.origin || '';  
         if (host && !host.endsWith('/')) host += '/';  
   
@@ -33,7 +52,8 @@
         }  
   
         userDataCache = data;  
-        var title = data.days_left === 0 ? '❌ Подписка истекла!' : `⏳ Осталось ${data.days_left} дней`;  
+        var daysText = Lampa.Utils.declOfNum(data.days_left, ['день', 'дня', 'дней']);  
+        var title = data.days_left === 0 ? '❌ Подписка истекла!' : `⏳ Осталось ${data.days_left} ${daysText}`;  
   
         if (window.surs_removeExternalButton) {  
             window.surs_removeExternalButton(buttonId);  
@@ -63,12 +83,14 @@
               })  
             : '—';  
   
+        var daysText = Lampa.Utils.declOfNum(userDataCache.days_left, ['день', 'дня', 'дней']);  
+  
         var html = $('<div style="padding: 1.8em; color: #fff; font-size: 1.05em; line-height: 1.5;">' +  
             '<h3 style="text-align: center; color: #ffcc00; margin-bottom: 1.2em;">📅 Информация о подписке Alcopac</h3>' +  
             '<p><strong>Пользователь:</strong> ' + (userDataCache.tg_username ? '@' + userDataCache.tg_username : 'promo / device') + '</p>' +  
             '<p><strong>Осталось дней:</strong> ' +  
             '<span style="font-size: 1.6em; font-weight: bold; color: ' + (userDataCache.days_left <= 3 ? '#ff4444' : '#ffcc00') + '">' +  
-            userDataCache.days_left + '</span></p>' +  
+            userDataCache.days_left + ' ' + daysText + '</span></p>' +  
             '<p><strong>Истекает:</strong> ' + expiresFormatted + '</p>' +  
             '<p><strong>Платформа:</strong> ' + userDataCache.platform + '</p>' +  
             '<p><strong>Версия:</strong> ' + userDataCache.version + '</p>' +  
@@ -76,14 +98,18 @@
             '</div>');  
   
         Lampa.Modal.open({  
-            title: userDataCache.days_left === 0 ? '❌ Подписка истекла!' : `⏳ Осталось ${userDataCache.days_left} дней`,  
+            title: userDataCache.days_left === 0 ? '❌ Подписка истекла!' : `⏳ Осталось ${userDataCache.days_left} ${daysText}`,  
             html: html,  
             buttons: [{   
                 name: 'Закрыть',   
                 onSelect: function() {   
                     Lampa.Modal.close();   
                 }   
-            }]  
+            }],  
+            onBack: function() {  
+                Lampa.Modal.close();  
+                Lampa.Controller.toggle('content');  
+            }  
         });  
   
         // Обновляем данные в фоне  
@@ -97,7 +123,12 @@
   
     // Запуск плагина  
     function startPlugin() {  
-        fetchUserInfo(updateExpirationButton);  
+        // Сначала проверяем через API  
+        isAlcopacPlatform().then(function(isAlcopac) {  
+            if (isAlcopac) {  
+                fetchUserInfo(updateExpirationButton);  
+            }  
+        });  
     }  
   
     // Инициализация  
