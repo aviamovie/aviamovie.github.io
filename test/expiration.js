@@ -9,7 +9,7 @@
 
     // ====================== ПОЛУЧЕНИЕ ИНФОРМАЦИИ (ИСПРАВЛЕНО) ======================
     function fetchUserInfo(callback) {
-        if (!window.alcopac) {
+        if (window.alcopac) {
             console.log('SURS Expiration Plugin: НЕ alcopac');
             return callback(null);
         }
