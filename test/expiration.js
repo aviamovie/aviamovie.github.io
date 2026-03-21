@@ -5,7 +5,7 @@
     var userDataCache = null;  
     var expirationIcon = '<svg fill="#ffcc00" width="64px" height="64px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';  
   
-    // Запрос данных через Lampa API  
+    // Запрос данных через Lampa.Network  
     function fetchUserInfo(callback) {  
         if (window.alcopac) return callback(null);  
   
@@ -15,7 +15,7 @@
         var uid = Lampa.Storage.get('lampac_unic_id', '');  
         var url = host + 'api/user/info' + (uid ? '?uid=' + encodeURIComponent(uid) : '');  
   
-        Lampa.Utils.put(url, {}, function(data) {  
+        Lampa.Network.silent(url, function(data) {  
             callback(data);  
         }, function(error) {  
             console.warn('SURS Expiration Plugin: запрос упал:', error);  
@@ -25,7 +25,7 @@
   
     // Обновление кнопки  
     function updateExpirationButton(data) {  
-        if (!data || data.days_left > 10) {  
+        if (!data || !data.authorized || data.days_left > 10) {  
             if (window.surs_removeExternalButton) {  
                 window.surs_removeExternalButton(buttonId);  
             }  
