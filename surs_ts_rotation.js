@@ -269,16 +269,13 @@
                 Lampa.Controller.collectionSet(html);  
                 var focusTarget = focusItem || html.find('.torrent-server__item').first();  
                 Lampa.Controller.collectionFocus(false, focusTarget);  
-                setTimeout(function() {  
-                    focusTarget.addClass('focus');  
-                }, 100);  
             },  
             back: function() {  
                 stopAutostart();  
                 Lampa.Modal.close();  
                 Lampa.Controller.toggle(enabled);  
             }  
-        });  
+        });
           
         Lampa.Controller.toggle('modal');  
     }  
