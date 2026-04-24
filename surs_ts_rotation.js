@@ -2,7 +2,7 @@
     // Plugin metadata    
     var plugin = {    
         name: 'TorrServer Rotation',    
-        version: '1.1.2',    
+        version: '1.1.3',    
         description: 'TorrServer selection with fallback to first server'    
     };    
     
@@ -71,7 +71,7 @@
      */  
     function selectServer() {    
         // If built-in server is available, use it    
-        if (builtinServerAvailable && config.servers.length > 0 && config.servers[0].title === 'Встроенный') {    
+        if (builtinServerAvailable && config.servers.length > 0 && config.servers[0].title === 'ÐÑÑÑÐ¾ÐµÐ½Ð½ÑÐ¹') {    
             config.currentIndex = 0;    
             Lampa.Storage.set('torrserver_url', config.servers[0].url);    
             TS_ROTATION.log('Using built-in TorrServer: ' + config.servers[0].title);    
@@ -126,7 +126,7 @@
                 // Add built-in server to the beginning of the list    
                 config.servers.unshift({    
                     url: 'http://127.0.0.1:8090',    
-                    title: 'Встроенный',    
+                    title: 'ÐÑÑÑÐ¾ÐµÐ½Ð½ÑÐ¹',    
                     available: true,    
                     isBuiltin: true    
                 });    
@@ -226,7 +226,7 @@
         for (var i = 0; i < availableServers.length; i++) {    
             var server = availableServers[i];    
             var isCurrent = server.url === config.servers[config.currentIndex || 0].url;    
-            var title = server.title + (isCurrent ? ' - текущий' : '');    
+            var title = server.title + (isCurrent ? ' - ÑÐµÐºÑÑÐ¸Ð¹' : '');    
                 
             var item = $('<div class="torrent-server__item selector' + (isCurrent ? ' current' : '') + '" data-url="' + server.url + '">' +    
                 '<div class="torrent-server__title">' + title + '</div>' +    
@@ -257,26 +257,15 @@
         // Use selected server for autostart (not random if built-in is available)    
         var autostartUrl = selectServer() || availableServers[0].url;    
             
-        // Add controller BEFORE opening modal (ИСПРАВЛЕНИЕ)  
-        Lampa.Controller.add('modal', {    
-            invisible: true,    
-            toggle: function() {    
-                Lampa.Controller.collectionSet(html);    
-                var focusTarget = focusItem || html.find('.torrent-server__item').first();    
-                Lampa.Controller.collectionFocus(false, focusTarget);    
-            },    
-            back: function() {    
-                stopAutostart();    
-                Lampa.Modal.close();    
-                Lampa.Controller.toggle(enabled);    
-            }    
-        });    
+        // Add controller BEFORE opening modal (ÐÐ¡ÐÐ ÐÐÐÐÐÐÐ)  
+        var focusTarget = focusItem ? focusItem[0] : list.find('.torrent-server__item').first()[0];    
             
         // Then open modal    
         Lampa.Modal.open({    
-            title: 'Выберите TorrServer',    
+            title: 'ÐÑÐ±ÐµÑÐ¸ÑÐµ TorrServer',    
             html: html,    
             size: 'small',    
+            select: focusTarget || false,    
             onBack: function() {    
                 stopAutostart();    
                 Lampa.Modal.close();    
@@ -289,9 +278,6 @@
             Lampa.Modal.close();    
             callback(selectedUrl);    
         }, progress.find('.torrent-server__progress-bar'));    
-            
-        // Finally toggle controller    
-        Lampa.Controller.toggle('modal');    
     }    
     
     /**    
@@ -346,9 +332,10 @@
     $('body').append('<style>' +    
         '.torrent-server-select { padding: 2em; }' +    
         '.torrent-server__list { margin-bottom: 2em; }' +    
-        '.torrent-server__item { padding: 1.2em; margin-bottom: 0.8em; border-radius: 0.3em; background-color: #363636; cursor: pointer; }' +    
-        '.torrent-server__item.current { background-color: #464646; border: 1px solid #fff; }' +    
-        '.torrent-server__item.focus { background-color: rgba(255,255,255,0.2); }' +    
+        '.torrent-server__item { padding: 1.2em; margin-bottom: 0.8em; border-radius: 0.3em; border: 1px solid transparent; background-color: #363636; cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease; }' +    
+        '.torrent-server__item.current { background-color: #464646; border-color: rgba(255,255,255,0.5); }' +    
+        '.torrent-server__item.selector.focus, .torrent-server__item.selector.hover, .torrent-server__item.selector.traverse { background-color: rgba(255,255,255,0.2); border-color: #fff; box-shadow: 0 0 0 0.15em rgba(255,255,255,0.15); }' +    
+        '.torrent-server__item.current.selector.focus, .torrent-server__item.current.selector.hover, .torrent-server__item.current.selector.traverse { background-color: rgba(255,255,255,0.28); }' +    
         '.torrent-server__title { font-size: 1.3em; }' +    
         '.torrent-server__progress { height: 0.5em; background-color: rgba(255, 255, 255, 0.15); border-radius: 5em; overflow: hidden; }' +    
         '.torrent-server__progress-bar { height: 100%; background-color: #fff; width: 0%; transition: width 0.1s linear; }' +    
