@@ -513,14 +513,20 @@
                 var CustomData = [];  
                 var trendingsData = [];  
 				
-				var globalStreamingRow = null;  
-				var russianStreamingRow = null;  
-				if (typeof window.streaming_getGlobalStreamingRow === 'function') {  
-					globalStreamingRow = makeStreamingRowWrapper(window.streaming_getGlobalStreamingRow);  
-				}  
-				if (typeof window.streaming_getRussianStreamingRow === 'function') {  
-					russianStreamingRow = makeStreamingRowWrapper(window.streaming_getRussianStreamingRow);  
-				}      
+                var globalStreamingRow = null;    
+                var russianStreamingRow = null;    
+                if (typeof window.streaming_getGlobalStreamingRow === 'function') {    
+                    globalStreamingRow = makeStreamingRowWrapper(window.streaming_getGlobalStreamingRow);    
+                }    
+                if (typeof window.streaming_getRussianStreamingRow === 'function') {    
+                    russianStreamingRow = makeStreamingRowWrapper(window.streaming_getRussianStreamingRow);    
+                }    
+                  
+                // Добавляем жанровые ряды  
+                var genresRow = null;    
+                if (typeof window.genres_createGenresRow === 'function') {    
+                    genresRow = makeStreamingRowWrapper(window.genres_createGenresRow);    
+                }      
                 var trendingMovies = function(callback) {    
                     var baseUrl = 'trending/movie/week';    
                     baseUrl = applyAgeRestriction(baseUrl);    
@@ -885,29 +891,40 @@
 					return Math.floor(Math.random() * 13) + 2;  
 				}  
 				  
-				if (globalStreamingRow) {  
-					var idx1 = randomIndex();  
-					combinedData.splice(idx1, 0, globalStreamingRow());  
-				}  
-				  
-				if (russianStreamingRow) {  
-					var idx2;  
-					var attempts = 0;  
-					do {  
-						idx2 = randomIndex();  
-					  
-						if (globalStreamingRow && Math.abs(idx2 - idx1) <= 1) {  
-							  
-							if (idx2 < idx1) {  
-								idx2 = Math.max(0, idx1 - 2);  
-							} else {  
-								idx2 = Math.min(combinedData.length - 1, idx1 + 2);  
-							}  
-						}  
-						attempts++;  
-					} while (globalStreamingRow && Math.abs(idx2 - idx1) <= 1 && attempts < 10);  
-					combinedData.splice(idx2, 0, russianStreamingRow());  
-				}
+if (globalStreamingRow) {    
+    var idx1 = randomIndex();    
+    combinedData.splice(idx1, 0, globalStreamingRow());    
+}    
+    
+                if (russianStreamingRow) {    
+                    var idx2;    
+                    var attempts = 0;    
+                    do {    
+                        idx2 = randomIndex();    
+                        if (globalStreamingRow && Math.abs(idx2 - idx1) <= 1) {    
+                            if (idx2 < idx1) {    
+                                idx2 = Math.max(0, idx1 - 2);    
+                            } else {    
+                                idx2 = Math.min(combinedData.length - 1, idx1 + 2);    
+                            }    
+                        }    
+                        attempts++;    
+                    } while (globalStreamingRow && Math.abs(idx2 - idx1) <= 1 && attempts < 10);    
+                    combinedData.splice(idx2, 0, russianStreamingRow());    
+                }  
+                  
+
+                if (genresRow) {    
+                    var idx3 = randomIndex();    
+
+                    if (globalStreamingRow && Math.abs(idx3 - idx1) <= 1) {    
+                        idx3 = Math.max(0, idx1 - 2);    
+                    }    
+                    if (russianStreamingRow && Math.abs(idx3 - idx2) <= 1) {    
+                        idx3 = Math.max(0, idx2 - 2);    
+                    }    
+                    combinedData.splice(idx3, 0, genresRow());    
+                }
 						
                 function loadPart(partLoaded, partEmpty) {    
                     Lampa.Api.partNext(combinedData, partsLimit, partLoaded, partEmpty);    
