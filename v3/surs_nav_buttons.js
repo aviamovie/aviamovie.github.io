@@ -200,7 +200,7 @@ function addStyles() {
     
             @media screen and (max-width: 767px) {      
                 .card--button-compact {      
-                    width: 11em !important;      
+                    width: 10.5em !important;      
                 }      
 
                       
