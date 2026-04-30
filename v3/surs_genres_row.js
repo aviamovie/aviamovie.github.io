@@ -216,18 +216,18 @@ var movieGenres = [
                     var tenDaysAgo = new Date(today);    
                     tenDaysAgo.setDate(today.getDate() - 10);    
                         
-                    var sixMonthsAgo = new Date(today);    
-                    sixMonthsAgo.setMonth(today.getMonth() - 6);    
+                    var nineMonthsAgo = new Date(today);    
+                    sixMonthsAgo.setMonth(today.getMonth() - 9);    
                         
                     var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';    
                     var lte = dateField + '.lte=' + formatDate(tenDaysAgo);    
-                    var gte = dateField + '.gte=' + formatDate(sixMonthsAgo);    
+                    var gte = dateField + '.gte=' + formatDate(nineMonthsAgo);    
                         
-                    url += '&' + lte + '&' + gte + '&vote_count.gte=40';     
+                    url += '&' + lte + '&' + gte + '&vote_count.gte=20';     
                 }  
                     
                 if (sortItem.sort === 'vote_average.desc') {    
-                    url += '&vote_count.gte=1000';    
+                    url += '&vote_count.gte=400';    
                 }    
                   
                   
