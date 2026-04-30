@@ -208,10 +208,9 @@ function addStyles() {
                     padding-bottom: 0.3em !important;      
                 }      
                   
-                /* Center and resize icons for mobile */      
                 .card__svg-icon {      
                     position: absolute;      
-                    top: 42%;      
+                    top: 40%;      
                     left: 50%;      
                     transform: translate(-50%, -50%);      
                     width: 40% !important;      
@@ -222,14 +221,14 @@ function addStyles() {
                 }     
                     .card__button-label {      
                     position: absolute;      
-                    bottom: 0.3em;      
+                    bottom: 0.2em;      
                     left: 0;      
                     right: 0;      
                     text-align: center;      
                     color: #fff;      
                     padding: 0.5em;      
-                    font-size: 0.7em;      
-                    font-weight: 400;      
+                    font-size: 0.6em;      
+                    font-weight: 300;      
                     z-index: 1;      
                 }      
             }      
