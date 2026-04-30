@@ -144,7 +144,7 @@
                     [ 'https://aviamovie.github.io/v3/surs.js',
                       'https://aviamovie.github.io/v3/surs_nav_buttons.js',
                       'https://aviamovie.github.io/v3/surs_strmngs_row.js',
-                      'https://aviamovie.github.io/v3/surs_genres_row.js'
+                      //'https://aviamovie.github.io/v3/surs_genres_row.js'
 
                     ],   
                     function () {  
