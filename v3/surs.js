@@ -923,7 +923,7 @@ if (globalStreamingRow) {
                     if (russianStreamingRow && Math.abs(idx3 - idx2) <= 1) {    
                         idx3 = Math.max(0, idx2 - 2);    
                     }    
-                    combinedData.splice(idx3, 0, genresRow());    
+                    combinedData.splice(idx3, 2, genresRow());    
                 }
 						
                 function loadPart(partLoaded, partEmpty) {    
