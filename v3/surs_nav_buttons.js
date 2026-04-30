@@ -253,6 +253,11 @@ function addStyles() {
                 height: 100% !important;      
                 //fill: currentColor;  
             }      
+
+            .card__svg-icon svg[fill="none"],  
+            .card__svg-icon svg[fill="transparent"] {  
+                fill: transparent !important;  
+            }
             .card__button-label {      
                 position: absolute;      
                 bottom: 0.4em;      
