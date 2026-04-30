@@ -209,7 +209,7 @@ function addStyles() {
                   
                 .card__svg-icon {      
                     position: absolute;      
-                    top: 40%;      
+                    top: 37%;      
                     left: 50%;      
                     transform: translate(-50%, -50%);      
                     width: 40% !important;      
