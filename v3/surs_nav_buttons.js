@@ -251,7 +251,7 @@ function addStyles() {
             .card__svg-icon svg {      
                 width: 100% !important;      
                 height: 100% !important;      
-                fill: currentColor;      
+                //fill: currentColor;  
             }      
             .card__button-label {      
                 position: absolute;      
