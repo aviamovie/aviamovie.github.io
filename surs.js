@@ -141,21 +141,17 @@
 
             function loadV3Plugins() {  
                 Lampa.Utils.putScriptAsync(  
-                    ['https://aviamovie.github.io/v3/surs_nav_buttons.js',
-                      'https://aviamovie.github.io/v3/surs_strmngs_row.js'
+                    [ 'https://aviamovie.github.io/v3/surs.js',
+                      'https://aviamovie.github.io/v3/surs_nav_buttons.js',
+                      'https://aviamovie.github.io/v3/surs_strmngs_row.js',
+                      'https://aviamovie.github.io/v3/surs_genres_row.js'
+
                     ],   
                     function () {  
-                        console.log('SURS nav and strmngs загружены.');  
+                        console.log('SURS (v3) загружен.');  
                     }  
                 );  
                   
-
-                Lampa.Utils.putScriptAsync(  
-                    ['https://aviamovie.github.io/v3/surs.js'],   
-                    function () {  
-                        console.log('SURS (v3) успешно загружен.');  
-                    }  
-                );  
                   
 
                 setTimeout(function () {  
