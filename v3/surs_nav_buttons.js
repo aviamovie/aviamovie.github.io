@@ -202,8 +202,7 @@ function addStyles() {
                 .card--button-compact {      
                     width: 9em !important;      
                 }      
-
-                      
+           
                 .items-line {      
                     padding-bottom: 0.3em !important;      
                 }      
@@ -226,8 +225,8 @@ function addStyles() {
                     right: 0;      
                     text-align: center;      
                     color: #fff;      
-                    padding: 0.5em;      
-                    font-size: 0.6em;      
+                    padding: 0.4em;      
+                    font-size: 0.5em;      
                     font-weight: 300;      
                     z-index: 1;      
                 }      
