@@ -6,7 +6,7 @@
        var defaultConfig = {    
 
         rowTitle: Lampa.Lang.translate('title_genre'),        
-        rowIndex: 4,        
+        rowIndex: 5,        
         source: 'tmdb',  
         // Настройки фильтрации ключевых слов  
         withoutKeywords: {  
@@ -324,6 +324,22 @@ var movieGenres = [
   
     function startPlugin() {      
     addStyles();      
+    
+        Lampa.ContentRows.add({  
+        index: defaultConfig.rowIndex,  
+        name: 'genres_buttons',  
+        title: defaultConfig.rowTitle,  
+        screen: ['main'],  
+        call: function (params, screen) {  
+            var genresData = [];  
+            createGenresRow(genresData);  
+            return function (callback) {  
+                if (genresData.length > 0) {  
+                    genresData[0](callback);  
+                }  
+            };  
+        }  
+    });  
 
       
     // Глобальный экспорт данных и функций  
