@@ -324,7 +324,7 @@ var movieGenres = [
   
     function startPlugin() {      
     addStyles();      
-    createGenresRow([]);
+
       
     // Глобальный экспорт данных и функций  
     window.genres_getMovieGenres = function() {  
