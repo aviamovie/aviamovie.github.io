@@ -200,24 +200,25 @@ function addStyles() {
     
             @media screen and (max-width: 767px) {      
                 .card--button-compact {      
-                    width: 9em !important;      
+                    width: 11em !important;      
                 }      
-                /* Hide button labels on mobile */      
-                .card--button-compact .card__button-label {      
-                    display: none !important;      
-                }      
-                /* Reduce row height */      
+
+                      
                 .items-line {      
-                    padding-bottom: 0.1em !important;      
+                    padding-bottom: 0.3em !important;      
                 }      
                   
                 /* Center and resize icons for mobile */      
                 .card__svg-icon {      
-                    width: 60% !important;      
-                    height: 60% !important;      
-                    top: 50% !important;      
-                    left: 50% !important;      
-                    transform: translate(-50%, -50%) !important;      
+                    position: absolute;      
+                    top: 45%;      
+                    left: 50%;      
+                    transform: translate(-50%, -50%);      
+                    width: 40% !important;      
+                    height: 40% !important;      
+                    display: flex;      
+                    align-items: center;      
+                    justify-content: center;        
                 }      
             }      
     
