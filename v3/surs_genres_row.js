@@ -260,73 +260,67 @@ var movieGenres = [
 		return year + '-' + month + '-' + day;  
 	}
 		  
-		function createGenresRow() {  
-			  
-			var allGenres = movieGenres.slice();  
-			tvGenres.forEach(function(tvGenre) {  
-				if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {  
-					allGenres.push(tvGenre);  
-				}  
-			});  
-			  
-			Lampa.ContentRows.add({        
-				index: defaultConfig.rowIndex,        
-				screen: ['main'],        
-				call: function () {        
-					return function (callback) {        
-						var results = allGenres.map(function (g) {        
-							return {        
-								source: 'custom',        
-								title: Lampa.Lang.translate(g.title),        
-								name: Lampa.Lang.translate(g.title),        
-								params: {        
-									createInstance: function () {        
-										var card = Lampa.Maker.make('Card', this, function (m) {        
-											return m.only('Card', 'Callback');        
-										});        
-										card.data.icon_svg = g.icon;  
-										return card;        
-									},        
-									emit: {      
-										onCreate: function () {      
-											this.html.addClass('card--genre-compact');      
-											  
-											var iconData = g.icon;    
-											if (iconData && iconData.startsWith('<svg')) {    
-												var imgElement = this.html.find('.card__img');    
-												var svgContainer = document.createElement('div');    
-												svgContainer.classList.add('card__svg-icon');    
-												svgContainer.innerHTML = iconData;    
-												imgElement.replaceWith(svgContainer);    
-											}  
-											  
-											var genreLabel = document.createElement('div');      
-											genreLabel.classList.add('card__genre-label');      
-											genreLabel.innerText = Lampa.Lang.translate(g.title);      
-											this.html.find('.card__view').append(genreLabel);      
-										},      
-										onlyEnter: function () {        
-											openGenre(g);        
-										}        
-									}        
-								}        
-							};        
-						});        
-			  
-						callback({        
-							results: results,        
-							title: defaultConfig.rowTitle,        
-							params: {        
-								items: {        
-									view: 20,        
-									mapping: 'line'        
-								}        
-							}        
-						});        
-					};        
-				}        
-			});        
-		}  
+    function createGenresRow(genresData) {  
+        var allGenres = movieGenres.slice();  
+        tvGenres.forEach(function(tvGenre) {  
+            if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {  
+                allGenres.push(tvGenre);  
+            }  
+        });  
+      
+        // Добавляем функцию в массив, а не регистрируем напрямую  
+        genresData.unshift(function(callback) {  
+            var results = allGenres.map(function (g) {  
+                return {  
+                    source: 'custom',  
+                    title: Lampa.Lang.translate(g.title),  
+                    name: Lampa.Lang.translate(g.title),  
+                    params: {  
+                        createInstance: function () {  
+                            var card = Lampa.Maker.make('Card', this, function (m) {  
+                                return m.only('Card', 'Callback');  
+                            });  
+                            card.data.icon_svg = g.icon;  
+                            return card;  
+                        },  
+                        emit: {  
+                            onCreate: function () {  
+                                this.html.addClass('card--genre-compact');  
+                                  
+                                var iconData = g.icon;  
+                                if (iconData && iconData.startsWith('<svg')) {  
+                                    var imgElement = this.html.find('.card__img');  
+                                    var svgContainer = document.createElement('div');  
+                                    svgContainer.classList.add('card__svg-icon');  
+                                    svgContainer.innerHTML = iconData;  
+                                    imgElement.replaceWith(svgContainer);  
+                                }  
+                                  
+                                var genreLabel = document.createElement('div');  
+                                genreLabel.classList.add('card__genre-label');  
+                                genreLabel.innerText = Lampa.Lang.translate(g.title);  
+                                this.html.find('.card__view').append(genreLabel);  
+                            },  
+                            onlyEnter: function () {  
+                                openGenre(g);  
+                            }  
+                        }  
+                    }  
+                };  
+            });  
+      
+            callback({  
+                results: results,  
+                title: defaultConfig.rowTitle,  
+                params: {  
+                    items: {  
+                        view: 20,  
+                        mapping: 'line'  
+                    }  
+                }  
+            });  
+        });  
+    } 
   
     function startPlugin() {      
     addStyles();      
