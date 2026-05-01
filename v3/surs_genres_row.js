@@ -198,91 +198,116 @@
 }
       
 function showSortMenu(genre, type, fromTypeSelection) {  
+    // Опции сортировки  
     var sortItems = sortOptions.map(function(s) {  
         return {  
             title: Lampa.Lang.translate(s.title),  
-            sort: s.sort  
+            sort: s.sort,  
+            selected: s.sort === 'popularity.desc' // Выбираем по умолчанию  
         };  
     });  
   
-    // Add year filter options  
+    // Опции года  
+    var currentYear = new Date().getFullYear();  
     var yearItems = [  
-        { title: Lampa.Lang.translate('filter_any'), value: '' },  
-        { title: new Date().getFullYear(), value: new Date().getFullYear() },  
-        { title: (new Date().getFullYear() - 1), value: new Date().getFullYear() - 1 },  
-        { title: (new Date().getFullYear() - 2), value: new Date().getFullYear() - 2 },  
-        { title: (new Date().getFullYear() - 3), value: new Date().getFullYear() - 3 },  
-        { title: (new Date().getFullYear() - 4), value: new Date().getFullYear() - 4 },  
-        { title: (new Date().getFullYear() - 5), value: new Date().getFullYear() - 5 }  
+        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: true }  
     ];  
+      
+    for (var i = 0; i <= 5; i++) {  
+        yearItems.push({  
+            title: (currentYear - i).toString(),  
+            value: (currentYear - i).toString(),  
+            checkbox: true,  
+            checked: false  
+        });  
+    }  
   
-    // Add language filter options (common languages)  
+    // Опции языка  
     var languageItems = [  
-        { title: Lampa.Lang.translate('filter_any'), value: '' },  
-        { title: 'English', value: 'en' },  
-        { title: 'Русский', value: 'ru' },  
-        { title: '日本語', value: 'ja' },  
-        { title: '한국어', value: 'ko' },  
-        { title: 'Español', value: 'es' },  
-        { title: 'Français', value: 'fr' },  
-        { title: 'Deutsch', value: 'de' },  
-        { title: 'Italiano', value: 'it' },  
-        { title: 'Português', value: 'pt' },  
-        { title: '中文', value: 'zh' }  
+        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: true },  
+        { title: 'English', value: 'en', checkbox: true, checked: false },  
+        { title: 'Русский', value: 'ru', checkbox: true, checked: false },  
+        { title: '日本語', value: 'ja', checkbox: true, checked: false },  
+        { title: '한국어', value: 'ko', checkbox: true, checked: false },  
+        { title: 'Español', value: 'es', checkbox: true, checked: false },  
+        { title: 'Français', value: 'fr', checkbox: true, checked: false },  
+        { title: 'Deutsch', value: 'de', checkbox: true, checked: false },  
+        { title: 'Italiano', value: 'it', checkbox: true, checked: false },  
+        { title: 'Português', value: 'pt', checkbox: true, checked: false },  
+        { title: '中文', value: 'zh', checkbox: true, checked: false }  
     ];  
   
+    // Собираем все элементы в один массив  
+    var allItems = [];  
+      
+    // Добавляем опции сортировки  
+    sortItems.forEach(function(item) {  
+        allItems.push(item);  
+    });  
+      
+    // Разделитель  
+    allItems.push({  
+        title: 'Дополнительные фильтры',  
+        separator: true,  
+        noenter: true  
+    });  
+      
+    // Заголовок года  
+    allItems.push({  
+        title: 'Год',  
+        subtitle: 'Выберите один или несколько лет',  
+        noenter: true,  
+        ghost: true  
+    });  
+      
+    // Добавляем опции года  
+    yearItems.forEach(function(item) {  
+        allItems.push(item);  
+    });  
+      
+    // Заголовок языка  
+    allItems.push({  
+        title: 'Язык оригинала',  
+        subtitle: 'Выберите один или несколько языков',  
+        noenter: true,  
+        ghost: true  
+    });  
+      
+    // Добавляем опции языка  
+    languageItems.forEach(function(item) {  
+        allItems.push(item);  
+    });  
+  
+    // Показываем единое меню  
     Lampa.Select.show({  
         title: Lampa.Lang.translate('filter_sorted'),  
-        items: sortItems,  
-        onSelect: function(sortItem) {  
-            // Show year selection  
-            Lampa.Select.show({  
-                title: Lampa.Lang.translate('title_year'),  
-                items: yearItems,  
-                onSelect: function(yearItem) {  
-                    // Show language selection  
-                    Lampa.Select.show({  
-                        title: Lampa.Lang.translate('title_original_language'),  
-                        items: languageItems,  
-                        onSelect: function(languageItem) {  
-                            buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem);  
-                        },  
-                        onBack: function() {  
-                            // Go back to year selection  
-                            Lampa.Select.show({  
-                                title: Lampa.Lang.translate('title_year'),  
-                                items: yearItems,  
-                                onSelect: function(yearItem) {  
-                                    Lampa.Select.show({  
-                                        title: Lampa.Lang.translate('title_original_language'),  
-                                        items: languageItems,  
-                                        onSelect: function(languageItem) {  
-                                            buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem);  
-                                        },  
-                                        onBack: function() {  
-                                            showSortMenu(genre, type, fromTypeSelection);  
-                                        }  
-                                    });  
-                                },  
-                                onBack: function() {  
-                                    if (fromTypeSelection) {  
-                                        openGenre(genre);  
-                                    } else {  
-                                        Lampa.Controller.toggle('content');  
-                                    }  
-                                }  
-                            });  
-                        }  
-                    });  
-                },  
-                onBack: function() {  
-                    if (fromTypeSelection) {  
-                        openGenre(genre);  
-                    } else {  
-                        Lampa.Controller.toggle('content');  
-                    }  
-                }  
-            });  
+        items: allItems,  
+        onSelect: function(item) {  
+            if (item.sort) {  
+                // Выбрана опция сортировки - снимаем выделение с других сортировок  
+                allItems.forEach(function(i) {  
+                    if (i.sort) i.selected = false;  
+                });  
+                item.selected = true;  
+            }  
+        },  
+        onCheck: function(item) {  
+            // Обработка чекбоксов для года и языка  
+            if (item.value !== '') {  
+                // Если выбран конкретный год/язык, снимаем галочку с "Любой"  
+                var sectionItems = item.title.match(/^\d+$/) ? yearItems : languageItems;  
+                sectionItems.forEach(function(i) {  
+                    if (i.value === '') i.checked = false;  
+                });  
+            } else {  
+                // Если выбран "Любой", снимаем галочки с остальных  
+                var sectionItems = item.title === Lampa.Lang.translate('filter_any') ?   
+                    (allItems.indexOf(item) > allItems.findIndex(i => i.title === 'Год') ? yearItems : languageItems) :  
+                    [];  
+                sectionItems.forEach(function(i) {  
+                    if (i.value !== '') i.checked = false;  
+                });  
+            }  
         },  
         onBack: function() {  
             if (fromTypeSelection) {  
