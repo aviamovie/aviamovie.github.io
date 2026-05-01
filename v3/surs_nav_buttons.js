@@ -190,7 +190,7 @@ function getExternalButtons() {
     // Добавление стилей с мобильными адаптациями  
 function addStyles() {  
     if (!window.surs_custom_css_loaded) {  
-        Utils.putScript(['https://aviamovie.github.io/surs_custom_css.js'], function() {  
+        Lampa.Utils.putScript(['https://aviamovie.github.io/surs_custom_css.js'], function() {  
             console.log('SURS Custom CSS loaded');  
         });  
     }  
