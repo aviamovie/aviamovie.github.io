@@ -202,8 +202,7 @@ function showSortMenu(genre, type, fromTypeSelection) {
     var sortItems = sortOptions.map(function(s) {  
         return {  
             title: Lampa.Lang.translate(s.title),  
-            sort: s.sort,  
-            selected: s.sort === 'popularity.desc' // Выбираем по умолчанию  
+            sort: s.sort  
         };  
     });  
   
@@ -237,7 +236,7 @@ function showSortMenu(genre, type, fromTypeSelection) {
         { title: '中文', value: 'zh', checkbox: true, checked: false }  
     ];  
   
-    // Собираем все элементы в один массив  
+    // Основное меню  
     var allItems = [];  
       
     // Добавляем опции сортировки  
@@ -252,61 +251,33 @@ function showSortMenu(genre, type, fromTypeSelection) {
         noenter: true  
     });  
       
-    // Заголовок года  
+    // Вкладка года  
     allItems.push({  
         title: 'Год',  
-        subtitle: 'Выберите один или несколько лет',  
-        noenter: true,  
-        ghost: true  
+        subtitle: 'Выберите год',  
+        items: yearItems,  
+        yearFilter: true  
     });  
       
-    // Добавляем опции года  
-    yearItems.forEach(function(item) {  
-        allItems.push(item);  
-    });  
-      
-    // Заголовок языка  
+    // Вкладка языка  
     allItems.push({  
         title: 'Язык оригинала',  
-        subtitle: 'Выберите один или несколько языков',  
-        noenter: true,  
-        ghost: true  
-    });  
-      
-    // Добавляем опции языка  
-    languageItems.forEach(function(item) {  
-        allItems.push(item);  
+        subtitle: 'Выберите язык',  
+        items: languageItems,  
+        languageFilter: true  
     });  
   
-    // Показываем единое меню  
+    // Показываем основное меню  
     Lampa.Select.show({  
         title: Lampa.Lang.translate('filter_sorted'),  
         items: allItems,  
         onSelect: function(item) {  
             if (item.sort) {  
-                // Выбрана опция сортировки - снимаем выделение с других сортировок  
-                allItems.forEach(function(i) {  
-                    if (i.sort) i.selected = false;  
-                });  
-                item.selected = true;  
-            }  
-        },  
-        onCheck: function(item) {  
-            // Обработка чекбоксов для года и языка  
-            if (item.value !== '') {  
-                // Если выбран конкретный год/язык, снимаем галочку с "Любой"  
-                var sectionItems = item.title.match(/^\d+$/) ? yearItems : languageItems;  
-                sectionItems.forEach(function(i) {  
-                    if (i.value === '') i.checked = false;  
-                });  
-            } else {  
-                // Если выбран "Любой", снимаем галочки с остальных  
-                var sectionItems = item.title === Lampa.Lang.translate('filter_any') ?   
-                    (allItems.indexOf(item) > allItems.findIndex(i => i.title === 'Год') ? yearItems : languageItems) :  
-                    [];  
-                sectionItems.forEach(function(i) {  
-                    if (i.value !== '') i.checked = false;  
-                });  
+                // Выбрана сортировка - начинаем поиск  
+                buildUrlAndNavigate(genre, type, item, null, null);  
+            } else if (item.yearFilter || item.languageFilter) {  
+                // Открываем вкладку с фильтрами  
+                showFilterTab(item, genre, type, fromTypeSelection);  
             }  
         },  
         onBack: function() {  
@@ -319,19 +290,65 @@ function showSortMenu(genre, type, fromTypeSelection) {
     });  
 }  
   
-
+function showFilterTab(filterItem, genre, type, fromTypeSelection) {  
+    var isYearFilter = filterItem.yearFilter;  
+    var filterType = isYearFilter ? 'year' : 'language';  
+      
+    Lampa.Select.show({  
+        title: filterItem.title,  
+        items: filterItem.items,  
+        onSelect: function(item) {  
+            // При выборе "Любой" закрываем вкладку и возвращаемся наверх  
+            if (item.value === '') {  
+                // Снимаем все чекбоксы кроме "Любой"  
+                filterItem.items.forEach(function(i) {  
+                    i.checked = i.value === '';  
+                });  
+                // Возвращаемся на основной уровень  
+                showSortMenu(genre, type, fromTypeSelection);  
+            } else {  
+                // При выборе конкретного значения снимаем галочку с "Любой"  
+                filterItem.items.forEach(function(i) {  
+                    if (i.value === '') i.checked = false;  
+                });  
+                item.checked = true;  
+            }  
+        },  
+        onCheck: function(item) {  
+            // Обработка чекбоксов [1](#3-0)   
+            if (item.value !== '') {  
+                // Если выбран конкретный год/язык, снимаем галочку с "Любой"  
+                filterItem.items.forEach(function(i) {  
+                    if (i.value === '') i.checked = false;  
+                });  
+            } else {  
+                // Если выбран "Любой", снимаем галочки с остальных и закрываем  
+                filterItem.items.forEach(function(i) {  
+                    i.checked = i.value === '';  
+                });  
+                // Закрываем вкладку и возвращаемся наверх  
+                Lampa.Select.hide();  
+                showSortMenu(genre, type, fromTypeSelection);  
+            }  
+        },  
+        onBack: function() {  
+            // Возвращаемся на основной уровень  
+            showSortMenu(genre, type, fromTypeSelection);  
+        }  
+    });  
+}  
+  
 function buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem) {  
     var base = type === 'movie' ? 'discover/movie' : 'discover/tv';  
     var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortItem.sort;  
       
-    // Add year filter if selected  
-    if (yearItem.value) {  
+    // Добавляем фильтры если они были выбраны  
+    if (yearItem && yearItem.value && sortItem.sort !== 'release_date.desc') {  
         var dateField = type === 'movie' ? 'primary_release_year' : 'first_air_date_year';  
         url += '&' + dateField + '=' + yearItem.value;  
     }  
       
-    // Add language filter if selected  
-    if (languageItem.value) {  
+    if (languageItem && languageItem.value) {  
         url += '&with_original_language=' + languageItem.value;  
     }  
       
