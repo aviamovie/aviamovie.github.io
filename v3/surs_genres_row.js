@@ -197,11 +197,7 @@
     });    
 }
       
-// Глобальные переменные для хранения выбранных фильтров  
-var selectedFilters = {  
-    year: '',  
-    languages: []  
-};  
+
   
 function showSortMenu(genre, type, fromTypeSelection) {  
     // Опции сортировки  
@@ -316,6 +312,12 @@ function showSortMenu(genre, type, fromTypeSelection) {
     });  
 }  
   
+// Глобальные переменные для хранения выбранных фильтров  
+var selectedFilters = {  
+    year: '',  
+    languages: []  
+};  
+  
 function showFilterTab(filterItem, genre, type, fromTypeSelection) {  
     var isYearFilter = filterItem.yearFilter;  
       
@@ -323,8 +325,8 @@ function showFilterTab(filterItem, genre, type, fromTypeSelection) {
         title: filterItem.title,  
         items: filterItem.items,  
         onSelect: function(item) {  
+            // При выборе "Любой" закрываем вкладку  
             if (item.value === '') {  
-                // Выбран "Любой" - сбрасываем все фильтры  
                 if (isYearFilter) {  
                     selectedFilters.year = '';  
                 } else {  
@@ -336,12 +338,8 @@ function showFilterTab(filterItem, genre, type, fromTypeSelection) {
                     i.checked = i.value === '';  
                 });  
                   
-                // Закрываем вкладку и возвращаемся наверх  
                 Lampa.Select.hide();  
                 showSortMenu(genre, type, fromTypeSelection);  
-            } else {  
-                // Выбрано конкретное значение - обрабатываем через onCheck  
-                // чтобы обеспечить правильную логику чекбоксов  
             }  
         },  
         onCheck: function(item) {  
@@ -356,6 +354,7 @@ function showFilterTab(filterItem, genre, type, fromTypeSelection) {
                 } else {  
                     // Выбран конкретный год  
                     selectedFilters.year = item.value;  
+                    // Снимаем галочку с "Любой" и ставим на выбранный год  
                     filterItem.items.forEach(function(i) {  
                         i.checked = i.value === item.value;  
                     });  
@@ -380,8 +379,10 @@ function showFilterTab(filterItem, genre, type, fromTypeSelection) {
                     // Обновляем состояние чекбоксов  
                     filterItem.items.forEach(function(i) {  
                         if (i.value === '') {  
+                            // "Любой" отмечен только если нет выбранных языков  
                             i.checked = selectedFilters.languages.length === 0;  
                         } else {  
+                            // Конкретный язык отмечен если он в массиве выбранных  
                             i.checked = selectedFilters.languages.indexOf(i.value) !== -1;  
                         }  
                     });  
@@ -389,10 +390,10 @@ function showFilterTab(filterItem, genre, type, fromTypeSelection) {
             }  
         },  
         onBack: function() {  
-
             showSortMenu(genre, type, fromTypeSelection);  
         }  
     });  
+}
 }  
   
 function showFilterTab(filterItem, genre, type, fromTypeSelection) {  
