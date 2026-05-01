@@ -197,61 +197,149 @@
     });    
 }
       
-    function showSortMenu(genre, type, fromTypeSelection) {      
-        var sortItems = sortOptions.map(function(s) {      
-            return {      
-                title: Lampa.Lang.translate(s.title),      
-                sort: s.sort      
-            };      
-        });      
-              
-        Lampa.Select.show({      
-            title: Lampa.Lang.translate('filter_sorted'),      
-            items: sortItems,      
-            onSelect: function(sortItem) {      
-                var base = type === 'movie' ? 'discover/movie' : 'discover/tv';    
-                var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortItem.sort;    
-                    
-                if (sortItem.sort === 'release_date.desc') {    
-                    var today = new Date();    
-                    var tenDaysAgo = new Date(today);    
-                    tenDaysAgo.setDate(today.getDate() - 10);    
-                        
-                    var nineMonthsAgo = new Date(today);    
-                    nineMonthsAgo.setMonth(today.getMonth() - 9);    
-                        
-                    var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';    
-                    var lte = dateField + '.lte=' + formatDate(tenDaysAgo);    
-                    var gte = dateField + '.gte=' + formatDate(nineMonthsAgo);    
-                        
-                    url += '&' + lte + '&' + gte + '&vote_count.gte=20';     
+function showSortMenu(genre, type, fromTypeSelection) {  
+    var sortItems = sortOptions.map(function(s) {  
+        return {  
+            title: Lampa.Lang.translate(s.title),  
+            sort: s.sort  
+        };  
+    });  
+  
+    // Add year filter options  
+    var yearItems = [  
+        { title: Lampa.Lang.translate('filter_any'), value: '' },  
+        { title: new Date().getFullYear(), value: new Date().getFullYear() },  
+        { title: (new Date().getFullYear() - 1), value: new Date().getFullYear() - 1 },  
+        { title: (new Date().getFullYear() - 2), value: new Date().getFullYear() - 2 },  
+        { title: (new Date().getFullYear() - 3), value: new Date().getFullYear() - 3 },  
+        { title: (new Date().getFullYear() - 4), value: new Date().getFullYear() - 4 },  
+        { title: (new Date().getFullYear() - 5), value: new Date().getFullYear() - 5 }  
+    ];  
+  
+    // Add language filter options (common languages)  
+    var languageItems = [  
+        { title: Lampa.Lang.translate('filter_any'), value: '' },  
+        { title: 'English', value: 'en' },  
+        { title: 'Русский', value: 'ru' },  
+        { title: '日本語', value: 'ja' },  
+        { title: '한국어', value: 'ko' },  
+        { title: 'Español', value: 'es' },  
+        { title: 'Français', value: 'fr' },  
+        { title: 'Deutsch', value: 'de' },  
+        { title: 'Italiano', value: 'it' },  
+        { title: 'Português', value: 'pt' },  
+        { title: '中文', value: 'zh' }  
+    ];  
+  
+    Lampa.Select.show({  
+        title: Lampa.Lang.translate('filter_sorted'),  
+        items: sortItems,  
+        onSelect: function(sortItem) {  
+            // Show year selection  
+            Lampa.Select.show({  
+                title: Lampa.Lang.translate('title_year'),  
+                items: yearItems,  
+                onSelect: function(yearItem) {  
+                    // Show language selection  
+                    Lampa.Select.show({  
+                        title: Lampa.Lang.translate('title_original_language'),  
+                        items: languageItems,  
+                        onSelect: function(languageItem) {  
+                            buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem);  
+                        },  
+                        onBack: function() {  
+                            // Go back to year selection  
+                            Lampa.Select.show({  
+                                title: Lampa.Lang.translate('title_year'),  
+                                items: yearItems,  
+                                onSelect: function(yearItem) {  
+                                    Lampa.Select.show({  
+                                        title: Lampa.Lang.translate('title_original_language'),  
+                                        items: languageItems,  
+                                        onSelect: function(languageItem) {  
+                                            buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem);  
+                                        },  
+                                        onBack: function() {  
+                                            showSortMenu(genre, type, fromTypeSelection);  
+                                        }  
+                                    });  
+                                },  
+                                onBack: function() {  
+                                    if (fromTypeSelection) {  
+                                        openGenre(genre);  
+                                    } else {  
+                                        Lampa.Controller.toggle('content');  
+                                    }  
+                                }  
+                            });  
+                        }  
+                    });  
+                },  
+                onBack: function() {  
+                    if (fromTypeSelection) {  
+                        openGenre(genre);  
+                    } else {  
+                        Lampa.Controller.toggle('content');  
+                    }  
                 }  
-                    
-                if (sortItem.sort === 'vote_average.desc') {    
-                    url += '&vote_count.gte=400';    
-                }    
-                  
-                  
-                url = applyWithoutKeywords(url);  
-                      
-                Lampa.Activity.push({          
-                    url: url,          
-                    title: Lampa.Lang.translate(genre.title),          
-                    component: 'category_full',          
-                    source: 'tmdb',          
-                    card_type: type,          
-                    page: 1          
-                });      
-            },      
-            onBack: function() {      
-                if (fromTypeSelection) {    
-                    openGenre(genre);    
-                } else {    
-                    Lampa.Controller.toggle('content');    
-                }    
-            }      
-        });      
-    }    
+            });  
+        },  
+        onBack: function() {  
+            if (fromTypeSelection) {  
+                openGenre(genre);  
+            } else {  
+                Lampa.Controller.toggle('content');  
+            }  
+        }  
+    });  
+}  
+  
+
+function buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem) {  
+    var base = type === 'movie' ? 'discover/movie' : 'discover/tv';  
+    var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortItem.sort;  
+      
+    // Add year filter if selected  
+    if (yearItem.value) {  
+        var dateField = type === 'movie' ? 'primary_release_year' : 'first_air_date_year';  
+        url += '&' + dateField + '=' + yearItem.value;  
+    }  
+      
+    // Add language filter if selected  
+    if (languageItem.value) {  
+        url += '&with_original_language=' + languageItem.value;  
+    }  
+      
+    if (sortItem.sort === 'release_date.desc') {  
+        var today = new Date();  
+        var tenDaysAgo = new Date(today);  
+        tenDaysAgo.setDate(today.getDate() - 10);  
+              
+        var nineMonthsAgo = new Date(today);  
+        nineMonthsAgo.setMonth(today.getMonth() - 9);  
+              
+        var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';  
+        var lte = dateField + '.lte=' + formatDate(tenDaysAgo);  
+        var gte = dateField + '.gte=' + formatDate(nineMonthsAgo);  
+              
+        url += '&' + lte + '&' + gte + '&vote_count.gte=20';       
+    }  
+          
+    if (sortItem.sort === 'vote_average.desc') {  
+        url += '&vote_count.gte=400';  
+    }  
+        
+    url = applyWithoutKeywords(url);  
+            
+    Lampa.Activity.push({            
+        url: url,            
+        title: Lampa.Lang.translate(genre.title),            
+        component: 'category_full',            
+        source: 'tmdb',            
+        card_type: type,            
+        page: 1            
+    });  
+}
   
   
 	function formatDate(date) {  
@@ -261,67 +349,72 @@
 		return year + '-' + month + '-' + day;  
 	}
 		  
-    function createGenresRow(genresData) {  
-        var allGenres = movieGenres.slice();  
-        tvGenres.forEach(function(tvGenre) {  
-            if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {  
-                allGenres.push(tvGenre);  
-            }  
-        });  
-      
-        // Добавляем функцию в массив, а не регистрируем напрямую  
-        genresData.unshift(function(callback) {  
-            var results = allGenres.map(function (g) {  
-                return {  
-                    source: 'custom',  
-                    title: Lampa.Lang.translate(g.title),  
-                    name: Lampa.Lang.translate(g.title),  
-                    params: {  
-                        createInstance: function () {  
-                            var card = Lampa.Maker.make('Card', this, function (m) {  
-                                return m.only('Card', 'Callback');  
-                            });  
-                            card.data.icon_svg = g.icon;  
-                            return card;  
-                        },  
-                        emit: {  
-                            onCreate: function () {  
-                                this.html.addClass('card--genre-compact');  
-                                  
-                                var iconData = g.icon;  
-                                if (iconData && iconData.startsWith('<svg')) {  
-                                    var imgElement = this.html.find('.card__img');  
-                                    var svgContainer = document.createElement('div');  
-                                    svgContainer.classList.add('card__svg-icon');  
-                                    svgContainer.innerHTML = iconData;  
-                                    imgElement.replaceWith(svgContainer);  
-                                }  
-                                  
-                                var genreLabel = document.createElement('div');  
-                                genreLabel.classList.add('card__genre-label');  
-                                genreLabel.innerText = Lampa.Lang.translate(g.title);  
-                                this.html.find('.card__view').append(genreLabel);  
-                            },  
-                            onlyEnter: function () {  
-                                openGenre(g);  
+function createGenresRow(genresData) {  
+    var allGenres = movieGenres.slice();  
+    tvGenres.forEach(function(tvGenre) {  
+        if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {  
+            allGenres.push(tvGenre);  
+        }  
+    });  
+  
+    // Randomize the order of genres  
+    allGenres.sort(function() {  
+        return Math.random() - 0.5;  
+    });  
+  
+    // Добавляем функцию в массив, а не регистрируем напрямую  
+    genresData.unshift(function(callback) {  
+        var results = allGenres.map(function (g) {  
+            return {  
+                source: 'custom',  
+                title: Lampa.Lang.translate(g.title),  
+                name: Lampa.Lang.translate(g.title),  
+                params: {  
+                    createInstance: function () {  
+                        var card = Lampa.Maker.make('Card', this, function (m) {  
+                            return m.only('Card', 'Callback');  
+                        });  
+                        card.data.icon_svg = g.icon;  
+                        return card;  
+                    },  
+                    emit: {  
+                        onCreate: function () {  
+                            this.html.addClass('card--genre-compact');  
+                                
+                            var iconData = g.icon;  
+                            if (iconData && iconData.startsWith('<svg')) {  
+                                var imgElement = this.html.find('.card__img');  
+                                var svgContainer = document.createElement('div');  
+                                svgContainer.classList.add('card__svg-icon');  
+                                svgContainer.innerHTML = iconData;  
+                                imgElement.replaceWith(svgContainer);  
                             }  
+                                
+                            var genreLabel = document.createElement('div');  
+                            genreLabel.classList.add('card__genre-label');  
+                            genreLabel.innerText = Lampa.Lang.translate(g.title);  
+                            this.html.find('.card__view').append(genreLabel);  
+                        },  
+                        onlyEnter: function () {  
+                            openGenre(g);  
                         }  
                     }  
-                };  
-            });  
-      
-            callback({  
-                results: results,  
-                title: defaultConfig.rowTitle,  
-                params: {  
-                    items: {  
-                        view: 20,  
-                        mapping: 'line'  
-                    }  
                 }  
-            });  
+            };  
         });  
-    } 
+  
+        callback({  
+            results: results,  
+            title: defaultConfig.rowTitle,  
+            params: {  
+                items: {  
+                    view: 20,  
+                    mapping: 'line'  
+                }  
+            }  
+        });  
+    });  
+}
   
     function startPlugin() {      
     addStyles();      
