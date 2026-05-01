@@ -216,13 +216,13 @@ function addStyles() {
             }  
             .card__button-label {  
                 position: absolute;  
-                bottom: 0.1em;  
+                bottom: 0em;  
                 left: 0;  
                 right: 0;  
                 text-align: center;  
                 color: #fff;  
-                padding: 0.4em;  
-                font-size: 0.4em;  
+                padding: 0.3em;  
+                font-size: 0.3em;  
                 font-weight: 300;  
                 z-index: 1;  
             }  
