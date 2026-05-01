@@ -1,23 +1,21 @@
-(function () {  
-    'use strict';  
-  
-    if (window.surs_genres_buttons_ready) return;  
-    window.surs_genres_buttons_ready = true;  
-  
-    var defaultConfig = {  
-        rowTitle: Lampa.Lang.translate('title_genre'),  
-        rowIndex: 5,  
-        source: 'tmdb'  
-    };  
-  
-    // ==================== ГЛОБАЛЬНОЕ ХРАНИЛИЩЕ ФИЛЬТРОВ ====================  
-    var selectedFilters = {  
-        year: '',  
-        languages: []  
-    };  
-  
-    // ==================== ДАННЫЕ ЖАНРОВ ====================  
-        var movieGenres = [
+(function () {
+    'use strict';
+
+    if (window.surs_genres_buttons_ready) return;
+    window.surs_genres_buttons_ready = true;
+
+    var defaultConfig = {
+        rowTitle: Lampa.Lang.translate('title_genre'),
+        rowIndex: 5,
+        source: 'tmdb',
+        // Настройки фильтрации ключевых слов
+        withoutKeywords: {
+            enabled: true, // Включить/выключить фильтрацию
+            level: '1' // Уровень: '0' (базовый), '1' (+ аниме), '2' (расширенный, отключает аниме полностью)
+        }
+    };
+
+         var movieGenres = [
                 { id: 28, title: 'filter_genre_ac', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M30 4C28.896 4 28 4.896 28 6C28 7.104 28.896 8 30 8C31.104 8 32 7.104 32 6C32 4.896 31.104 4 30 4ZM23.91 5.01599L13.757 0.285004C13.258 0.0530037 12.66 0.269005 12.428 0.768005C12.195 1.26901 12.411 1.86398 12.911 2.09698L22.746 6.67999L23.085 7.01999L19.082 11.022C18.618 10.18 18.018 9.39499 17.344 8.82999L9.345 2.12C8.556 1.46 7.31902 1.459 6.52802 2.121L6.17401 2.41901L4.48599 0H1C0.447 0 0 0.447 0 1C0 1.553 0.447 2 1 2H3.44299L10.862 12.636C11.709 13.848 12.534 16.121 12.664 17.598L13.758 30.091C13.851 31.161 14.766 32 15.841 32H20V18.997C26.609 18.951 28.932 18.305 28.977 11.506C28.983 10.687 28.564 9.669 27.981 9.086L23.91 5.01599ZM18 30H15.841C15.808 30 15.753 29.95 15.75 29.917L14.656 17.424C14.496 15.597 13.55 12.99 12.502 11.49L7.32101 4.06299L7.811 3.65201C7.864 3.60901 8.00799 3.60901 8.05899 3.65201L16.058 10.36C17.092 11.228 17.999 12.961 17.999 14.068V30H18ZM20 16.998C20 16.998 20.001 14.021 20 14H26.848C26.476 16.725 25.066 16.977 20 16.998ZM26.968 12H20.933L24.5 8.43399L26.566 10.5C26.767 10.701 26.978 11.211 26.976 11.492C26.976 11.672 26.971 11.832 26.968 12Z"/></svg>' },
                 { id: 12, title: 'filter_genre_ad', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M8 16.001C5.794 16.001 4 17.795 4 20C4 22.206 5.794 24 8 24C10.206 24 12 22.206 12 20C12 17.795 10.206 16.001 8 16.001ZM8 22C6.897 22 6 21.103 6 20C6 18.897 6.897 18.001 8 18.001C9.103 18.001 10 18.897 10 20C10 21.103 9.103 22 8 22ZM27.707 8.29199C27.316 7.90099 26.684 7.90099 26.293 8.29199L24 10.586L21.707 8.29199C21.316 7.90099 20.684 7.90099 20.293 8.29199C19.902 8.68299 19.902 9.31499 20.293 9.70599L22.586 12L20.293 14.293C19.902 14.684 19.902 15.316 20.293 15.707C20.488 15.902 20.744 16 21 16C21.256 16 21.512 15.902 21.707 15.707L24 13.414L26.293 15.707C26.488 15.902 26.744 16 27 16C27.256 16 27.512 15.902 27.707 15.707C28.098 15.316 28.098 14.684 27.707 14.293L25.414 12L27.707 9.70599C28.098 9.31499 28.098 8.68299 27.707 8.29199ZM30.442 2.552C28.506 1.784 26.227 1 24 1C21.21 1 18.309 2.21999 15.503 3.39899C12.817 4.52799 10.281 5.59399 8 5.59399C6.161 5.59399 4.085 4.86199 2.298 4.14499C2.066 4.05099 1.82999 4.004 1.59799 4.004C0.686992 4.004 0 4.73099 0 5.69299V27.1C0 28.06 0.667009 29.051 1.55301 29.407C3.61701 30.235 5.827 31.001 8 31.001C10.685 31.001 13.528 29.806 16.278 28.649C18.901 27.546 21.613 26.406 24 26.406C25.89 26.406 27.944 27.119 29.705 27.817C29.935 27.908 30.169 27.955 30.399 27.955C31.311 27.955 32 27.227 32 26.264V4.85901C32 3.89601 31.331 2.904 30.442 2.552ZM30 25.784C28.163 25.076 26.059 24.405 24 24.405C21.21 24.405 18.309 25.625 15.503 26.804C12.817 27.934 10.281 29 8 29C6.161 29 4.085 28.268 2.298 27.551C2.167 27.498 2 27.245 2 27.1V6.17899C3.935 6.93599 5.983 7.595 8 7.595C10.685 7.595 13.528 6.40001 16.278 5.24301C18.901 4.14001 21.613 3 24 3C25.89 3 27.944 3.71301 29.705 4.41101C29.835 4.46201 30 4.71299 30 4.85699V25.784ZM23 18C22.447 18 22 18.447 22 19C22 19.553 22.447 20 23 20C23.553 20 24 19.553 24 19C24 18.447 23.553 18 23 18ZM20 20C19.447 20 19 20.447 19 21C19 21.553 19.447 22 20 22C20.553 22 21 21.553 21 21C21 20.447 20.553 20 20 20ZM17 18C16.447 18 16 18.447 16 19C16 19.553 16.447 20 17 20C17.553 20 18 19.553 18 19C18 18.447 17.553 18 17 18ZM9 14C9.553 14 10 13.553 10 13C10 12.447 9.553 12 9 12C8.447 12 8 12.447 8 13C8 13.553 8.447 14 9 14ZM17 16C17 15.447 16.553 15 16 15C15.447 15 15 15.447 15 16C15 16.553 15.447 17 16 17C16.553 17 17 16.553 17 16ZM16 13C16 12.447 15.553 12 15 12C14.447 12 14 12.447 14 13C14 13.553 14.447 14 15 14C15.553 14 16 13.553 16 13ZM12 10C11.447 10 11 10.447 11 11C11 11.553 11.447 12 12 12C12.553 12 13 11.553 13 11C13 10.447 12.553 10 12 10Z"/></svg>' },  
                 { id: 16, title: 'filter_genre_mv', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M31.0747 14.7325C30.5167 14.2365 29.7527 14.0346 28.9447 14.1116C29.0967 12.2086 28.9527 10.1776 28.0347 8.71458C27.3257 7.58458 26.2137 6.89952 24.8167 6.73252C24.6417 6.71152 24.4627 6.62754 24.3817 6.56254C24.3747 6.06954 24.7977 5.58857 25.8107 4.92857C26.3787 4.55857 26.6587 4.00153 26.5547 3.44053C26.4517 2.88153 25.9997 2.46657 25.3457 2.32957C23.2507 1.89257 18.2067 1.29357 15.7777 5.02757C14.4637 3.84857 12.0667 2.17354 9.16966 2.45854C8.63566 2.51054 8.17968 2.78956 7.91868 3.22556C7.63369 3.70056 7.60365 4.30758 7.83665 4.89158C8.11165 5.58058 8.1897 6.30855 8.1967 6.85655C6.6907 6.62055 4.5987 6.61055 2.9987 7.83055C1.8767 8.68455 1.2077 9.98353 1.0117 11.6905C0.959703 12.1345 1.0137 13.2256 2.5977 13.7676C2.7257 13.8116 2.85165 13.9325 2.97465 14.1065C2.19665 14.0495 1.46165 14.2545 0.922652 14.7345C0.0686524 15.4955 -0.628325 17.1145 0.908675 20.5075C1.72168 22.3075 2.60765 23.3176 3.61265 23.5956C4.16265 23.7496 4.7167 23.6786 5.2827 23.3666C7.2617 27.5266 11.2487 30.0016 15.9967 30.0016C20.7257 30.0016 24.6967 27.5486 26.7137 23.3666C27.2417 23.6716 27.8147 23.7535 28.3817 23.5965C29.3887 23.3205 30.2757 22.3105 31.0907 20.5085C32.6287 17.1115 31.9317 15.4925 31.0747 14.7325ZM4.1887 9.42558C5.3267 8.56058 7.05167 8.69052 7.97667 8.84452C8.55767 8.94352 9.12767 8.79155 9.54967 8.43455C9.94567 8.10055 10.1677 7.62352 10.1757 7.09452C10.1857 6.42052 10.1227 5.44355 9.77971 4.42655C11.9377 4.42555 13.7437 5.83356 14.6787 6.72056C15.0877 7.11056 15.5867 7.28255 16.0837 7.21055C16.5867 7.13655 17.0257 6.81555 17.3186 6.30955C18.6616 3.98655 21.6047 3.84855 23.6297 4.07755C22.9387 4.70955 22.2847 5.62554 22.4187 6.85954C22.5317 7.92454 23.5957 8.60155 24.5857 8.71855C25.4017 8.81655 25.9667 9.15555 26.3617 9.78355C27.0127 10.8215 27.0977 12.4675 26.9477 14.1045L26.5117 13.4435C25.9517 12.5945 24.7737 12.2276 23.8267 12.5986L22.8847 12.9726C22.7917 13.0116 22.5647 12.9516 22.4987 12.8686L20.4007 10.1745C20.0497 9.72454 19.5427 9.46653 19.0077 9.46653H18.9917C18.4517 9.47153 17.9427 9.73753 17.5967 10.1985L15.7957 12.5986C15.7427 12.6676 15.5497 12.7146 15.4707 12.6866L10.3077 10.4726C9.75366 10.2366 9.17171 10.2746 8.71471 10.5746C8.26171 10.8766 7.99968 11.3956 7.99968 11.9996V14.9996H5.50566C5.08066 13.5786 4.38467 12.2656 3.23167 11.8716C3.12067 11.8336 3.04469 11.7995 2.99669 11.7735C3.14569 10.6915 3.5367 9.92358 4.1887 9.42558ZM29.2697 19.6816C28.4677 21.4526 27.9137 21.6505 27.8527 21.6665C27.8277 21.6745 27.7857 21.6866 27.6667 21.6026C27.0197 21.1516 26.4727 21.1726 26.1247 21.2646C25.7827 21.3596 25.3087 21.6185 24.9927 22.3175C23.3617 25.9285 20.0827 28.0005 15.9967 28.0005C11.9137 28.0005 8.63571 25.9316 7.00371 22.3246C6.68771 21.6256 6.21265 21.3665 5.87065 21.2715C5.52265 21.1745 4.9757 21.1576 4.3297 21.6056C4.2157 21.6846 4.17165 21.6736 4.14665 21.6676C4.08465 21.6506 3.53066 21.4515 2.72966 19.6825C1.74066 17.4985 1.96266 16.4836 2.25066 16.2286C2.52366 15.9846 3.15069 16.0556 3.70769 16.3916C3.73969 16.4116 3.77665 16.4126 3.81065 16.4286C3.99465 17.2696 4.12271 18.2055 4.16771 19.0755C4.19771 19.6265 4.67166 20.0545 5.20866 20.0205C5.75466 19.9915 6.17367 19.5215 6.14567 18.9695C6.12367 18.5415 6.06865 17.8206 5.94365 16.9986H7.99968C9.10268 16.9986 9.99968 16.1016 9.99968 14.9986V12.5155L14.6877 14.5256C15.6247 14.9256 16.7887 14.6125 17.3987 13.7995L19.0137 11.6465L20.9217 14.0965C21.5327 14.8825 22.6927 15.2005 23.6237 14.8315L24.5657 14.4576C24.6397 14.4266 24.7997 14.4806 24.8417 14.5436L26.1627 16.5486C26.2517 16.6846 26.3707 16.7875 26.5017 16.8625C26.3277 17.6405 26.1387 18.3065 25.9907 18.7555C25.8167 19.2785 26.0957 19.8455 26.6147 20.0215C26.7187 20.0565 26.8257 20.0735 26.9287 20.0735C27.3417 20.0735 27.7277 19.8095 27.8667 19.3905C27.9657 19.0925 28.3637 17.8295 28.6607 16.2135C29.1037 16.0435 29.5307 16.0376 29.7447 16.2276C30.0357 16.4836 30.2587 17.4986 29.2697 19.6816ZM12.9997 18.9996C13.5527 18.9996 13.9997 18.5526 13.9997 17.9996C13.9997 17.4466 13.5527 16.9996 12.9997 16.9996C12.4467 16.9996 11.9997 17.4466 11.9997 17.9996C11.9997 18.5526 12.4467 18.9996 12.9997 18.9996ZM18.9997 18.9996C19.5527 18.9996 19.9997 18.5526 19.9997 17.9996C19.9997 17.4466 19.5527 16.9996 18.9997 16.9996C18.4467 16.9996 17.9997 17.4466 17.9997 17.9996C17.9997 18.5526 18.4467 18.9996 18.9997 18.9996ZM21.3367 20.0306C16.8487 24.0036 15.1507 24.0036 10.6627 20.0306C10.2497 19.6666 9.61666 19.7046 9.25066 20.1166C8.88465 20.5306 8.92365 21.1625 9.33665 21.5285C11.9517 23.8415 13.9767 24.9996 15.9997 24.9996C18.0227 24.9996 20.0477 23.8425 22.6627 21.5285C23.0757 21.1625 23.1147 20.5306 22.7487 20.1166C22.3837 19.7036 21.7497 19.6656 21.3367 20.0306Z"/></svg>' },  
@@ -59,381 +57,302 @@
         
             { id: 37, title: 'filter_genre_ve', icon: '' } // Вестерн
         ];
-  
-    // ==================== СОРТИРОВКИ ====================  
-    var sortOptions = [  
-        { title: 'title_popular',       sort: 'popularity.desc' },  
-        { title: 'title_new',           sort: 'release_date.desc' },  
-        { title: 'title_hight_voite',   sort: 'vote_average.desc' },  
-        { title: 'title_in_top',        sort: 'vote_count.desc' }  
-    ];  
-  
-    // ==================== ЯЗЫКИ ====================  
-    var languages = [  
-        { title: 'filter_lang_ru', code: 'ru' },  
-        { title: 'filter_lang_en', code: 'en' },  
-        { title: 'filter_lang_uk', code: 'uk' },  
-        { title: 'filter_lang_ja', code: 'ja' },  
-        { title: 'filter_lang_ko', code: 'ko' },  
-        { title: 'filter_lang_zh', code: 'zh|cn' },  
-        { title: 'filter_lang_fr', code: 'fr' },  
-        { title: 'filter_lang_de', code: 'de' },  
-        { title: 'filter_lang_es', code: 'es' },  
-        { title: 'filter_lang_it', code: 'it' }  
-    ];  
-  
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================  
-    function shuffle(array) {  
-        var currentIndex = array.length, temporaryValue, randomIndex;  
-        while (0 !== currentIndex) {  
-            randomIndex = Math.floor(Math.random() * currentIndex);  
-            currentIndex -= 1;  
-            temporaryValue = array[currentIndex];  
-            array[currentIndex] = array[randomIndex];  
-            array[randomIndex] = temporaryValue;  
-        }  
-        return array;  
-    }  
-  
-    function formatDate(date) {  
-        var d = new Date(date);  
-        var month = '' + (d.getMonth() + 1);  
-        var day = '' + d.getDate();  
-        var year = d.getFullYear();  
-  
-        if (month.length < 2) month = '0' + month;  
-        if (day.length < 2) day = '0' + day;  
-  
-        return [year, month, day].join('-');  
-    }  
-  
-    // ==================== ОСНОВНАЯ ЛОГИКА ====================  
-    function openGenre(genre) {  
-        var hasMovie = movieGenres.some(function(g) { return g.id === genre.id; });  
-        var hasTv = tvGenres.some(function(g) { return g.id === genre.id; });  
-  
-        var typeChoices = [];  
-        if (hasMovie) typeChoices.push({ title: Lampa.Lang.translate('menu_movies'), value: 'movie' });  
-        if (hasTv)    typeChoices.push({ title: Lampa.Lang.translate('menu_tv'),     value: 'tv' });  
-  
-        if (typeChoices.length === 1) {  
-            showFiltersMenu(genre, typeChoices[0].value);  
-            return;  
-        }  
-  
-        Lampa.Select.show({  
-            title: Lampa.Lang.translate(genre.title),  
-            items: typeChoices,  
-            onSelect: function (t) {  
-                showFiltersMenu(genre, t.value);  
-            },  
-            onBack: function () {  
-                Lampa.Controller.toggle('content');  
-            }  
-        });  
-    }  
-  
-    function showFiltersMenu(genre, type) {  
-        var sortItems = sortOptions.map(function(s) {  
-            return {  
-                title: Lampa.Lang.translate(s.title),  
-                sort: s.sort  
-            };  
-        });  
-  
-        // Добавляем разделитель  
-        sortItems.push({ title: 'Дополнительные фильтры', separator: true, noenter: true });  
-  
-        // Вкладка года  
-        sortItems.push({  
-            title: 'Год',  
-            subtitle: selectedFilters.year ? selectedFilters.year : 'Выберите год',  
-            items: getYearItems(),  
-            yearFilter: true  
-        });  
-  
-        // Вкладка языка  
-        sortItems.push({  
-            title: 'Язык оригинала',  
-            subtitle: selectedFilters.languages.length > 0 ?   
-                selectedFilters.languages.map(function(code) {  
-                    var lang = languages.find(function(l) { return l.code === code; });  
-                    return lang ? Lampa.Lang.translate(lang.title) : code;  
-                }).join(', ') : 'Выберите язык',  
-            items: getLanguageItems(),  
-            languageFilter: true  
-        });  
-  
-        Lampa.Select.show({  
-            title: Lampa.Lang.translate(genre.title),  
-            items: sortItems,  
-            onSelect: function (item) {  
-                if (item.sort) {  
-                    // Выбрана сортировка - начинаем поиск  
-                    buildAndOpenActivity(genre, type, item.sort);  
-                } else if (item.yearFilter || item.languageFilter) {  
-                    // Открываем вкладку с фильтрами  
-                    showFilterTab(item, genre, type);  
-                }  
-            },  
-            onBack: function () {  
-                openGenre(genre);  
-            }  
-        });  
-    }  
-  
-    function getYearItems() {  
-        var currentYear = new Date().getFullYear();  
-        var yearItems = [{ title: 'Любой', value: '', checkbox: true, checked: !selectedFilters.year }];  
-  
-        for (var i = 0; i <= 5; i++) {  
-            var yearValue = (currentYear - i).toString();  
-            yearItems.push({  
-                title: yearValue,  
-                value: yearValue,  
-                checkbox: true,  
-                checked: selectedFilters.year === yearValue  
-            });  
-        }  
-  
-        return yearItems;  
-    }  
-  
-    function getLanguageItems() {  
-        var languageItems = [{ title: 'Любой', value: '', checkbox: true, checked: selectedFilters.languages.length === 0 }];  
-  
-        languages.forEach(function(lang) {  
-            languageItems.push({  
-                title: Lampa.Lang.translate(lang.title),  
-                value: lang.code,  
-                checkbox: true,  
-                checked: selectedFilters.languages.indexOf(lang.code) !== -1  
-            });  
-        });  
-  
-        return languageItems;  
-    }  
-  
-    function showFilterTab(filterItem, genre, type) {  
-        var isYearFilter = filterItem.yearFilter;  
-          
-        Lampa.Select.show({  
-            title: filterItem.title,  
-            items: filterItem.items,  
-            onSelect: function(item) {  
-                if (item.value === '') {  
-                    // Выбран "Любой" - закрываем вкладку и возвращаемся наверх  
-                    if (isYearFilter) {  
-                        selectedFilters.year = '';  
-                    } else {  
-                        selectedFilters.languages = [];  
-                    }  
-                      
-                    filterItem.items.forEach(function(i) {  
-                        i.checked = i.value === '';  
-                    });  
-                      
-                    Lampa.Select.hide();  
-                    showFiltersMenu(genre, type);  
-                }  
-            },  
-            onCheck: function(item) {  
-                if (isYearFilter) {  
-                    // Обработка фильтра года  
-                    if (item.value === '') {  
-                        selectedFilters.year = '';  
-                        filterItem.items.forEach(function(i) {  
-                            i.checked = i.value === '';  
-                        });  
-                    } else {  
-                        selectedFilters.year = item.value;  
-                        filterItem.items.forEach(function(i) {  
-                            i.checked = i.value === item.value;  
-                        });  
-                    }  
-                } else {  
-                    // Обработка фильтра языка  
-                    if (item.value === '') {  
-                        selectedFilters.languages = [];  
-                        filterItem.items.forEach(function(i) {  
-                            i.checked = i.value === '';  
-                        });  
-                    } else {  
-                        var index = selectedFilters.languages.indexOf(item.value);  
-                        if (index === -1) {  
-                            selectedFilters.languages.push(item.value);  
-                        } else {  
-                            selectedFilters.languages.splice(index, 1);  
-                        }  
-                          
-                        filterItem.items.forEach(function(i) {  
-                            if (i.value === '') {  
-                                i.checked = selectedFilters.languages.length === 0;  
-                            } else {  
-                                i.checked = selectedFilters.languages.indexOf(i.value) !== -1;  
-                            }  
-                        });  
-                    }  
-                }  
-            },  
-            onBack: function() {  
-                showFiltersMenu(genre, type);  
-            }  
-        });  
-    }  
-  
-    function buildAndOpenActivity(genre, type, sortBy) {  
-        var base = type === 'movie' ? 'discover/movie' : 'discover/tv';  
-        var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortBy;  
-  
-        // Год  
-        if (selectedFilters.year && sortBy !== 'release_date.desc') {  
-            var dateField = type === 'movie' ? 'primary_release_year' : 'first_air_date_year';  
-            url += '&' + dateField + '=' + selectedFilters.year;  
-        }  
-  
-        // Язык  
-        if (selectedFilters.languages.length > 0) {  
-            url += '&with_original_language=' + selectedFilters.languages.join('|');  
-        }  
-  
-        // Дополнительные параметры для "Новинок"  
-        if (sortBy === 'release_date.desc') {  
-            var today = new Date();  
-            var tenDaysAgo = new Date(today);  
-            tenDaysAgo.setDate(today.getDate() - 10);  
-            var nineMonthsAgo = new Date(today);  
-            nineMonthsAgo.setMonth(today.getMonth() - 9);  
-  
-            var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';  
-            url += '&' + dateField + '.lte=' + formatDate(tenDaysAgo);  
-            url += '&' + dateField + '.gte=' + formatDate(nineMonthsAgo);  
-            url += '&vote_count.gte=20';  
-        }  
-  
-        if (sortBy === 'vote_average.desc') {  
-            url += '&vote_count.gte=400';  
-        }  
-  
-        Lampa.Activity.push({  
-            url: url,  
-            title: Lampa.Lang.translate(genre.title),  
-            component: 'category_full',  
-            source: 'tmdb',  
-            card_type: type,  
-            page: 1  
-        });  
-    }  
-  
-    // ==================== СОЗДАНИЕ РЯДА ====================  
-    function createGenresRow(genresData) {  
-        var allGenres = movieGenres.concat(tvGenres.filter(function(tv) {  
-            return !movieGenres.some(function(m) { return m.id === tv.id; });  
-        }));  
-  
-        // Перемешиваем каждый раз  
-        shuffle(allGenres);  
-  
-        genresData.unshift(function (callback) {  
-            var results = allGenres.map(function (g) {  
-                return {  
-                    source: 'custom',  
-                    title: Lampa.Lang.translate(g.title),  
-                    name: Lampa.Lang.translate(g.title),  
-                    params: {  
-                        createInstance: function () {  
-                            var card = Lampa.Maker.make('Card', this, function (m) {  
-                                return m.only('Card', 'Callback');  
-                            });  
-  
-                            card.data.icon_svg = g.icon || '';  
-                            return card;  
-                        },  
-                        emit: {  
-                            onCreate: function () {  
-                                this.html.addClass('card--genre-compact');  
-  
-                                if (g.icon && g.icon.startsWith('<svg')) {  
-                                    var img = this.html.find('.card__img');  
-                                    var svgDiv = document.createElement('div');  
-                                    svgDiv.className = 'card__svg-icon';  
-                                    svgDiv.innerHTML = g.icon;  
-                                    img.replaceWith(svgDiv);  
-                                }  
-  
-                                var label = document.createElement('div');  
-                                label.className = 'card__genre-label';  
-                                label.textContent = Lampa.Lang.translate(g.title);  
-                                this.html.find('.card__view').append(label);  
-                            },  
-                            onlyEnter: function () {  
-                                openGenre(g);  
-                            }  
-                        }  
-                    }  
-                };  
-            });  
-  
-            callback({  
-                results: results,  
-                title: defaultConfig.rowTitle,  
-                params: { items: { view: 20, mapping: 'line' } }  
-            });  
-        });  
-    }  
-  
-    function addStyles() {  
-        Lampa.Template.add('genres_compact_wide_style', `  
-            <style>  
-                .card--genre-compact { width: 12.75em !important; }  
-                .card--genre-compact .card__view {  
-                    padding-bottom: 56% !important;  
-                    display: flex;  
-                    align-items: center;  
-                    justify-content: center;  
-                    background-color: rgba(0,0,0,0.25);  
-                    border-radius: 1em;  
-                }  
-                .card__svg-icon {  
-                    position: absolute;  
-                    top: 45%; left: 50%;  
-                    transform: translate(-50%, -50%);  
-                    width: 42%; height: 42%;  
-                }  
-                .card__svg-icon svg { width: 100%; height: 100%; fill: currentColor; }  
-                .card__genre-label {  
-                    position: absolute; bottom: 0.4em; left: 0; right: 0;  
-                    text-align: center; color: #fff; font-weight: 500; font-size: 1.05em;  
-                    text-shadow: 0 1px 3px rgba(0,0,0,0.8);  
-                }  
-            </style>  
-        `);  
-        $('body').append(Lampa.Template.get('genres_compact_wide_style', {}, true));  
-    }  
-  
-    function startPlugin() {  
-        addStyles();  
-  
-        Lampa.ContentRows.add({  
-            index: defaultConfig.rowIndex,  
-            name: 'genres_buttons',  
-            title: defaultConfig.rowTitle,  
-            screen: ['main'],  
-            call: function (params, screen) {  
-                var genresData = [];  
-                createGenresRow(genresData);  
-                return function (callback) {  
-                    if (genresData.length > 0) genresData[0](callback);  
-                };  
-            }  
-        });  
-    }  
-  
-    if (Lampa.Manifest.app_digital >= 300) {  
-        if (window.appready) startPlugin();  
-        else Lampa.Listener.follow('app', function (e) {  
-            if (e.type === 'ready') startPlugin();  
-        });  
-    }  
-  
+
+    var sortOptions = [
+        { title: 'title_popular', sort: 'popularity.desc' },
+        { title: 'title_new', sort: 'release_date.desc' },
+        { title: 'title_hight_voite', sort: 'vote_average.desc' },
+        { title: 'title_in_top', sort: 'vote_count.desc' }
+    ];
+
+    function applyWithoutKeywords(baseUrl) {
+        if (!defaultConfig.withoutKeywords.enabled) return baseUrl;
+
+        var filterLevel = defaultConfig.withoutKeywords.level;
+        var baseExcludedKeywords = [
+            '346488', // Гей-тематика
+            '158718', // ЛГБТ-тематика
+            '41278' // Российская политика
+        ];
+
+        if (!filterLevel || filterLevel == '1') {
+            baseExcludedKeywords.push(
+                '13141', // Основано на манге
+                '345822', // Основано на 4-кома манге
+                '315535', // Донхуа (китайская анимация)
+                '290667', // Основано на маньхуа
+                '323477', // Основано на манхве
+                '290609' // Манхва
+            );
+        }
+
+        if (filterLevel == '2') {
+            baseExcludedKeywords.push(
+                '210024',
+                '13141',
+                '345822',
+                '315535',
+                '290667',
+                '323477',
+                '290609'
+            );
+        }
+
+        baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));
+        return baseUrl;
+    }
+
+    function addStyles() {
+        Lampa.Template.add('genres_compact_wide_style', `
+            <style>
+                .card--genre-compact {
+                    width: 12.75em !important;
+                }
+                .card--genre-compact .card__view {
+                    padding-bottom: 56% !important;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: rgba(0, 0, 0, 0.2);
+                    border-radius: 1em;
+                }
+                .card--genre-compact.hover .card__view,
+                .card--genre-compact.focus .card__view {
+                    background-color: rgba(255, 255, 255, 0.1);
+                }
+                .card--genre-compact .card__title,
+                .card--genre-compact .card__age {
+                    display: none !important;
+                }
+                .card__svg-icon {
+                    position: absolute;
+                    top: 45%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 40% !important;
+                    height: 40% !important;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .card__svg-icon svg {
+                    width: 100% !important;
+                    height: 100% !important;
+                    fill: currentColor;
+                }
+                .card__svg-icon svg path,
+                .card__svg-icon svg polygon {
+                    fill: rgba(255, 255, 255, 0.8) !important;
+                }
+                .card__genre-label {
+                    position: absolute;
+                    bottom: 0.4em;
+                    left: 0;
+                    right: 0;
+                    text-align: center;
+                    color: #fff;
+                    padding: 0.5em;
+                    font-size: 1.1em;
+                    font-weight: 500;
+                    z-index: 1;
+                }
+            </style>
+        `);
+        $('body').append(Lampa.Template.get('genres_compact_wide_style', {}, true));
+    }
+
+    function openGenre(genre) {
+        var hasMovie = movieGenres.some(function(g) { return g.id === genre.id; });
+        var hasTv = tvGenres.some(function(g) { return g.id === genre.id; });
+
+        var typeChoices = [];
+        if (hasMovie) {
+            typeChoices.push({ title: Lampa.Lang.translate('menu_movies'), value: 'movie' });
+        }
+        if (hasTv) {
+            typeChoices.push({ title: Lampa.Lang.translate('menu_tv'), value: 'tv' });
+        }
+
+        if (typeChoices.length === 1) {
+            showSortMenu(genre, typeChoices[0].value, false);
+            return;
+        }
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate(genre.title),
+            items: typeChoices,
+            onSelect: function (t) {
+                showSortMenu(genre, t.value, true);
+            },
+            onBack: function () {
+                Lampa.Controller.toggle('content');
+            }
+        });
+    }
+
+    function showSortMenu(genre, type, fromTypeSelection) {
+        var sortItems = sortOptions.map(function(s) {
+            return { title: Lampa.Lang.translate(s.title), sort: s.sort };
+        });
+
+        Lampa.Select.show({
+            title: Lampa.Lang.translate('filter_sorted'),
+            items: sortItems,
+            onSelect: function(sortItem) {
+                var base = type === 'movie' ? 'discover/movie' : 'discover/tv';
+                var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortItem.sort;
+
+                if (sortItem.sort === 'release_date.desc') {
+                    var today = new Date();
+                    var tenDaysAgo = new Date(today);
+                    tenDaysAgo.setDate(today.getDate() - 10);
+                    var nineMonthsAgo = new Date(today);
+                    nineMonthsAgo.setMonth(today.getMonth() - 9);
+
+                    var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';
+                    var lte = dateField + '.lte=' + formatDate(tenDaysAgo);
+                    var gte = dateField + '.gte=' + formatDate(nineMonthsAgo);
+                    url += '&' + lte + '&' + gte + '&vote_count.gte=20';
+                }
+
+                if (sortItem.sort === 'vote_average.desc') {
+                    url += '&vote_count.gte=400';
+                }
+
+                url = applyWithoutKeywords(url);
+
+                Lampa.Activity.push({
+                    url: url,
+                    title: Lampa.Lang.translate(genre.title),
+                    component: 'category_full',
+                    source: 'tmdb',
+                    card_type: type,
+                    page: 1
+                });
+            },
+            onBack: function() {
+                if (fromTypeSelection) {
+                    openGenre(genre);
+                } else {
+                    Lampa.Controller.toggle('content');
+                }
+            }
+        });
+    }
+
+    function formatDate(date) {
+        var year = date.getFullYear();
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var day = String(date.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    }
+
+    function createGenresRow(genresData) {
+        var allGenres = movieGenres.slice();
+        tvGenres.forEach(function(tvGenre) {
+            if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {
+                allGenres.push(tvGenre);
+            }
+        });
+
+        // Добавляем функцию в массив, а не регистрируем напрямую
+        genresData.unshift(function(callback) {
+            var results = allGenres.map(function (g) {
+                return {
+                    source: 'custom',
+                    title: Lampa.Lang.translate(g.title),
+                    name: Lampa.Lang.translate(g.title),
+                    params: {
+                        createInstance: function () {
+                            var card = Lampa.Maker.make('Card', this, function (m) {
+                                return m.only('Card', 'Callback');
+                            });
+                            card.data.icon_svg = g.icon;
+                            return card;
+                        },
+                        emit: {
+                            onCreate: function () {
+                                this.html.addClass('card--genre-compact');
+
+                                var iconData = g.icon;
+                                if (iconData && iconData.startsWith('<svg')) {
+                                    var imgElement = this.html.find('.card__img');
+                                    var svgContainer = document.createElement('div');
+                                    svgContainer.classList.add('card__svg-icon');
+                                    svgContainer.innerHTML = iconData;
+                                    imgElement.replaceWith(svgContainer);
+                                }
+
+                                var genreLabel = document.createElement('div');
+                                genreLabel.classList.add('card__genre-label');
+                                genreLabel.innerText = Lampa.Lang.translate(g.title);
+                                this.html.find('.card__view').append(genreLabel);
+                            },
+                            onlyEnter: function () {
+                                openGenre(g);
+                            }
+                        }
+                    }
+                };
+            });
+
+            callback({
+                results: results,
+                title: defaultConfig.rowTitle,
+                params: {
+                    items: {
+                        view: 20,
+                        mapping: 'line'
+                    }
+                }
+            });
+        });
+    }
+
+    function startPlugin() {
+        addStyles();
+
+        Lampa.ContentRows.add({
+            index: defaultConfig.rowIndex,
+            name: 'genres_buttons',
+            title: defaultConfig.rowTitle,
+            screen: ['main'],
+            call: function (params, screen) {
+                var genresData = [];
+                createGenresRow(genresData);
+
+                return function (callback) {
+                    if (genresData.length > 0) {
+                        genresData[0](callback);
+                    }
+                };
+            }
+        });
+
+        // Глобальный экспорт данных и функций
+        window.genres_getMovieGenres = function() {
+            return movieGenres.slice(); // Возвращаем копию массива
+        };
+        window.genres_getTvGenres = function() {
+            return tvGenres.slice(); // Возвращаем копию массива
+        };
+        window.genres_getAllGenres = function() {
+            var allGenres = movieGenres.slice();
+            tvGenres.forEach(function(tvGenre) {
+                if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {
+                    allGenres.push(tvGenre);
+                }
+            });
+            return allGenres;
+        };
+        window.genres_openGenre = openGenre;
+        window.genres_createGenresRow = createGenresRow;
+    }
+
+    if (Lampa.Manifest.app_digital >= 300) {
+        if (window.appready) startPlugin();
+        else Lampa.Listener.follow('app', function (e) {
+            if (e.type === 'ready') startPlugin();
+        });
+    }
 })();
