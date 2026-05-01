@@ -197,6 +197,12 @@
     });    
 }
       
+// Глобальные переменные для хранения выбранных фильтров  
+var selectedFilters = {  
+    year: '',  
+    languages: []  
+};  
+  
 function showSortMenu(genre, type, fromTypeSelection) {  
     // Опции сортировки  
     var sortItems = sortOptions.map(function(s) {  
@@ -206,35 +212,48 @@ function showSortMenu(genre, type, fromTypeSelection) {
         };  
     });  
   
-    // Опции года  
+    // Опции года с учетом сохраненного выбора  
     var currentYear = new Date().getFullYear();  
     var yearItems = [  
-        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: true }  
+        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: !selectedFilters.year }  
     ];  
       
     for (var i = 0; i <= 5; i++) {  
+        var yearValue = (currentYear - i).toString();  
         yearItems.push({  
-            title: (currentYear - i).toString(),  
-            value: (currentYear - i).toString(),  
+            title: yearValue,  
+            value: yearValue,  
             checkbox: true,  
-            checked: false  
+            checked: selectedFilters.year === yearValue  
         });  
     }  
   
-    // Опции языка  
+    // Опции языка с учетом сохраненных выборов  
     var languageItems = [  
-        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: true },  
-        { title: 'English', value: 'en', checkbox: true, checked: false },  
-        { title: 'Русский', value: 'ru', checkbox: true, checked: false },  
-        { title: '日本語', value: 'ja', checkbox: true, checked: false },  
-        { title: '한국어', value: 'ko', checkbox: true, checked: false },  
-        { title: 'Español', value: 'es', checkbox: true, checked: false },  
-        { title: 'Français', value: 'fr', checkbox: true, checked: false },  
-        { title: 'Deutsch', value: 'de', checkbox: true, checked: false },  
-        { title: 'Italiano', value: 'it', checkbox: true, checked: false },  
-        { title: 'Português', value: 'pt', checkbox: true, checked: false },  
-        { title: '中文', value: 'zh', checkbox: true, checked: false }  
+        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: selectedFilters.languages.length === 0 }  
     ];  
+      
+    var availableLanguages = [  
+        { title: 'English', value: 'en' },  
+        { title: 'Русский', value: 'ru' },  
+        { title: '日本語', value: 'ja' },  
+        { title: '한국어', value: 'ko' },  
+        { title: 'Español', value: 'es' },  
+        { title: 'Français', value: 'fr' },  
+        { title: 'Deutsch', value: 'de' },  
+        { title: 'Italiano', value: 'it' },  
+        { title: 'Português', value: 'pt' },  
+        { title: '中文', value: 'zh' }  
+    ];  
+      
+    availableLanguages.forEach(function(lang) {  
+        languageItems.push({  
+            title: lang.title,  
+            value: lang.value,  
+            checkbox: true,  
+            checked: selectedFilters.languages.indexOf(lang.value) !== -1  
+        });  
+    });  
   
     // Основное меню  
     var allItems = [];  
@@ -254,7 +273,7 @@ function showSortMenu(genre, type, fromTypeSelection) {
     // Вкладка года  
     allItems.push({  
         title: 'Год',  
-        subtitle: 'Выберите год',  
+        subtitle: selectedFilters.year ? selectedFilters.year : 'Выберите год',  
         items: yearItems,  
         yearFilter: true  
     });  
@@ -262,7 +281,11 @@ function showSortMenu(genre, type, fromTypeSelection) {
     // Вкладка языка  
     allItems.push({  
         title: 'Язык оригинала',  
-        subtitle: 'Выберите язык',  
+        subtitle: selectedFilters.languages.length > 0 ?   
+            selectedFilters.languages.map(function(code) {  
+                var lang = availableLanguages.find(function(l) { return l.value === code; });  
+                return lang ? lang.title : code;  
+            }).join(', ') : 'Выберите язык',  
         items: languageItems,  
         languageFilter: true  
     });  
@@ -273,8 +296,11 @@ function showSortMenu(genre, type, fromTypeSelection) {
         items: allItems,  
         onSelect: function(item) {  
             if (item.sort) {  
-                // Выбрана сортировка - начинаем поиск  
-                buildUrlAndNavigate(genre, type, item, null, null);  
+                // Выбрана сортировка - начинаем поиск с сохраненными фильтрами  
+                var yearFilter = selectedFilters.year ? { value: selectedFilters.year } : null;  
+                var languageFilter = selectedFilters.languages.length > 0 ?   
+                    { value: selectedFilters.languages.join(',') } : null;  
+                buildUrlAndNavigate(genre, type, item, yearFilter, languageFilter);  
             } else if (item.yearFilter || item.languageFilter) {  
                 // Открываем вкладку с фильтрами  
                 showFilterTab(item, genre, type, fromTypeSelection);  
@@ -286,6 +312,85 @@ function showSortMenu(genre, type, fromTypeSelection) {
             } else {  
                 Lampa.Controller.toggle('content');  
             }  
+        }  
+    });  
+}  
+  
+function showFilterTab(filterItem, genre, type, fromTypeSelection) {  
+    var isYearFilter = filterItem.yearFilter;  
+      
+    Lampa.Select.show({  
+        title: filterItem.title,  
+        items: filterItem.items,  
+        onSelect: function(item) {  
+            if (item.value === '') {  
+                // Выбран "Любой" - сбрасываем все фильтры  
+                if (isYearFilter) {  
+                    selectedFilters.year = '';  
+                } else {  
+                    selectedFilters.languages = [];  
+                }  
+                  
+                // Обновляем состояние всех чекбоксов  
+                filterItem.items.forEach(function(i) {  
+                    i.checked = i.value === '';  
+                });  
+                  
+                // Закрываем вкладку и возвращаемся наверх  
+                Lampa.Select.hide();  
+                showSortMenu(genre, type, fromTypeSelection);  
+            } else {  
+                // Выбрано конкретное значение - обрабатываем через onCheck  
+                // чтобы обеспечить правильную логику чекбоксов  
+            }  
+        },  
+        onCheck: function(item) {  
+            if (isYearFilter) {  
+                // Обработка фильтра года  
+                if (item.value === '') {  
+                    // Выбран "Любой"  
+                    selectedFilters.year = '';  
+                    filterItem.items.forEach(function(i) {  
+                        i.checked = i.value === '';  
+                    });  
+                } else {  
+                    // Выбран конкретный год  
+                    selectedFilters.year = item.value;  
+                    filterItem.items.forEach(function(i) {  
+                        i.checked = i.value === item.value;  
+                    });  
+                }  
+            } else {  
+                // Обработка фильтра языка  
+                if (item.value === '') {  
+                    // Выбран "Любой"  
+                    selectedFilters.languages = [];  
+                    filterItem.items.forEach(function(i) {  
+                        i.checked = i.value === '';  
+                    });  
+                } else {  
+                    // Выбран конкретный язык  
+                    var index = selectedFilters.languages.indexOf(item.value);  
+                    if (index === -1) {  
+                        selectedFilters.languages.push(item.value);  
+                    } else {  
+                        selectedFilters.languages.splice(index, 1);  
+                    }  
+                      
+                    // Обновляем состояние чекбоксов  
+                    filterItem.items.forEach(function(i) {  
+                        if (i.value === '') {  
+                            i.checked = selectedFilters.languages.length === 0;  
+                        } else {  
+                            i.checked = selectedFilters.languages.indexOf(i.value) !== -1;  
+                        }  
+                    });  
+                }  
+            }  
+        },  
+        onBack: function() {  
+
+            showSortMenu(genre, type, fromTypeSelection);  
         }  
     });  
 }  
