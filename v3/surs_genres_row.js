@@ -1,21 +1,22 @@
-(function () {      
-    'use strict';      
-    if (window.surs_genres_buttons_ready) return;      
-    window.surs_genres_buttons_ready = true;      
-      
-       var defaultConfig = {    
-
-        rowTitle: Lampa.Lang.translate('title_genre'),        
-        rowIndex: 5,        
-        source: 'tmdb',  
-        // Настройки фильтрации ключевых слов  
-        withoutKeywords: {  
-            enabled: true,  // Включить/выключить фильтрацию  
-            level: '1'      // Уровень: '0' (базовый), '1' (+ аниме), '2' (расширенный, отключает аниме полностью)  
-        }  
-    };        
-      
-      
+(function () {  
+    'use strict';  
+  
+    if (window.surs_genres_buttons_ready) return;  
+    window.surs_genres_buttons_ready = true;  
+  
+    var defaultConfig = {  
+        rowTitle: Lampa.Lang.translate('title_genre'),  
+        rowIndex: 5,  
+        source: 'tmdb'  
+    };  
+  
+    // ==================== ГЛОБАЛЬНОЕ ХРАНИЛИЩЕ ФИЛЬТРОВ ====================  
+    var selectedFilters = {  
+        year: '',  
+        languages: []  
+    };  
+  
+    // ==================== ДАННЫЕ ЖАНРОВ ====================  
         var movieGenres = [
                 { id: 28, title: 'filter_genre_ac', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M30 4C28.896 4 28 4.896 28 6C28 7.104 28.896 8 30 8C31.104 8 32 7.104 32 6C32 4.896 31.104 4 30 4ZM23.91 5.01599L13.757 0.285004C13.258 0.0530037 12.66 0.269005 12.428 0.768005C12.195 1.26901 12.411 1.86398 12.911 2.09698L22.746 6.67999L23.085 7.01999L19.082 11.022C18.618 10.18 18.018 9.39499 17.344 8.82999L9.345 2.12C8.556 1.46 7.31902 1.459 6.52802 2.121L6.17401 2.41901L4.48599 0H1C0.447 0 0 0.447 0 1C0 1.553 0.447 2 1 2H3.44299L10.862 12.636C11.709 13.848 12.534 16.121 12.664 17.598L13.758 30.091C13.851 31.161 14.766 32 15.841 32H20V18.997C26.609 18.951 28.932 18.305 28.977 11.506C28.983 10.687 28.564 9.669 27.981 9.086L23.91 5.01599ZM18 30H15.841C15.808 30 15.753 29.95 15.75 29.917L14.656 17.424C14.496 15.597 13.55 12.99 12.502 11.49L7.32101 4.06299L7.811 3.65201C7.864 3.60901 8.00799 3.60901 8.05899 3.65201L16.058 10.36C17.092 11.228 17.999 12.961 17.999 14.068V30H18ZM20 16.998C20 16.998 20.001 14.021 20 14H26.848C26.476 16.725 25.066 16.977 20 16.998ZM26.968 12H20.933L24.5 8.43399L26.566 10.5C26.767 10.701 26.978 11.211 26.976 11.492C26.976 11.672 26.971 11.832 26.968 12Z"/></svg>' },
                 { id: 12, title: 'filter_genre_ad', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M8 16.001C5.794 16.001 4 17.795 4 20C4 22.206 5.794 24 8 24C10.206 24 12 22.206 12 20C12 17.795 10.206 16.001 8 16.001ZM8 22C6.897 22 6 21.103 6 20C6 18.897 6.897 18.001 8 18.001C9.103 18.001 10 18.897 10 20C10 21.103 9.103 22 8 22ZM27.707 8.29199C27.316 7.90099 26.684 7.90099 26.293 8.29199L24 10.586L21.707 8.29199C21.316 7.90099 20.684 7.90099 20.293 8.29199C19.902 8.68299 19.902 9.31499 20.293 9.70599L22.586 12L20.293 14.293C19.902 14.684 19.902 15.316 20.293 15.707C20.488 15.902 20.744 16 21 16C21.256 16 21.512 15.902 21.707 15.707L24 13.414L26.293 15.707C26.488 15.902 26.744 16 27 16C27.256 16 27.512 15.902 27.707 15.707C28.098 15.316 28.098 14.684 27.707 14.293L25.414 12L27.707 9.70599C28.098 9.31499 28.098 8.68299 27.707 8.29199ZM30.442 2.552C28.506 1.784 26.227 1 24 1C21.21 1 18.309 2.21999 15.503 3.39899C12.817 4.52799 10.281 5.59399 8 5.59399C6.161 5.59399 4.085 4.86199 2.298 4.14499C2.066 4.05099 1.82999 4.004 1.59799 4.004C0.686992 4.004 0 4.73099 0 5.69299V27.1C0 28.06 0.667009 29.051 1.55301 29.407C3.61701 30.235 5.827 31.001 8 31.001C10.685 31.001 13.528 29.806 16.278 28.649C18.901 27.546 21.613 26.406 24 26.406C25.89 26.406 27.944 27.119 29.705 27.817C29.935 27.908 30.169 27.955 30.399 27.955C31.311 27.955 32 27.227 32 26.264V4.85901C32 3.89601 31.331 2.904 30.442 2.552ZM30 25.784C28.163 25.076 26.059 24.405 24 24.405C21.21 24.405 18.309 25.625 15.503 26.804C12.817 27.934 10.281 29 8 29C6.161 29 4.085 28.268 2.298 27.551C2.167 27.498 2 27.245 2 27.1V6.17899C3.935 6.93599 5.983 7.595 8 7.595C10.685 7.595 13.528 6.40001 16.278 5.24301C18.901 4.14001 21.613 3 24 3C25.89 3 27.944 3.71301 29.705 4.41101C29.835 4.46201 30 4.71299 30 4.85699V25.784ZM23 18C22.447 18 22 18.447 22 19C22 19.553 22.447 20 23 20C23.553 20 24 19.553 24 19C24 18.447 23.553 18 23 18ZM20 20C19.447 20 19 20.447 19 21C19 21.553 19.447 22 20 22C20.553 22 21 21.553 21 21C21 20.447 20.553 20 20 20ZM17 18C16.447 18 16 18.447 16 19C16 19.553 16.447 20 17 20C17.553 20 18 19.553 18 19C18 18.447 17.553 18 17 18ZM9 14C9.553 14 10 13.553 10 13C10 12.447 9.553 12 9 12C8.447 12 8 12.447 8 13C8 13.553 8.447 14 9 14ZM17 16C17 15.447 16.553 15 16 15C15.447 15 15 15.447 15 16C15 16.553 15.447 17 16 17C16.553 17 17 16.553 17 16ZM16 13C16 12.447 15.553 12 15 12C14.447 12 14 12.447 14 13C14 13.553 14.447 14 15 14C15.553 14 16 13.553 16 13ZM12 10C11.447 10 11 10.447 11 11C11 11.553 11.447 12 12 12C12.553 12 13 11.553 13 11C13 10.447 12.553 10 12 10Z"/></svg>' },  
@@ -58,559 +59,381 @@
         
             { id: 37, title: 'filter_genre_ve', icon: '' } // Вестерн
         ];
-      
-     
+  
+    // ==================== СОРТИРОВКИ ====================  
     var sortOptions = [  
-        { title: 'title_popular', sort: 'popularity.desc' },  
-        { title: 'title_new', sort: 'release_date.desc' },  
-        { title: 'title_hight_voite', sort: 'vote_average.desc' },  
-        { title: 'title_in_top', sort: 'vote_count.desc' }  
+        { title: 'title_popular',       sort: 'popularity.desc' },  
+        { title: 'title_new',           sort: 'release_date.desc' },  
+        { title: 'title_hight_voite',   sort: 'vote_average.desc' },  
+        { title: 'title_in_top',        sort: 'vote_count.desc' }  
     ];  
-	
-	      
-    function applyWithoutKeywords(baseUrl) {  
-        if (!defaultConfig.withoutKeywords.enabled) return baseUrl;  
-          
-        var filterLevel = defaultConfig.withoutKeywords.level;  
-        var baseExcludedKeywords = [  
-            '346488',  // Гей-тематика  
-            '158718',  // ЛГБТ-тематика  
-            '41278'    // Российская политика  
-        ];  
   
-        if (!filterLevel || filterLevel == '1') {  
-            baseExcludedKeywords.push(  
-                '13141',   // Основано на манге  
-                '345822',  // Основано на 4-кома манге  
-                '315535',  // Донхуа (китайская анимация)  
-                '290667',  // Основано на маньхуа  
-                '323477',  // Основано на манхве  
-                '290609'   // Манхва  
-            );  
+    // ==================== ЯЗЫКИ ====================  
+    var languages = [  
+        { title: 'filter_lang_ru', code: 'ru' },  
+        { title: 'filter_lang_en', code: 'en' },  
+        { title: 'filter_lang_uk', code: 'uk' },  
+        { title: 'filter_lang_ja', code: 'ja' },  
+        { title: 'filter_lang_ko', code: 'ko' },  
+        { title: 'filter_lang_zh', code: 'zh|cn' },  
+        { title: 'filter_lang_fr', code: 'fr' },  
+        { title: 'filter_lang_de', code: 'de' },  
+        { title: 'filter_lang_es', code: 'es' },  
+        { title: 'filter_lang_it', code: 'it' }  
+    ];  
+  
+    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================  
+    function shuffle(array) {  
+        var currentIndex = array.length, temporaryValue, randomIndex;  
+        while (0 !== currentIndex) {  
+            randomIndex = Math.floor(Math.random() * currentIndex);  
+            currentIndex -= 1;  
+            temporaryValue = array[currentIndex];  
+            array[currentIndex] = array[randomIndex];  
+            array[randomIndex] = temporaryValue;  
+        }  
+        return array;  
+    }  
+  
+    function formatDate(date) {  
+        var d = new Date(date);  
+        var month = '' + (d.getMonth() + 1);  
+        var day = '' + d.getDate();  
+        var year = d.getFullYear();  
+  
+        if (month.length < 2) month = '0' + month;  
+        if (day.length < 2) day = '0' + day;  
+  
+        return [year, month, day].join('-');  
+    }  
+  
+    // ==================== ОСНОВНАЯ ЛОГИКА ====================  
+    function openGenre(genre) {  
+        var hasMovie = movieGenres.some(function(g) { return g.id === genre.id; });  
+        var hasTv = tvGenres.some(function(g) { return g.id === genre.id; });  
+  
+        var typeChoices = [];  
+        if (hasMovie) typeChoices.push({ title: Lampa.Lang.translate('menu_movies'), value: 'movie' });  
+        if (hasTv)    typeChoices.push({ title: Lampa.Lang.translate('menu_tv'),     value: 'tv' });  
+  
+        if (typeChoices.length === 1) {  
+            showFiltersMenu(genre, typeChoices[0].value);  
+            return;  
         }  
   
-        if (filterLevel == '2') {  
-            baseExcludedKeywords.push(  
-                '210024',  
-                '13141',  
-                '345822',  
-                '315535',  
-                '290667',  
-                '323477',  
-                '290609'  
-            );  
-        }  
-  
-        baseUrl += '&without_keywords=' + encodeURIComponent(baseExcludedKeywords.join(','));  
-        return baseUrl;  
-    }  
-    
-    function addStyles() {      
-        Lampa.Template.add('genres_compact_wide_style', `      
-            <style>      
-                .card--genre-compact {      
-                    width: 12.75em !important;      
-                }      
-                .card--genre-compact .card__view {    
-                    padding-bottom: 56% !important;    
-                    display: flex;    
-                    align-items: center;    
-                    justify-content: center;    
-                    background-color: rgba(0, 0, 0, 0.2);  
-                    border-radius: 1em;    
-                }    
-                .card--genre-compact.hover .card__view,    
-                .card--genre-compact.focus .card__view {    
-                    background-color: rgba(255, 255, 255, 0.1);  
-                }  
-                .card--genre-compact .card__title,      
-                .card--genre-compact .card__age {      
-                    display: none !important;      
-                }    
-                .card__svg-icon {    
-                    position: absolute;    
-                    top: 45%;    
-                    left: 50%;    
-                    transform: translate(-50%, -50%);    
-                    width: 40% !important;    
-                    height: 40% !important;    
-                    display: flex;    
-                    align-items: center;    
-                    justify-content: center;    
-                }    
-                .card__svg-icon svg {    
-                    width: 100% !important;    
-                    height: 100% !important;    
-                    fill: currentColor;    
-                }    
-                .card__svg-icon svg path,    
-                .card__svg-icon svg polygon {    
-                    fill: rgba(255, 255, 255, 0.8) !important;    
-                }    
-                .card__genre-label {      
-                    position: absolute;      
-                    bottom: 0.4em;      
-                    left: 0;      
-                    right: 0;      
-                    text-align: center;      
-                    color: #fff;      
-                    padding: 0.5em;      
-                    font-size: 1.1em;      
-                    font-weight: 500;    
-                    z-index: 1;    
-                }      
-            </style>      
-        `);      
-        $('body').append(Lampa.Template.get('genres_compact_wide_style', {}, true));      
-    }  
-      
-    function openGenre(genre) {    
-    var hasMovie = movieGenres.some(function(g) { return g.id === genre.id; });    
-    var hasTv = tvGenres.some(function(g) { return g.id === genre.id; });    
-        
-    var typeChoices = [];    
-        
-    if (hasMovie) {    
-        typeChoices.push({ title: Lampa.Lang.translate('menu_movies'), value: 'movie' });    
-    }    
-        
-    if (hasTv) {    
-        typeChoices.push({ title: Lampa.Lang.translate('menu_tv'), value: 'tv' });    
-    }    
-        
-        
-    if (typeChoices.length === 1) {    
-        showSortMenu(genre, typeChoices[0].value, false);   
-        return;    
-    }    
-        
-        
-    Lampa.Select.show({    
-        title: Lampa.Lang.translate(genre.title),    
-        items: typeChoices,    
-        onSelect: function (t) {    
-            showSortMenu(genre, t.value, true);   
-        },    
-        onBack: function () {    
-            Lampa.Controller.toggle('content');    
-        }    
-    });    
-}
-      
-
-  
-function showSortMenu(genre, type, fromTypeSelection) {  
-    // Опции сортировки  
-    var sortItems = sortOptions.map(function(s) {  
-        return {  
-            title: Lampa.Lang.translate(s.title),  
-            sort: s.sort  
-        };  
-    });  
-  
-    // Опции года с учетом сохраненного выбора  
-    var currentYear = new Date().getFullYear();  
-    var yearItems = [  
-        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: !selectedFilters.year }  
-    ];  
-      
-    for (var i = 0; i <= 5; i++) {  
-        var yearValue = (currentYear - i).toString();  
-        yearItems.push({  
-            title: yearValue,  
-            value: yearValue,  
-            checkbox: true,  
-            checked: selectedFilters.year === yearValue  
-        });  
-    }  
-  
-    // Опции языка с учетом сохраненных выборов  
-    var languageItems = [  
-        { title: Lampa.Lang.translate('filter_any'), value: '', checkbox: true, checked: selectedFilters.languages.length === 0 }  
-    ];  
-      
-    var availableLanguages = [  
-        { title: 'English', value: 'en' },  
-        { title: 'Русский', value: 'ru' },  
-        { title: '日本語', value: 'ja' },  
-        { title: '한국어', value: 'ko' },  
-        { title: 'Español', value: 'es' },  
-        { title: 'Français', value: 'fr' },  
-        { title: 'Deutsch', value: 'de' },  
-        { title: 'Italiano', value: 'it' },  
-        { title: 'Português', value: 'pt' },  
-        { title: '中文', value: 'zh' }  
-    ];  
-      
-    availableLanguages.forEach(function(lang) {  
-        languageItems.push({  
-            title: lang.title,  
-            value: lang.value,  
-            checkbox: true,  
-            checked: selectedFilters.languages.indexOf(lang.value) !== -1  
-        });  
-    });  
-  
-    // Основное меню  
-    var allItems = [];  
-      
-    // Добавляем опции сортировки  
-    sortItems.forEach(function(item) {  
-        allItems.push(item);  
-    });  
-      
-    // Разделитель  
-    allItems.push({  
-        title: 'Дополнительные фильтры',  
-        separator: true,  
-        noenter: true  
-    });  
-      
-    // Вкладка года  
-    allItems.push({  
-        title: 'Год',  
-        subtitle: selectedFilters.year ? selectedFilters.year : 'Выберите год',  
-        items: yearItems,  
-        yearFilter: true  
-    });  
-      
-    // Вкладка языка  
-    allItems.push({  
-        title: 'Язык оригинала',  
-        subtitle: selectedFilters.languages.length > 0 ?   
-            selectedFilters.languages.map(function(code) {  
-                var lang = availableLanguages.find(function(l) { return l.value === code; });  
-                return lang ? lang.title : code;  
-            }).join(', ') : 'Выберите язык',  
-        items: languageItems,  
-        languageFilter: true  
-    });  
-  
-    // Показываем основное меню  
-    Lampa.Select.show({  
-        title: Lampa.Lang.translate('filter_sorted'),  
-        items: allItems,  
-        onSelect: function(item) {  
-            if (item.sort) {  
-                // Выбрана сортировка - начинаем поиск с сохраненными фильтрами  
-                var yearFilter = selectedFilters.year ? { value: selectedFilters.year } : null;  
-                var languageFilter = selectedFilters.languages.length > 0 ?   
-                    { value: selectedFilters.languages.join(',') } : null;  
-                buildUrlAndNavigate(genre, type, item, yearFilter, languageFilter);  
-            } else if (item.yearFilter || item.languageFilter) {  
-                // Открываем вкладку с фильтрами  
-                showFilterTab(item, genre, type, fromTypeSelection);  
-            }  
-        },  
-        onBack: function() {  
-            if (fromTypeSelection) {  
-                openGenre(genre);  
-            } else {  
+        Lampa.Select.show({  
+            title: Lampa.Lang.translate(genre.title),  
+            items: typeChoices,  
+            onSelect: function (t) {  
+                showFiltersMenu(genre, t.value);  
+            },  
+            onBack: function () {  
                 Lampa.Controller.toggle('content');  
             }  
-        }  
-    });  
-}  
+        });  
+    }  
   
-// Глобальные переменные для хранения выбранных фильтров  
-var selectedFilters = {  
-    year: '',  
-    languages: []  
-};  
+    function showFiltersMenu(genre, type) {  
+        var sortItems = sortOptions.map(function(s) {  
+            return {  
+                title: Lampa.Lang.translate(s.title),  
+                sort: s.sort  
+            };  
+        });  
   
-function showFilterTab(filterItem, genre, type, fromTypeSelection) {  
-    var isYearFilter = filterItem.yearFilter;  
-      
-    Lampa.Select.show({  
-        title: filterItem.title,  
-        items: filterItem.items,  
-        onSelect: function(item) {  
-            // При выборе "Любой" закрываем вкладку  
-            if (item.value === '') {  
-                if (isYearFilter) {  
-                    selectedFilters.year = '';  
-                } else {  
-                    selectedFilters.languages = [];  
+        // Добавляем разделитель  
+        sortItems.push({ title: 'Дополнительные фильтры', separator: true, noenter: true });  
+  
+        // Вкладка года  
+        sortItems.push({  
+            title: 'Год',  
+            subtitle: selectedFilters.year ? selectedFilters.year : 'Выберите год',  
+            items: getYearItems(),  
+            yearFilter: true  
+        });  
+  
+        // Вкладка языка  
+        sortItems.push({  
+            title: 'Язык оригинала',  
+            subtitle: selectedFilters.languages.length > 0 ?   
+                selectedFilters.languages.map(function(code) {  
+                    var lang = languages.find(function(l) { return l.code === code; });  
+                    return lang ? Lampa.Lang.translate(lang.title) : code;  
+                }).join(', ') : 'Выберите язык',  
+            items: getLanguageItems(),  
+            languageFilter: true  
+        });  
+  
+        Lampa.Select.show({  
+            title: Lampa.Lang.translate(genre.title),  
+            items: sortItems,  
+            onSelect: function (item) {  
+                if (item.sort) {  
+                    // Выбрана сортировка - начинаем поиск  
+                    buildAndOpenActivity(genre, type, item.sort);  
+                } else if (item.yearFilter || item.languageFilter) {  
+                    // Открываем вкладку с фильтрами  
+                    showFilterTab(item, genre, type);  
                 }  
-                  
-                // Обновляем состояние всех чекбоксов  
-                filterItem.items.forEach(function(i) {  
-                    i.checked = i.value === '';  
-                });  
-                  
-                Lampa.Select.hide();  
-                showSortMenu(genre, type, fromTypeSelection);  
+            },  
+            onBack: function () {  
+                openGenre(genre);  
             }  
-        },  
-        onCheck: function(item) {  
-            if (isYearFilter) {  
-                // Обработка фильтра года  
+        });  
+    }  
+  
+    function getYearItems() {  
+        var currentYear = new Date().getFullYear();  
+        var yearItems = [{ title: 'Любой', value: '', checkbox: true, checked: !selectedFilters.year }];  
+  
+        for (var i = 0; i <= 5; i++) {  
+            var yearValue = (currentYear - i).toString();  
+            yearItems.push({  
+                title: yearValue,  
+                value: yearValue,  
+                checkbox: true,  
+                checked: selectedFilters.year === yearValue  
+            });  
+        }  
+  
+        return yearItems;  
+    }  
+  
+    function getLanguageItems() {  
+        var languageItems = [{ title: 'Любой', value: '', checkbox: true, checked: selectedFilters.languages.length === 0 }];  
+  
+        languages.forEach(function(lang) {  
+            languageItems.push({  
+                title: Lampa.Lang.translate(lang.title),  
+                value: lang.code,  
+                checkbox: true,  
+                checked: selectedFilters.languages.indexOf(lang.code) !== -1  
+            });  
+        });  
+  
+        return languageItems;  
+    }  
+  
+    function showFilterTab(filterItem, genre, type) {  
+        var isYearFilter = filterItem.yearFilter;  
+          
+        Lampa.Select.show({  
+            title: filterItem.title,  
+            items: filterItem.items,  
+            onSelect: function(item) {  
                 if (item.value === '') {  
-                    // Выбран "Любой"  
-                    selectedFilters.year = '';  
-                    filterItem.items.forEach(function(i) {  
-                        i.checked = i.value === '';  
-                    });  
-                } else {  
-                    // Выбран конкретный год  
-                    selectedFilters.year = item.value;  
-                    // Снимаем галочку с "Любой" и ставим на выбранный год  
-                    filterItem.items.forEach(function(i) {  
-                        i.checked = i.value === item.value;  
-                    });  
-                }  
-            } else {  
-                // Обработка фильтра языка  
-                if (item.value === '') {  
-                    // Выбран "Любой"  
-                    selectedFilters.languages = [];  
-                    filterItem.items.forEach(function(i) {  
-                        i.checked = i.value === '';  
-                    });  
-                } else {  
-                    // Выбран конкретный язык  
-                    var index = selectedFilters.languages.indexOf(item.value);  
-                    if (index === -1) {  
-                        selectedFilters.languages.push(item.value);  
+                    // Выбран "Любой" - закрываем вкладку и возвращаемся наверх  
+                    if (isYearFilter) {  
+                        selectedFilters.year = '';  
                     } else {  
-                        selectedFilters.languages.splice(index, 1);  
+                        selectedFilters.languages = [];  
                     }  
                       
-                    // Обновляем состояние чекбоксов  
                     filterItem.items.forEach(function(i) {  
-                        if (i.value === '') {  
-                            // "Любой" отмечен только если нет выбранных языков  
-                            i.checked = selectedFilters.languages.length === 0;  
-                        } else {  
-                            // Конкретный язык отмечен если он в массиве выбранных  
-                            i.checked = selectedFilters.languages.indexOf(i.value) !== -1;  
-                        }  
+                        i.checked = i.value === '';  
                     });  
+                      
+                    Lampa.Select.hide();  
+                    showFiltersMenu(genre, type);  
                 }  
-            }  
-        },  
-        onBack: function() {  
-            showSortMenu(genre, type, fromTypeSelection);  
-        }  
-    });  
-}
-}  
-  
-function showFilterTab(filterItem, genre, type, fromTypeSelection) {  
-    var isYearFilter = filterItem.yearFilter;  
-    var filterType = isYearFilter ? 'year' : 'language';  
-      
-    Lampa.Select.show({  
-        title: filterItem.title,  
-        items: filterItem.items,  
-        onSelect: function(item) {  
-            // При выборе "Любой" закрываем вкладку и возвращаемся наверх  
-            if (item.value === '') {  
-                // Снимаем все чекбоксы кроме "Любой"  
-                filterItem.items.forEach(function(i) {  
-                    i.checked = i.value === '';  
-                });  
-                // Возвращаемся на основной уровень  
-                showSortMenu(genre, type, fromTypeSelection);  
-            } else {  
-                // При выборе конкретного значения снимаем галочку с "Любой"  
-                filterItem.items.forEach(function(i) {  
-                    if (i.value === '') i.checked = false;  
-                });  
-                item.checked = true;  
-            }  
-        },  
-        onCheck: function(item) {  
-            // Обработка чекбоксов [1](#3-0)   
-            if (item.value !== '') {  
-                // Если выбран конкретный год/язык, снимаем галочку с "Любой"  
-                filterItem.items.forEach(function(i) {  
-                    if (i.value === '') i.checked = false;  
-                });  
-            } else {  
-                // Если выбран "Любой", снимаем галочки с остальных и закрываем  
-                filterItem.items.forEach(function(i) {  
-                    i.checked = i.value === '';  
-                });  
-                // Закрываем вкладку и возвращаемся наверх  
-                Lampa.Select.hide();  
-                showSortMenu(genre, type, fromTypeSelection);  
-            }  
-        },  
-        onBack: function() {  
-            // Возвращаемся на основной уровень  
-            showSortMenu(genre, type, fromTypeSelection);  
-        }  
-    });  
-}  
-  
-function buildUrlAndNavigate(genre, type, sortItem, yearItem, languageItem) {  
-    var base = type === 'movie' ? 'discover/movie' : 'discover/tv';  
-    var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortItem.sort;  
-      
-    // Добавляем фильтры если они были выбраны  
-    if (yearItem && yearItem.value && sortItem.sort !== 'release_date.desc') {  
-        var dateField = type === 'movie' ? 'primary_release_year' : 'first_air_date_year';  
-        url += '&' + dateField + '=' + yearItem.value;  
-    }  
-      
-    if (languageItem && languageItem.value) {  
-        url += '&with_original_language=' + languageItem.value;  
-    }  
-      
-    if (sortItem.sort === 'release_date.desc') {  
-        var today = new Date();  
-        var tenDaysAgo = new Date(today);  
-        tenDaysAgo.setDate(today.getDate() - 10);  
-              
-        var nineMonthsAgo = new Date(today);  
-        nineMonthsAgo.setMonth(today.getMonth() - 9);  
-              
-        var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';  
-        var lte = dateField + '.lte=' + formatDate(tenDaysAgo);  
-        var gte = dateField + '.gte=' + formatDate(nineMonthsAgo);  
-              
-        url += '&' + lte + '&' + gte + '&vote_count.gte=20';       
-    }  
-          
-    if (sortItem.sort === 'vote_average.desc') {  
-        url += '&vote_count.gte=400';  
-    }  
-        
-    url = applyWithoutKeywords(url);  
-            
-    Lampa.Activity.push({            
-        url: url,            
-        title: Lampa.Lang.translate(genre.title),            
-        component: 'category_full',            
-        source: 'tmdb',            
-        card_type: type,            
-        page: 1            
-    });  
-}
-  
-  
-	function formatDate(date) {  
-		var year = date.getFullYear();  
-		var month = String(date.getMonth() + 1).padStart(2, '0');  
-		var day = String(date.getDate()).padStart(2, '0');  
-		return year + '-' + month + '-' + day;  
-	}
-		  
-function createGenresRow(genresData) {  
-    var allGenres = movieGenres.slice();  
-    tvGenres.forEach(function(tvGenre) {  
-        if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {  
-            allGenres.push(tvGenre);  
-        }  
-    });  
-  
-    // Randomize the order of genres  
-    allGenres.sort(function() {  
-        return Math.random() - 0.5;  
-    });  
-  
-    // Добавляем функцию в массив, а не регистрируем напрямую  
-    genresData.unshift(function(callback) {  
-        var results = allGenres.map(function (g) {  
-            return {  
-                source: 'custom',  
-                title: Lampa.Lang.translate(g.title),  
-                name: Lampa.Lang.translate(g.title),  
-                params: {  
-                    createInstance: function () {  
-                        var card = Lampa.Maker.make('Card', this, function (m) {  
-                            return m.only('Card', 'Callback');  
+            },  
+            onCheck: function(item) {  
+                if (isYearFilter) {  
+                    // Обработка фильтра года  
+                    if (item.value === '') {  
+                        selectedFilters.year = '';  
+                        filterItem.items.forEach(function(i) {  
+                            i.checked = i.value === '';  
                         });  
-                        card.data.icon_svg = g.icon;  
-                        return card;  
-                    },  
-                    emit: {  
-                        onCreate: function () {  
-                            this.html.addClass('card--genre-compact');  
-                                
-                            var iconData = g.icon;  
-                            if (iconData && iconData.startsWith('<svg')) {  
-                                var imgElement = this.html.find('.card__img');  
-                                var svgContainer = document.createElement('div');  
-                                svgContainer.classList.add('card__svg-icon');  
-                                svgContainer.innerHTML = iconData;  
-                                imgElement.replaceWith(svgContainer);  
-                            }  
-                                
-                            var genreLabel = document.createElement('div');  
-                            genreLabel.classList.add('card__genre-label');  
-                            genreLabel.innerText = Lampa.Lang.translate(g.title);  
-                            this.html.find('.card__view').append(genreLabel);  
-                        },  
-                        onlyEnter: function () {  
-                            openGenre(g);  
+                    } else {  
+                        selectedFilters.year = item.value;  
+                        filterItem.items.forEach(function(i) {  
+                            i.checked = i.value === item.value;  
+                        });  
+                    }  
+                } else {  
+                    // Обработка фильтра языка  
+                    if (item.value === '') {  
+                        selectedFilters.languages = [];  
+                        filterItem.items.forEach(function(i) {  
+                            i.checked = i.value === '';  
+                        });  
+                    } else {  
+                        var index = selectedFilters.languages.indexOf(item.value);  
+                        if (index === -1) {  
+                            selectedFilters.languages.push(item.value);  
+                        } else {  
+                            selectedFilters.languages.splice(index, 1);  
                         }  
+                          
+                        filterItem.items.forEach(function(i) {  
+                            if (i.value === '') {  
+                                i.checked = selectedFilters.languages.length === 0;  
+                            } else {  
+                                i.checked = selectedFilters.languages.indexOf(i.value) !== -1;  
+                            }  
+                        });  
                     }  
                 }  
-            };  
-        });  
-  
-        callback({  
-            results: results,  
-            title: defaultConfig.rowTitle,  
-            params: {  
-                items: {  
-                    view: 20,  
-                    mapping: 'line'  
-                }  
+            },  
+            onBack: function() {  
+                showFiltersMenu(genre, type);  
             }  
         });  
-    });  
-}
+    }  
   
-    function startPlugin() {      
-    addStyles();      
-    
-        Lampa.ContentRows.add({  
-        index: defaultConfig.rowIndex,  
-        name: 'genres_buttons',  
-        title: defaultConfig.rowTitle,  
-        screen: ['main'],  
-        call: function (params, screen) {  
-            var genresData = [];  
-            createGenresRow(genresData);  
-            return function (callback) {  
-                if (genresData.length > 0) {  
-                    genresData[0](callback);  
-                }  
-            };  
+    function buildAndOpenActivity(genre, type, sortBy) {  
+        var base = type === 'movie' ? 'discover/movie' : 'discover/tv';  
+        var url = base + '?with_genres=' + genre.id + '&sort_by=' + sortBy;  
+  
+        // Год  
+        if (selectedFilters.year && sortBy !== 'release_date.desc') {  
+            var dateField = type === 'movie' ? 'primary_release_year' : 'first_air_date_year';  
+            url += '&' + dateField + '=' + selectedFilters.year;  
         }  
-    });  
-
-      
-    // Глобальный экспорт данных и функций  
-    window.genres_getMovieGenres = function() {  
-        return movieGenres.slice(); // Возвращаем копию массива  
-    };  
-      
-    window.genres_getTvGenres = function() {  
-        return tvGenres.slice(); // Возвращаем копию массива  
-    };  
-      
-    window.genres_getAllGenres = function() {  
-        var allGenres = movieGenres.slice();  
-        tvGenres.forEach(function(tvGenre) {  
-            if (!allGenres.find(function(g) { return g.id === tvGenre.id; })) {  
-                allGenres.push(tvGenre);  
+  
+        // Язык  
+        if (selectedFilters.languages.length > 0) {  
+            url += '&with_original_language=' + selectedFilters.languages.join('|');  
+        }  
+  
+        // Дополнительные параметры для "Новинок"  
+        if (sortBy === 'release_date.desc') {  
+            var today = new Date();  
+            var tenDaysAgo = new Date(today);  
+            tenDaysAgo.setDate(today.getDate() - 10);  
+            var nineMonthsAgo = new Date(today);  
+            nineMonthsAgo.setMonth(today.getMonth() - 9);  
+  
+            var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';  
+            url += '&' + dateField + '.lte=' + formatDate(tenDaysAgo);  
+            url += '&' + dateField + '.gte=' + formatDate(nineMonthsAgo);  
+            url += '&vote_count.gte=20';  
+        }  
+  
+        if (sortBy === 'vote_average.desc') {  
+            url += '&vote_count.gte=400';  
+        }  
+  
+        Lampa.Activity.push({  
+            url: url,  
+            title: Lampa.Lang.translate(genre.title),  
+            component: 'category_full',  
+            source: 'tmdb',  
+            card_type: type,  
+            page: 1  
+        });  
+    }  
+  
+    // ==================== СОЗДАНИЕ РЯДА ====================  
+    function createGenresRow(genresData) {  
+        var allGenres = movieGenres.concat(tvGenres.filter(function(tv) {  
+            return !movieGenres.some(function(m) { return m.id === tv.id; });  
+        }));  
+  
+        // Перемешиваем каждый раз  
+        shuffle(allGenres);  
+  
+        genresData.unshift(function (callback) {  
+            var results = allGenres.map(function (g) {  
+                return {  
+                    source: 'custom',  
+                    title: Lampa.Lang.translate(g.title),  
+                    name: Lampa.Lang.translate(g.title),  
+                    params: {  
+                        createInstance: function () {  
+                            var card = Lampa.Maker.make('Card', this, function (m) {  
+                                return m.only('Card', 'Callback');  
+                            });  
+  
+                            card.data.icon_svg = g.icon || '';  
+                            return card;  
+                        },  
+                        emit: {  
+                            onCreate: function () {  
+                                this.html.addClass('card--genre-compact');  
+  
+                                if (g.icon && g.icon.startsWith('<svg')) {  
+                                    var img = this.html.find('.card__img');  
+                                    var svgDiv = document.createElement('div');  
+                                    svgDiv.className = 'card__svg-icon';  
+                                    svgDiv.innerHTML = g.icon;  
+                                    img.replaceWith(svgDiv);  
+                                }  
+  
+                                var label = document.createElement('div');  
+                                label.className = 'card__genre-label';  
+                                label.textContent = Lampa.Lang.translate(g.title);  
+                                this.html.find('.card__view').append(label);  
+                            },  
+                            onlyEnter: function () {  
+                                openGenre(g);  
+                            }  
+                        }  
+                    }  
+                };  
+            });  
+  
+            callback({  
+                results: results,  
+                title: defaultConfig.rowTitle,  
+                params: { items: { view: 20, mapping: 'line' } }  
+            });  
+        });  
+    }  
+  
+    function addStyles() {  
+        Lampa.Template.add('genres_compact_wide_style', `  
+            <style>  
+                .card--genre-compact { width: 12.75em !important; }  
+                .card--genre-compact .card__view {  
+                    padding-bottom: 56% !important;  
+                    display: flex;  
+                    align-items: center;  
+                    justify-content: center;  
+                    background-color: rgba(0,0,0,0.25);  
+                    border-radius: 1em;  
+                }  
+                .card__svg-icon {  
+                    position: absolute;  
+                    top: 45%; left: 50%;  
+                    transform: translate(-50%, -50%);  
+                    width: 42%; height: 42%;  
+                }  
+                .card__svg-icon svg { width: 100%; height: 100%; fill: currentColor; }  
+                .card__genre-label {  
+                    position: absolute; bottom: 0.4em; left: 0; right: 0;  
+                    text-align: center; color: #fff; font-weight: 500; font-size: 1.05em;  
+                    text-shadow: 0 1px 3px rgba(0,0,0,0.8);  
+                }  
+            </style>  
+        `);  
+        $('body').append(Lampa.Template.get('genres_compact_wide_style', {}, true));  
+    }  
+  
+    function startPlugin() {  
+        addStyles();  
+  
+        Lampa.ContentRows.add({  
+            index: defaultConfig.rowIndex,  
+            name: 'genres_buttons',  
+            title: defaultConfig.rowTitle,  
+            screen: ['main'],  
+            call: function (params, screen) {  
+                var genresData = [];  
+                createGenresRow(genresData);  
+                return function (callback) {  
+                    if (genresData.length > 0) genresData[0](callback);  
+                };  
             }  
         });  
-        return allGenres;  
-    };  
-      
-    window.genres_openGenre = openGenre;  
-    window.genres_createGenresRow = createGenresRow;  
-}    
-      
-    if (Lampa.Manifest.app_digital >= 300) {      
-        if (window.appready) startPlugin();      
-        else Lampa.Listener.follow('app', function (e) {      
-            if (e.type === 'ready') startPlugin();      
-        });      
-    }      
+    }  
+  
+    if (Lampa.Manifest.app_digital >= 300) {  
+        if (window.appready) startPlugin();  
+        else Lampa.Listener.follow('app', function (e) {  
+            if (e.type === 'ready') startPlugin();  
+        });  
+    }  
+  
 })();
