@@ -205,7 +205,7 @@ function addStyles() {
             }  
             .card__svg-icon {  
                 position: absolute;  
-                top: 40% !important;
+                top: 45% !important;
                 left: 50%;  
                 transform: translate(-50%, -50%);  
                 width: 40% !important;  
@@ -216,14 +216,14 @@ function addStyles() {
             }  
             .card__button-label {  
                 position: absolute;  
-                bottom: 0.3em !important;
+                bottom: 0.5em !important;
                 left: 0;  
                 right: 0;  
                 text-align: center;  
                 color: #fff;  
-                padding: 0.3em !important;  
-                font-size: 0.7em !important;  
-                font-weight: 300 !important;  
+                padding: 0.4em !important;  
+                font-size: 0.8em !important;  
+                font-weight: 400 !important;  
                 z-index: 1;  
             }  
         }  
