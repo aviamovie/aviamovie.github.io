@@ -283,11 +283,9 @@
                     createInstance: function() { return createCard(this, 'Card'); },
                     emit: {
                         onCreate: function() {
-                            this.html.addClass('card--surs-banner');
-var $html = this.html && this.html.find ? this.html : $(this.html);
-$html.addClass('card--surs-banner');
-$html.find('.card__title, .card__age').css('display', 'none');
-var view = $html.find('.card__view');
+                            var $html = $(this.html);
+                            $html.addClass('card--surs-banner');
+                            var view = $html.find('.card__view');
                             view.empty();
                             var inner = buildBannerInner();
                             view.append(inner);
@@ -297,7 +295,7 @@ var view = $html.find('.card__view');
                     }
                 }
             }],
-            title: '',
+            title: ' ',
             params: { items: { view: 1, mapping: 'line' } }
         };
     }
@@ -325,8 +323,9 @@ var view = $html.find('.card__view');
                         },
                         emit: {
                             onCreate: function() {
-                                this.html.addClass('card--button-compact');
-                                var imgElement = this.html.find('.card__img');
+                                var $html = $(this.html);
+                                $html.addClass('card--button-compact');
+                                var imgElement = $html.find('.card__img');
                                 var svgContainer = document.createElement('div');
                                 svgContainer.classList.add('card__svg-icon');
                                 if (this.data.icon_svg) svgContainer.innerHTML = this.data.icon_svg;
@@ -336,7 +335,7 @@ var view = $html.find('.card__view');
                                 var buttonLabel = document.createElement('div');
                                 buttonLabel.classList.add('card__button-label');
                                 buttonLabel.innerText = Lampa.Lang.translate(b.title);
-                                this.html.find('.card__view').append(buttonLabel);
+                                $html.find('.card__view').append(buttonLabel);
                             },
                             onlyEnter: function() {
                                 if (b.id && buttonActions[b.id]) buttonActions[b.id]();
@@ -346,7 +345,7 @@ var view = $html.find('.card__view');
                     }
                 };
             });
-            callback({ results: enabledButtons, title: '', params: { items: { view: 20, mapping: 'line' } } });
+            callback({ results: enabledButtons, title: ' ', params: { items: { view: 20, mapping: 'line' } } });
         });
     }
 
@@ -414,7 +413,7 @@ var view = $html.find('.card__view');
         Lampa.ContentRows.add({
             index: 0,
             name: 'surs_banner',
-            title: '',
+            title: ' ',
             screen: ['main'],
             call: function() {
                 return function(callback) {
@@ -428,7 +427,7 @@ var view = $html.find('.card__view');
         Lampa.ContentRows.add({
             index: 1,
             name: 'surs_buttons',
-            title: '',
+            title: ' ',
             screen: ['main'],
             call: function() {
                 var partsData = [];
