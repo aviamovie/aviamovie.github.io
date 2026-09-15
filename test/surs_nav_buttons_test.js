@@ -2,7 +2,7 @@
     'use strict';
 
     // BANNER.height — адаптивная высота (vw обеспечивает одинаковые пропорции на любых экранах)
-    var BANNER = { max: 10, rotate: 7, cache_min: 360, height: '22vw' };
+    var BANNER = { max: 10, rotate: 10, cache_min: 360, height: '24vw' };
     var bannerState = { timer: null, index: 0, cards: [], html: null };
 
     var buttonIcons = {
@@ -333,7 +333,7 @@
             '.card--surs-banner{width:115%!important;max-width:115%!important;flex:0 0 auto!important;margin:0!important;transform:none!important}' +
             '.card--surs-banner.focus,.card--surs-banner.hover{transform:none!important}' +
             '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1.2em!important;overflow:hidden;background-color:rgba(0,0,0,.3)!important;transform:none!important}' +
-            '.card--surs-banner.focus .card__view,.card--surs-banner.hover .card__view{transform:none!important}' +
+            '.card--surs-banner.focus .card__view,.card--surs-banner.hover .card__view' +
             
             '.card--surs-banner .card__title,.card--surs-banner .card__age{display:none!important}' +
             '.surs-bb{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;overflow:hidden;color:#fff;cursor:pointer}' +
@@ -341,7 +341,7 @@
             '/* Основной слайд (3/4) */' +
             '.surs-bb__main{position:relative;width:75%;height:100%;overflow:hidden;border-right:1px solid rgba(255,255,255,0.08)}' +
             '.surs-bb__main-art{position:absolute;top:0;left:0;right:0;bottom:0;background-repeat:no-repeat;background-position:center center;background-size:cover;transition:opacity .6s cubic-bezier(0.25, 1, 0.5, 1), transform .6s cubic-bezier(0.25, 1, 0.5, 1)}' +
-            '.surs-bb__main-art--changing{opacity:0.3;transform:scale(1.02)}' +
+            '.surs-bb__main-art--changing{opacity:0.3;transform:scale(1.06)}' +
             
             '.surs-bb__scrim{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(77deg,rgba(0,0,0,.9) 0,rgba(0,0,0,.4) 65%,rgba(0,0,0,0) 100%)}' +
             '.surs-bb__info{position:absolute;left:1.8em;bottom:1.5em;width:80%;z-index:2;transition:opacity .4s ease, transform .4s ease}' +
