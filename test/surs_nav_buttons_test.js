@@ -154,7 +154,6 @@
         var card = bannerState.cards[bannerState.index];
         var art = heroImage(card);
 
-        // Основной слайд (3/4)
         var $artElem = html.find('.surs-bb__main-art');
         $artElem.css('opacity', '0.2');
         setTimeout(function() {
@@ -163,7 +162,6 @@
 
         fillBanner(html, card);
 
-        // Правая часть (1/4) с 3 карточками
         var $cardsList = html.find('.surs-bb__cards-list');
         $cardsList.css({ 'transform': 'translateY(-15px)', 'opacity': '0.5' });
         
@@ -201,7 +199,6 @@
     function buildBannerInner() {
         return $(
             '<div class="surs-bb">' +
-                '<!-- Слайд 1: Основной (3/4 ширины) -->' +
                 '<div class="surs-bb__main">' +
                     '<div class="surs-bb__main-art"></div>' +
                     '<div class="surs-bb__scrim"></div>' +
@@ -212,7 +209,6 @@
                         '<div class="surs-bb__descr"></div>' +
                     '</div>' +
                 '</div>' +
-                '<!-- Правая панель (1/4 ширины): 3 карточки с анимацией -->' +
                 '<div class="surs-bb__sidebar">' +
                     '<div class="surs-bb__cards-list"></div>' +
                 '</div>' +
@@ -325,23 +321,17 @@
     function addStyles() {
         Lampa.Template.add('surs_buttons_banner_style',
             '<style>' +
-            '.card--button-compact{width:12.75em!important;transform:none!important}' +
-            '.card--button-compact.hover,.card--button-compact.focus{transform:none!important}' +
+            '.card--button-compact{width:12.75em!important}' +
             '.items-line{padding-bottom:.5em!important;overflow:visible!important}' +
             
-            '/* 1 и 2. Увеличение ширины карточки до 115% и относительная высота BANNER.height */' +
-            '.card--surs-banner{width:115%!important;max-width:115%!important;flex:0 0 auto!important;margin:0!important;transform:none!important}' +
-            '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1.2em!important;overflow:hidden;background-color:rgba(0,0,0,.3)!important;transition:border .2s ease, box-shadow .2s ease;transform:none!important}' +
-            
-            '/* 4. Возврат стандартной рамки фокуса */' +
-            '.card--surs-banner.focus .card__view, .card--surs-banner.hover .card__view{' +
-                'border:0.18em solid #fff!important;' +
-                'box-shadow:0 0 2em rgba(255,255,255,0.25)!important;' +
-            '}' +
+            '/* Размеры баннера */' +
+            '.card--surs-banner{width:115%!important;max-width:115%!important;flex:0 0 auto!important;margin:0!important}' +
+            '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1.2em!important;overflow:hidden;background-color:rgba(0,0,0,.3)!important}' +
             '.card--surs-banner .card__title,.card--surs-banner .card__age{display:none!important}' +
+            
             '.surs-bb{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;overflow:hidden;color:#fff;cursor:pointer}' +
             
-            '/* 3. Левая часть — первый слайд (3/4 ширины) */' +
+            '/* Левая часть (3/4 ширины) */' +
             '.surs-bb__main{position:relative;width:75%;height:100%;overflow:hidden;border-right:2px solid rgba(255,255,255,0.08)}' +
             '.surs-bb__main-art{position:absolute;top:0;left:0;right:0;bottom:0;background-repeat:no-repeat;background-position:center center;background-size:cover;transition:opacity .4s ease, background-image .4s ease}' +
             '.surs-bb__scrim{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(77deg,rgba(0,0,0,.9) 0,rgba(0,0,0,.4) 65%,rgba(0,0,0,0) 100%)}' +
@@ -353,7 +343,7 @@
             '.surs-bb__match{color:#ffffff;font-weight:700}' +
             '.surs-bb__descr{font-size:.85em;line-height:1.3;max-height:2.6em;overflow:hidden;opacity:.85}' +
 
-            '/* 3. Правая панель (1/4 ширины) с 3 mini-карточками */' +
+            '/* Правая панель (1/4 ширины) */' +
             '.surs-bb__sidebar{position:relative;width:25%;height:100%;background:rgba(0,0,0,.4);padding:.5em;box-sizing:border-box;overflow:hidden}' +
             '.surs-bb__cards-list{display:flex;flex-direction:column;height:100%;gap:.4em;transition:transform .3s ease, opacity .3s ease}' +
             '.surs-bb__mini-card{position:relative;flex:1;border-radius:.6em;overflow:hidden;background:#111}' +
