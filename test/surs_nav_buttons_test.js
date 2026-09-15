@@ -1,8 +1,8 @@
 (function() {
     'use strict';
 
-    // BANNER.height — параметр высоты карточки баннера (24lvl = 24vh)
-    var BANNER = { max: 6, rotate: 7, cache_min: 360, height: '24vh' };
+    // BANNER.height — адаптивная высота (vw обеспечивает одинаковые пропорции на TV и телефонах)
+    var BANNER = { max: 10, rotate: 7, cache_min: 360, height: '22vw' };
     var bannerState = { timer: null, index: 0, cards: [], html: null };
 
     var buttonIcons = {
@@ -33,18 +33,10 @@
     }
 
     var buttonActions = {
-        surs_main: function() {
-            Lampa.Activity.push({ source: Lampa.Storage.get('source'), title: Lampa.Lang.translate('title_main'), component: 'main', page: 1 });
-        },
-        surs_bookmarks: function() {
-            Lampa.Activity.push({ url: '', title: Lampa.Lang.translate('surs_bookmarks'), component: 'bookmarks', page: 1 });
-        },
-        surs_history: function() {
-            Lampa.Activity.push({ url: '', title: Lampa.Lang.translate('surs_history'), component: 'favorite', type: 'history', page: 1 });
-        },
-        surs_select: function() {
-            if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') window.SursSelect.showSursSelectMenu();
-        },
+        surs_main: function() { Lampa.Activity.push({ source: Lampa.Storage.get('source'), title: Lampa.Lang.translate('title_main'), component: 'main', page: 1 }); },
+        surs_bookmarks: function() { Lampa.Activity.push({ url: '', title: Lampa.Lang.translate('surs_bookmarks'), component: 'bookmarks', page: 1 }); },
+        surs_history: function() { Lampa.Activity.push({ url: '', title: Lampa.Lang.translate('surs_history'), component: 'favorite', type: 'history', page: 1 }); },
+        surs_select: function() { if (window.SursSelect && typeof window.SursSelect.showSursSelectMenu === 'function') window.SursSelect.showSursSelectMenu(); },
         surs_new: function() {
             var sourceName = Lampa.Storage.get('surs_name') || 'SURS';
             Lampa.Activity.push({ source: sourceName + ' NEW', title: Lampa.Lang.translate('title_main') + ' - ' + sourceName + ' NEW', component: 'main', page: 1 });
@@ -72,32 +64,6 @@
         var profileSettings = getProfileSettings();
         return profileSettings.hasOwnProperty(key) ? profileSettings[key] : defaultValue;
     }
-    function addExternalButton(buttonData) {
-        if (!window.surs_external_buttons) window.surs_external_buttons = [];
-        window.surs_external_buttons.push({
-            id: buttonData.id || 'external_' + Date.now(),
-            title: buttonData.title || 'External Button',
-            icon: buttonData.icon || '',
-            action: buttonData.action || function() {}
-        });
-        if (window.plugin_custom_buttons_ready) refreshButtons();
-    }
-    function removeExternalButton(buttonId) {
-        if (!window.surs_external_buttons) return;
-        for (var i = 0; i < window.surs_external_buttons.length; i++) {
-            if (window.surs_external_buttons[i].id === buttonId) {
-                window.surs_external_buttons.splice(i, 1);
-                if (window.plugin_custom_buttons_ready) refreshButtons();
-                break;
-            }
-        }
-    }
-    function clearExternalButtons() {
-        window.surs_external_buttons = [];
-        if (window.plugin_custom_buttons_ready) refreshButtons();
-    }
-    function refreshButtons() { try { Lampa.ContentRows.call('surs_buttons', {}, []); } catch (e) {} }
-    function getExternalButtons() { return window.surs_external_buttons || []; }
 
     function isSerial(card) { return !!(card && (card.name || card.original_name || card.first_air_date || card.number_of_seasons)); }
     function cardTitle(card) { return (card && (card.title || card.name || card.original_title || card.original_name)) || ''; }
@@ -138,9 +104,7 @@
         var out = [];
         for (var i = 0; i < raw.length && out.length < BANNER.max; i++) {
             var c = raw[i];
-            if (!c) continue;
-            if (!cardTitle(c)) continue;
-            if (!c.backdrop_path && !c.poster_path && !c.img) continue;
+            if (!c || !cardTitle(c) || (!c.backdrop_path && !c.poster_path && !c.img)) continue;
             out.push(c);
         }
         return out;
@@ -150,9 +114,7 @@
             if (Lampa.Api && Lampa.Api.sources && Lampa.Api.sources.tmdb && typeof Lampa.Api.sources.tmdb.get === 'function') {
                 return Lampa.Api.sources.tmdb.get(method, {}, ok, err, { life: BANNER.cache_min });
             }
-        } catch (e) {
-            console.log('SURS banner tmdb.get fail', method);
-        }
+        } catch (e) {}
         if (err) err();
     }
     function loadBannerCards(done) {
@@ -161,16 +123,13 @@
             if (i >= methods.length) return done([]);
             tmdbGet(methods[i], function(json) {
                 var list = parseBannerList(json);
-                console.log('SURS banner', methods[i], 'raw', ((json && json.results) || []).length, 'ok', list.length);
                 if (list.length) done(list);
                 else next(i + 1);
             }, function() { next(i + 1); });
         }
         next(0);
     }
-    function placeholderCard() {
-        return { surs_placeholder: true, id: 'surs_banner_empty', title: 'Banner', name: 'Banner', overview: '' };
-    }
+    function placeholderCard() { return { surs_placeholder: true, id: 'surs_banner_empty', title: 'Banner', name: 'Banner', overview: '' }; }
     function currentBannerCard() { return bannerState.cards.length ? bannerState.cards[bannerState.index] : null; }
     function stopBannerRotate() { if (bannerState.timer) clearInterval(bannerState.timer); bannerState.timer = null; }
 
@@ -189,19 +148,44 @@
 
     function showBannerSlide(html, i) {
         if (!html || !bannerState.cards.length) return;
-        bannerState.index = (i + bannerState.cards.length) % bannerState.cards.length;
-        var nextIndex = (bannerState.index + 1) % bannerState.cards.length;
+        var total = bannerState.cards.length;
+        bannerState.index = (i + total) % total;
 
         var card = bannerState.cards[bannerState.index];
-        var nextCard = bannerState.cards[nextIndex];
-
         var art = heroImage(card);
-        var nextArt = heroImage(nextCard);
 
-        html.find('.surs-bb__main-art').css('background-image', art ? 'url("' + art + '")' : 'none');
-        html.find('.surs-bb__next-art').css('background-image', nextArt ? 'url("' + nextArt + '")' : 'none');
+        // Основной слайд (3/4)
+        var $artElem = html.find('.surs-bb__main-art');
+        $artElem.css('opacity', '0.2');
+        setTimeout(function() {
+            $artElem.css('background-image', art ? 'url("' + art + '")' : 'none').css('opacity', '1');
+        }, 200);
 
         fillBanner(html, card);
+
+        // Правая часть (1/4) с 3 карточками
+        var $cardsList = html.find('.surs-bb__cards-list');
+        $cardsList.css({ 'transform': 'translateY(-15px)', 'opacity': '0.5' });
+        
+        setTimeout(function() {
+            $cardsList.empty();
+            for (var offset = 1; offset <= 3; offset++) {
+                var nextCard = bannerState.cards[(bannerState.index + offset) % total];
+                var nextArt = heroImage(nextCard);
+                var miniTitle = cardTitle(nextCard);
+
+                var miniHtml = $(
+                    '<div class="surs-bb__mini-card">' +
+                        '<div class="surs-bb__mini-art" style="background-image: url(\'' + nextArt + '\')"></div>' +
+                        '<div class="surs-bb__mini-overlay"></div>' +
+                        '<div class="surs-bb__mini-title">' + esc(miniTitle) + '</div>' +
+                    '</div>'
+                );
+                $cardsList.append(miniHtml);
+            }
+            $cardsList.css({ 'transform': 'translateY(0)', 'opacity': '1' });
+        }, 250);
+
         html.find('.surs-bb__dot').each(function(n) { $(this).toggleClass('surs-bb__dot--on', n === bannerState.index); });
     }
 
@@ -228,10 +212,9 @@
                         '<div class="surs-bb__descr"></div>' +
                     '</div>' +
                 '</div>' +
-                '<!-- Слайд 2: Подготовленный следующий (1/4 ширины) -->' +
-                '<div class="surs-bb__next">' +
-                    '<div class="surs-bb__next-art"></div>' +
-                    '<div class="surs-bb__next-overlay"></div>' +
+                '<!-- Правая панель (1/4 ширины): 3 карточки с анимацией -->' +
+                '<div class="surs-bb__sidebar">' +
+                    '<div class="surs-bb__cards-list"></div>' +
                 '</div>' +
                 '<div class="surs-bb__dots"></div>' +
             '</div>'
@@ -344,42 +327,53 @@
             '<style>' +
             '.card--button-compact{width:12.75em!important;transform:none!important}' +
             '.card--button-compact.hover,.card--button-compact.focus{transform:none!important}' +
-            '.items-line{padding-bottom:.5em!important}' +
-            '.card--surs-banner{width:calc(100vw - 4.2em)!important;max-width:100%!important;flex:0 0 auto!important;margin:0!important;transform:none!important}' +
-            '.card--surs-banner.hover,.card--surs-banner.focus{transform:none!important}' +
-            '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1em!important;overflow:hidden;background-color:rgba(0,0,0,.2)!important;transition:background-color .2s ease;transform:none!important}' +
-            '.card--surs-banner.hover .card__view,.card--surs-banner.focus .card__view{background-color:rgba(255,255,255,.1)!important;transform:none!important;box-shadow:none!important}' +
+            '.items-line{padding-bottom:.5em!important;overflow:visible!important}' +
+            
+            '/* 1 и 2. Увеличение ширины карточки до 115% и относительная высота BANNER.height */' +
+            '.card--surs-banner{width:115%!important;max-width:115%!important;flex:0 0 auto!important;margin:0!important;transform:none!important}' +
+            '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1.2em!important;overflow:hidden;background-color:rgba(0,0,0,.3)!important;transition:border .2s ease, box-shadow .2s ease;transform:none!important}' +
+            
+            '/* 4. Возврат стандартной рамки фокуса */' +
+            '.card--surs-banner.focus .card__view, .card--surs-banner.hover .card__view{' +
+                'border:0.18em solid #fff!important;' +
+                'box-shadow:0 0 2em rgba(255,255,255,0.25)!important;' +
+            '}' +
             '.card--surs-banner .card__title,.card--surs-banner .card__age{display:none!important}' +
             '.surs-bb{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;overflow:hidden;color:#fff;cursor:pointer}' +
             
-            '/* Левая часть — первый слайд (3/4 ширины) */' +
-            '.surs-bb__main{position:relative;width:75%;height:100%;overflow:hidden;border-right:1px solid rgba(255,255,255,0.1)}' +
-            '.surs-bb__main-art{position:absolute;top:0;left:0;right:0;bottom:0;background-repeat:no-repeat;background-position:center center;background-size:cover;transition:background-image .5s ease-in-out}' +
-            '.surs-bb__scrim{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(77deg,rgba(0,0,0,.85) 0,rgba(0,0,0,.35) 60%,rgba(0,0,0,0) 100%)}' +
-            '.surs-bb__info{position:absolute;left:1.5em;bottom:1.2em;width:80%;z-index:2}' +
-            '.surs-bb__kind{font-size:.75em;letter-spacing:.22em;text-transform:uppercase;color:#e5e5e5;margin-bottom:.3em}' +
-            '.surs-bb__title{font-size:1.8em;line-height:1.1;font-weight:800;margin-bottom:.25em;max-height:2.2em;overflow:hidden;text-shadow:0 .08em .3em rgba(0,0,0,.55)}' +
-            '.surs-bb__meta{display:flex;align-items:center;flex-wrap:wrap;font-size:.95em;color:#e5e5e5;margin-bottom:.4em}' +
+            '/* 3. Левая часть — первый слайд (3/4 ширины) */' +
+            '.surs-bb__main{position:relative;width:75%;height:100%;overflow:hidden;border-right:2px solid rgba(255,255,255,0.08)}' +
+            '.surs-bb__main-art{position:absolute;top:0;left:0;right:0;bottom:0;background-repeat:no-repeat;background-position:center center;background-size:cover;transition:opacity .4s ease, background-image .4s ease}' +
+            '.surs-bb__scrim{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(77deg,rgba(0,0,0,.9) 0,rgba(0,0,0,.4) 65%,rgba(0,0,0,0) 100%)}' +
+            '.surs-bb__info{position:absolute;left:1.8em;bottom:1.5em;width:80%;z-index:2}' +
+            '.surs-bb__kind{font-size:.75em;letter-spacing:.2em;text-transform:uppercase;color:#ccc;margin-bottom:.3em}' +
+            '.surs-bb__title{font-size:1.8em;line-height:1.1;font-weight:800;margin-bottom:.3em;max-height:2.2em;overflow:hidden;text-shadow:0 .08em .3em rgba(0,0,0,.7)}' +
+            '.surs-bb__meta{display:flex;align-items:center;flex-wrap:wrap;font-size:.9em;color:#e5e5e5;margin-bottom:.4em}' +
             '.surs-bb__meta span{margin-right:.7em}' +
             '.surs-bb__match{color:#ffffff;font-weight:700}' +
-            '.surs-bb__descr{font-size:.9em;line-height:1.3;max-height:2.6em;overflow:hidden;opacity:.9}' +
+            '.surs-bb__descr{font-size:.85em;line-height:1.3;max-height:2.6em;overflow:hidden;opacity:.85}' +
 
-            '/* Правая часть — подготовленный второй слайд (1/4 ширины) */' +
-            '.surs-bb__next{position:relative;width:25%;height:100%;overflow:hidden}' +
-            '.surs-bb__next-art{position:absolute;top:0;left:0;right:0;bottom:0;background-repeat:no-repeat;background-position:center center;background-size:cover;filter:blur(2px);opacity:.6;transition:background-image .5s ease-in-out}' +
-            '.surs-bb__next-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4)}' +
+            '/* 3. Правая панель (1/4 ширины) с 3 mini-карточками */' +
+            '.surs-bb__sidebar{position:relative;width:25%;height:100%;background:rgba(0,0,0,.4);padding:.5em;box-sizing:border-box;overflow:hidden}' +
+            '.surs-bb__cards-list{display:flex;flex-direction:column;height:100%;gap:.4em;transition:transform .3s ease, opacity .3s ease}' +
+            '.surs-bb__mini-card{position:relative;flex:1;border-radius:.6em;overflow:hidden;background:#111}' +
+            '.surs-bb__mini-art{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;filter:brightness(0.7)}' +
+            '.surs-bb__mini-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 70%)}' +
+            '.surs-bb__mini-title{position:absolute;bottom:.3em;left:.5em;right:.5em;font-size:.7em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.8)}' +
 
-            '/* Точки индикации (замена красного на белый) */' +
-            '.surs-bb__dots{position:absolute;right:1.5em;bottom:1.2em;display:flex;z-index:2}' +
-            '.surs-bb__dot{width:.5em;height:.5em;border-radius:50%;background:rgba(255,255,255,.35);margin-left:.4em;transition:background-color .3s ease}' +
-            '.surs-bb__dot--on{background:#ffffff}' +
+            '/* Индикаторы */' +
+            '.surs-bb__dots{position:absolute;right:26.5%;bottom:1.2em;display:flex;z-index:3}' +
+            '.surs-bb__dot{width:.45em;height:.45em;border-radius:50%;background:rgba(255,255,255,.3);margin-left:.35em;transition:background-color .3s ease, transform .3s ease}' +
+            '.surs-bb__dot--on{background:#ffffff;transform:scale(1.2)}' +
 
             '@media screen and (max-width:767px){' +
             '.card--button-compact{width:9em!important}' +
-            '.card--surs-banner{width:calc(100vw - 2.4em)!important}' +
+            '.card--surs-banner{width:100%!important}' +
             '.surs-bb__info{left:1em;bottom:.8em;width:88%}' +
-            '.surs-bb__title{font-size:1.3em}' +
+            '.surs-bb__title{font-size:1.2em}' +
             '.surs-bb__descr{display:none}' +
+            '.surs-bb__sidebar{display:none}' +
+            '.surs-bb__main{width:100%}' +
             '}' +
             '.card--button-compact .card__view{padding-bottom:56%!important;display:flex;align-items:center;justify-content:center;background-color:rgba(0,0,0,.2);border-radius:1em}' +
             '.card--button-compact.hover .card__view,.card--button-compact.focus .card__view{background-color:rgba(255,255,255,.1)}' +
@@ -397,10 +391,6 @@
         addStyles();
         window.surs_getAllButtons = getAllButtons;
         window.surs_getCustomButtonsRow = function(partsData) { addCustomButtonsRow(partsData); };
-        window.surs_addExternalButton = addExternalButton;
-        window.surs_removeExternalButton = removeExternalButton;
-        window.surs_clearExternalButtons = clearExternalButtons;
-        window.surs_getExternalButtons = getExternalButtons;
 
         Lampa.ContentRows.add({
             index: 0,
@@ -432,7 +422,6 @@
             if (e.type === 'archive' || e.type === 'destroy') stopBannerRotate();
         });
         Lampa.Listener.send('custom_buttons', { type: 'ready' });
-        console.log('SURS banner plugin ready');
     }
 
     Lampa.Lang.add({
@@ -440,7 +429,7 @@
         surs_btns_rus: { ru: 'Новинки Россия', uk: 'Новинки Росія', en: 'New Russia' },
         surs_bb_match: { ru: 'совпадение', uk: 'збіг', en: 'Match' },
         surs_bb_movie: { ru: 'Фильм', uk: 'Фільм', en: 'Movie' },
-        surs_bb_series: { ru: 'Серриал', uk: 'Серіал', en: 'Series' }
+        surs_bb_series: { ru: 'Сериал', uk: 'Серіал', en: 'Series' }
     });
 
     if (window.appready) startPlugin();
