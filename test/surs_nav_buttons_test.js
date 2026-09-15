@@ -2,7 +2,7 @@
     'use strict';
 
     // BANNER.height — адаптивная высота (vw)
-    var BANNER = { max: 10, rotate: 8, cache_min: 360, height: '22vw' };
+    var BANNER = { max: 15, rotate: 12, cache_min: 360, height: '26vw' };
     var bannerState = { timer: null, index: 0, cards: [], html: null };
 
     var buttonIcons = {
@@ -154,7 +154,7 @@
         var card = bannerState.cards[bannerState.index];
         var art = heroImage(card);
 
-        // Основной арт: длинная анимированная смена с расфокусом
+        // Основной арт: длительная анимация расфокусировки
         var $artElem = html.find('.surs-bb__main-art');
         $artElem.addClass('surs-bb__blur');
 
@@ -164,7 +164,7 @@
             $artElem.removeClass('surs-bb__blur');
         }, 450);
 
-        // Правая часть (1/4): плавный размытый сдвиг карточек без названий
+        // Правая часть (1/4): сдвиг карточек без названий и скруглений
         var $cardsList = html.find('.surs-bb__cards-list');
         $cardsList.addClass('surs-bb__blur-slide');
 
@@ -325,11 +325,12 @@
             '.card--button-compact.hover,.card--button-compact.focus{transform:none!important}' +
             '.items-line{padding-bottom:.5em!important;overflow:visible!important}' +
             
-            '/* Ширина 115% и относительная высота */' +
-            '.card--surs-banner{width:115%!important;max-width:115%!important;flex:0 0 auto!important;margin:0!important}' +
-            '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1.2em!important;overflow:hidden;background-color:rgba(0,0,0,.3)!important}' +
+            '/* Основная структура баннера */' +
+            '.card--surs-banner{width:115%!important;max-width:115%!important;flex:0 0 auto!important;margin:0!important;position:relative}' +
+            '.card--surs-banner .card__view{position:relative!important;height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1.2em!important;overflow:hidden;background-color:rgba(0,0,0,.3)!important}' +
             
-            '/* Штатный класс фокуса без кастомных переопределений рамки */' +
+            '/* Восстановление отображения штатной рамки фокуса Lampa */' +
+            '.card--surs-banner.focus .card__view{outline:none}' +
             '.card--surs-banner .card__title,.card--surs-banner .card__age{display:none!important}' +
             '.surs-bb{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;overflow:hidden;color:#fff;cursor:pointer}' +
             
@@ -347,15 +348,15 @@
             '.surs-bb__match{color:#ffffff;font-weight:700}' +
             '.surs-bb__descr{font-size:.85em;line-height:1.3;max-height:2.6em;overflow:hidden;opacity:.85}' +
 
-            '/* Правая панель (1/4 ширины): карточки без скруглений и без названий */' +
+            '/* Правая панель (1/4 ширины): без скруглений и названий */' +
             '.surs-bb__sidebar{position:relative;width:25%;height:100%;background:rgba(0,0,0,.4);padding:0;box-sizing:border-box;overflow:hidden}' +
-            '.surs-bb__cards-list{display:flex;flex-direction:column;height:100%;gap:2px;transition:transform 0.9s ease-in-out, filter 0.9s ease-in-out, opacity 0.9s ease-in-out}' +
+            '.surs-bb__cards-list{display:flex;flex-direction:column;height:100%;gap:2px;transition:transform 1.5s ease-in-out, filter 1.5s ease-in-out, opacity 0.9s ease-in-out}' +
             '.surs-bb__blur-slide{transform:translateY(-12px);filter:blur(8px);opacity:0.3}' +
             
             '.surs-bb__mini-card{position:relative;flex:1;border-radius:0!important;overflow:hidden;background:#0d0d0d}' +
             '.surs-bb__mini-art{position:absolute;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;filter:brightness(0.65)}' +
 
-            '/* Индикаторы */' +
+            '/* Точечные индикаторы */' +
             '.surs-bb__dots{position:absolute;right:26.5%;bottom:1.2em;display:flex;z-index:3}' +
             '.surs-bb__dot{width:.45em;height:.45em;border-radius:50%;background:rgba(255,255,255,.3);margin-left:.35em;transition:background-color .4s ease, transform .4s ease}' +
             '.surs-bb__dot--on{background:#ffffff;transform:scale(1.25)}' +
