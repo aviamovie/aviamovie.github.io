@@ -389,7 +389,7 @@
         window.surs_getExternalButtons = getExternalButtons;
 
         Lampa.ContentRows.add({
-            index: -1,
+            index: 2,
             name: 'surs_banner',
             title: '',
             screen: ['main'],
