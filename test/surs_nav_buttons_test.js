@@ -284,8 +284,10 @@
                     emit: {
                         onCreate: function() {
                             this.html.addClass('card--surs-banner');
-                            this.html.find('.card__title, .card__age').hide();
-                            var view = this.html.find('.card__view');
+var $html = this.html && this.html.find ? this.html : $(this.html);
+$html.addClass('card--surs-banner');
+$html.find('.card__title, .card__age').css('display', 'none');
+var view = $html.find('.card__view');
                             view.empty();
                             var inner = buildBannerInner();
                             view.append(inner);
