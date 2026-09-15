@@ -1,7 +1,8 @@
 (function() {
     'use strict';
 
-    var BANNER = { max: 6, rotate: 12, cache_min: 360 };
+    // BANNER.height — параметр высоты карточки бананера (например: '38vh', '350px', '100vh')
+    var BANNER = { max: 6, rotate: 7, cache_min: 360, height: '19vh' };
     var bannerState = { timer: null, index: 0, cards: [], swap: false, html: null, autoplayWait: false };
 
     var buttonIcons = {
@@ -131,26 +132,6 @@
         if (Lampa.Router && typeof Lampa.Router.call === 'function') return Lampa.Router.call('full', card);
         Lampa.Activity.push({ url: '', component: 'full', id: card.id, method: isSerial(card) ? 'tv' : 'movie', card: card, source: card.source || 'tmdb' });
     }
-    function nfxAutoPlay(card) {
-        if (!card || card.surs_placeholder) return;
-        bannerState.autoplayWait = true;
-        openCard(card);
-    }
-    function autoPlayInit() {
-        Lampa.Listener.follow('full', function(e) {
-            if (!bannerState.autoplayWait) return;
-            if (e.type !== 'build' || e.name !== 'start') return;
-            bannerState.autoplayWait = false;
-            setTimeout(function() {
-                var button = e.body.find('.button--priority');
-                if (!button.length) button = e.body.find('.button--play');
-                if (button.length) button.trigger('hover:enter');
-            }, 400);
-        });
-        Lampa.Listener.follow('activity', function(e) {
-            if (e.type === 'start' && e.component !== 'full') bannerState.autoplayWait = false;
-        });
-    }
 
     function parseBannerList(json) {
         var raw = (json && json.results) || [];
@@ -232,8 +213,6 @@
         }, BANNER.rotate * 1000);
     }
     function buildBannerInner() {
-        var ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.5v17l14-8.5z"/></svg>';
-        var ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.6v.6" stroke-linecap="round"/></svg>';
         var html = $(
             '<div class="surs-bb">' +
                 '<div class="surs-bb__art"></div><div class="surs-bb__art-next"></div>' +
@@ -241,14 +220,8 @@
                 '<div class="surs-bb__dots"></div>' +
                 '<div class="surs-bb__info">' +
                     '<div class="surs-bb__kind"></div><div class="surs-bb__title"></div><div class="surs-bb__meta"></div><div class="surs-bb__descr"></div>' +
-                    '<div class="surs-bb__buttons">' +
-                        '<div class="surs-bb__btn surs-bb__btn--play selector">' + ICON_PLAY + '<span>' + esc(Lampa.Lang.translate('surs_bb_play')) + '</span></div>' +
-                        '<div class="surs-bb__btn surs-bb__btn--info selector">' + ICON_INFO + '<span>' + esc(Lampa.Lang.translate('surs_bb_info')) + '</span></div>' +
-                    '</div></div></div>'
+                '</div></div>'
         );
-        html.find('.surs-bb__btn--play').on('hover:enter', function() { nfxAutoPlay(currentBannerCard()); });
-        html.find('.surs-bb__btn--info').on('hover:enter', function() { openCard(currentBannerCard()); });
-        html.find('.surs-bb__btn').on('hover:focus hover:hover hover:touch', function() { startBannerRotate(html); });
         return html;
     }
     function applyBannerCards(html, list) {
@@ -291,7 +264,9 @@
                             view.append(inner);
                             applyBannerCards(inner, list);
                         },
-                        onlyEnter: function() { nfxAutoPlay(currentBannerCard()); }
+                        onlyEnter: function() {
+                            openCard(currentBannerCard());
+                        }
                     }
                 }
             }],
@@ -355,36 +330,29 @@
             '.card--button-compact{width:12.75em!important}' +
             '.items-line{padding-bottom:.5em!important}' +
             '.card--surs-banner{width:calc(100vw - 4.2em)!important;max-width:100%!important;flex:0 0 auto!important;margin:0!important}' +
-            '.card--surs-banner .card__view{padding-bottom:42%!important;border-radius:.4em;overflow:hidden;background:#141414}' +
-            '.card--surs-banner.focus .card__view,.card--surs-banner.hover .card__view{transform:none!important;box-shadow:none!important}' +
+            '.card--surs-banner .card__view{height:' + BANNER.height + '!important;padding-bottom:0!important;border-radius:1em!important;overflow:hidden;background-color:rgba(0,0,0,.2)!important;transition:background-color .2s ease}' +
+            '.card--surs-banner.hover .card__view,.card--surs-banner.focus .card__view{background-color:rgba(255,255,255,.1)!important;transform:none!important;box-shadow:none!important}' +
             '.card--surs-banner .card__title,.card--surs-banner .card__age{display:none!important}' +
-            '.surs-bb{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;color:#fff}' +
+            '.surs-bb{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;color:#fff;cursor:pointer}' +
             '.surs-bb__art,.surs-bb__art-next{position:absolute;top:0;left:0;right:0;bottom:0;background-repeat:no-repeat;background-position:center 22%;background-size:cover;transition:opacity .8s ease}' +
             '.surs-bb__art-next{opacity:0}' +
             '.surs-bb--swap .surs-bb__art{opacity:0}' +
             '.surs-bb--swap .surs-bb__art-next{opacity:1}' +
             '.surs-bb__scrim{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(77deg,rgba(0,0,0,.82) 0,rgba(0,0,0,.45) 46%,rgba(0,0,0,0) 78%)}' +
             '.surs-bb__scrim-b{position:absolute;left:0;right:0;bottom:0;height:48%;background:linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,.72) 100%)}' +
-            '.surs-bb__info{position:absolute;left:2em;bottom:1.6em;width:48%;min-width:16em;z-index:2}' +
+            '.surs-bb__info{position:absolute;left:2em;bottom:1.6em;width:60%;min-width:16em;z-index:2}' +
             '.surs-bb__kind{font-size:.85em;letter-spacing:.22em;text-transform:uppercase;color:#e5e5e5;margin-bottom:.45em}' +
             '.surs-bb__title{font-size:2.2em;line-height:1.05;font-weight:800;margin-bottom:.25em;max-height:2.2em;overflow:hidden;text-shadow:0 .08em .3em rgba(0,0,0,.55)}' +
             '.surs-bb__meta{display:flex;align-items:center;flex-wrap:wrap;font-size:1.05em;color:#e5e5e5;margin-bottom:.55em}' +
             '.surs-bb__meta span{margin-right:.7em}' +
             '.surs-bb__match{color:#46d369;font-weight:700}' +
-            '.surs-bb__descr{font-size:1.05em;line-height:1.35;max-height:3.9em;overflow:hidden;margin-bottom:.9em}' +
-            '.surs-bb__buttons{display:flex;align-items:center}' +
-            '.surs-bb__btn{display:flex;align-items:center;height:2.4em;padding:0 1.2em;margin-right:.7em;border-radius:.22em;font-size:1.1em;font-weight:700;background:rgba(109,109,110,.75);color:#fff}' +
-            '.surs-bb__btn svg{width:1.2em;height:1.2em;margin-right:.5em}' +
-            '.surs-bb__btn--play{background:#fff;color:#000}' +
-            '.surs-bb__btn.focus,.surs-bb__btn.hover{background:#e50914;color:#fff}' +
-            '.surs-bb__btn--play.focus,.surs-bb__btn--play.hover{background:rgba(255,255,255,.78);color:#000}' +
+            '.surs-bb__descr{font-size:1.05em;line-height:1.35;max-height:3.9em;overflow:hidden}' +
             '.surs-bb__dots{position:absolute;right:2em;bottom:1.8em;display:flex;z-index:2}' +
             '.surs-bb__dot{width:.5em;height:.5em;border-radius:50%;background:rgba(255,255,255,.35);margin-left:.4em}' +
             '.surs-bb__dot--on{background:#e50914}' +
             '@media screen and (max-width:767px){' +
             '.card--button-compact{width:9em!important}' +
             '.card--surs-banner{width:calc(100vw - 2.4em)!important}' +
-            '.card--surs-banner .card__view{padding-bottom:56%!important}' +
             '.surs-bb__info{left:1.1em;bottom:1em;width:82%;min-width:0}' +
             '.surs-bb__title{font-size:1.45em}' +
             '}' +
@@ -402,7 +370,6 @@
     function startPlugin() {
         window.plugin_custom_buttons_ready = true;
         addStyles();
-        autoPlayInit();
         window.surs_getAllButtons = getAllButtons;
         window.surs_getCustomButtonsRow = function(partsData) { addCustomButtonsRow(partsData); };
         window.surs_addExternalButton = addExternalButton;
@@ -446,8 +413,6 @@
     Lampa.Lang.add({
         surs_btns_new: { ru: 'Новинки Мир', uk: 'Новинки Світ', en: 'New Globe' },
         surs_btns_rus: { ru: 'Новинки Россия', uk: 'Новинки Росія', en: 'New Russia' },
-        surs_bb_play: { ru: 'Смотреть', uk: 'Дивитися', en: 'Play' },
-        surs_bb_info: { ru: 'Подробнее', uk: 'Детальніше', en: 'More Info' },
         surs_bb_match: { ru: 'совпадение', uk: 'збіг', en: 'Match' },
         surs_bb_movie: { ru: 'Фильм', uk: 'Фільм', en: 'Movie' },
         surs_bb_series: { ru: 'Сериал', uk: 'Серіал', en: 'Series' }
