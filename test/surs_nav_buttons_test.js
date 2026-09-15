@@ -1,5 +1,5 @@
-(function() { 
-‘use strict’;
+(function() {
+    'use strict';
 var BANNER = { max: 6, rotate: 12, cache_min: 360 };
 
 var bannerState = { timer: null, index: 0, cards: [], swap: false, html: null, autoplayWait: false };
