@@ -20,6 +20,7 @@
         wideChance: 0.1,        // вероятность, что ряд будет отрисован широкими карточками
         cacheLife: 60 * 6,      // кеш запросов TMDB в минутах (Lampa.Request cache, V3)
         liteScreen: 'surs',     // экран ContentRows для источников NEW / KIDS / RUS
+        personsCount: 8,        // сколько рядов «актёр → фильмы» на главной SURS
         settingsComponent: 'surs'
     };
 
@@ -248,16 +249,31 @@
             if (!all[id]) all[id] = {};
             all[id][key] = value;
             Lampa.Storage.set('surs_settings', all);
+            Settings.dirty = true;
         },
+        reset: function () {
+            var all = Settings.all();
+            delete all[Settings.profileId()];
+            Lampa.Storage.set('surs_settings', all);
+            Settings.dirty = true;
+        },
+        dirty: false,
         toggle: function (key, defaultValue) {
             var value = !Settings.get(key, defaultValue);
             Settings.set(key, value);
             return value;
         },
+        /** Включённые элементы списка. Если выключено всё — берём весь список (иначе pick() вернёт undefined) */
         enabled: function (items, prefix) {
-            return items.filter(function (item) {
+            var result = items.filter(function (item) {
                 return Settings.get(prefix + item.id, true);
             });
+            return result.length ? result : items.slice();
+        },
+        count: function (items, prefix) {
+            return items.filter(function (item) {
+                return Settings.get(prefix + item.id, typeof item.def === 'boolean' ? item.def : true);
+            }).length;
         }
     };
 
@@ -595,11 +611,97 @@
 
         parts = shuffle(parts.map(maybeWide));
 
+        // Персоны: ряды добавляются в parts во время загрузки (как Api.partPersons)
+        if (Settings.get('rows_persons', true)) parts.splice(Math.min(4, parts.length), 0, personsLoader(owner, parts, CONFIG.personsCount));
+
         // Тренды всегда в начале
-        parts.unshift(trendingRow(owner, params, 'tv'));
-        parts.unshift(trendingRow(owner, params, 'movie'));
+        if (Settings.get('rows_trending', true)) {
+            parts.unshift(trendingRow(owner, params, 'tv'));
+            parts.unshift(trendingRow(owner, params, 'movie'));
+        }
 
         return parts;
+    }
+
+    /* ---------------- персоны ----------------
+     * Как Lampa.Api.partPersons: часть-«расширитель» грузит person/popular,
+     * вставляет N рядов «актёр → его фильмы и сериалы» в случайные места
+     * оставшейся очереди и отдаёт пустой результат. Отличия от штатной:
+     *  - фильмы и сериалы вместе (combined_credits), без дублей;
+     *  - отсеиваются актёры, известные в основном по азиатскому контенту;
+     *  - применяются фильтры SURS (кириллица);
+     *  - кнопка «Ещё» в ряду открывает страницу актёра.
+     */
+    function personsLoader(owner, parts, count) {
+        var loader = function (call) {
+            var page = 1 + Math.floor(Math.random() * 3);
+
+            owner.get('person/popular?page=' + page, {}, function (json) {
+                var persons = (json && json.results || []).filter(function (p) {
+                    if ((p.known_for_department || '').toLowerCase() !== 'acting' || !p.known_for || !p.known_for.length) return false;
+                    return p.known_for.some(function (k) { return !contains(FORBIDDEN_LANGUAGES, k.original_language); });
+                });
+
+                var start = parts.indexOf(loader) + 1;
+
+                shuffle(persons).slice(0, count).forEach(function (person) {
+                    var pos = start + Math.floor(Math.random() * (parts.length - start + 1));
+                    parts.splice(pos, 0, personRow(owner, person));
+                });
+
+                call(EMPTY());
+            }, function () {
+                call(EMPTY());
+            }, { life: 60 * 24 });
+        };
+
+        return loader;
+    }
+
+    function personRow(owner, person) {
+        return function (call) {
+            owner.get('person/' + person.id + '/combined_credits', {}, function (json) {
+                var seen = {};
+                var items = (json && json.cast || []).filter(function (m) {
+                    var key = m.media_type + '_' + m.id;
+                    var talk = m.genre_ids && (contains(m.genre_ids, 10767) || contains(m.genre_ids, 10763));
+                    if (seen[key] || talk || !m.backdrop_path || m.vote_count <= 20) return false;
+                    seen[key] = true;
+                    return true;
+                });
+
+                items = filterCyrillic(items).sort(function (a, b) {
+                    var da = a.release_date || a.first_air_date || '';
+                    var db = b.release_date || b.first_air_date || '';
+                    return da < db ? 1 : da > db ? -1 : 0;
+                });
+
+                if (items.length < 6) return call(EMPTY());
+
+                items.forEach(function (item) {
+                    if (!item.source) item.source = 'tmdb';
+                });
+
+                var Line = Lampa.Maker.module('Line');
+
+                call({
+                    title: person.name,
+                    icon_img: person.profile_path ? Lampa.Api.img(person.profile_path, 'w90_and_h90_face') : './img/actor.svg',
+                    results: items.slice(0, 20),
+                    total_pages: 2, // показывает кнопку «Ещё»
+                    params: {
+                        module: Line.add(Line.MASK.base, 'Icon'),
+                        emit: {
+                            onlyMore: function () {
+                                Lampa.Router.call('actor', person);
+                            }
+                        }
+                    }
+                });
+            }, function () {
+                call(EMPTY());
+            }, { life: 60 * 24 });
+        };
     }
 
     function trendingRow(owner, params, type) {
@@ -1016,6 +1118,7 @@
         var names = sourceNames();
         return [
             { id: 'Button_sourceName',     source: names.main },
+            { id: 'Button_sourceNameNew',  source: names.new },
             { id: 'Button_sourceNameKids', source: names.kids },
             { id: 'Button_sourceNameRus',  source: names.rus }
         ];
@@ -1040,74 +1143,233 @@
     /* =====================================================================
      *  НАСТРОЙКИ
      *
-     *  Параметры пересобираются при каждом открытии настроек (как это
-     *  делает сам Lampa для ContentRows), поэтому для NEW/KIDS/RUS фильтры
-     *  просто не добавляются — без DOM-хаков со скрытием элементов.
+     *  Структура (по смыслу, а не по истории добавления функций):
+     *    1. Источник и меню   — какой источник на главной, боковое меню, название
+     *    2. Главная страница   — какие ряды-кнопки и какие подборки показывать
+     *    3. Состав подборок    — жанры, сортировки, стриминги (только SURS)
+     *    4. Фильтры контента   — кириллица, рейтинг, возраст, азиатский контент
+     *    5. Сервис             — обновить главную, сбросить настройки
+     *
+     *  - Параметры пересобираются при каждом открытии настроек (как делает
+     *    сам Lampa для ContentRows), для NEW/KIDS/RUS лишние разделы не
+     *    добавляются.
+     *  - В описании каждого пункта видно текущее значение, оно обновляется
+     *    сразу после закрытия меню выбора.
+     *  - При выходе из настроек главная SURS перезагружается сама, если
+     *    что-то поменялось (раньше нужно было жать «Главная» вручную).
      * ===================================================================== */
 
     var SETTINGS_ICON = '<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g fill="#ffffff"><path d="M443.724,166.599c27.038-2.293,47.087-26.07,44.786-53.125c-2.292-27.038-26.078-47.087-53.115-44.795 c-27.038,2.301-47.078,26.088-44.776,53.124C392.91,148.85,416.677,168.9,443.724,166.599z"/><path d="M431.752,346.544l30.541-114.485c5.068-19.305-6.466-39.075-25.78-44.144 c-19.304-5.077-39.075,6.448-44.152,25.771v-0.018L365.052,315.64l-78.755-13.276c-17.218-4.304-34.696,5.786-39.578,22.864 l-33.317,133.445c-3.82,13.342,3.913,27.28,17.274,31.1c13.37,3.81,27.298-3.923,31.128-17.283l39.392-98.638l61.286,16.155 C398.863,400.125,421.633,382.927,431.752,346.544z"/><path d="M498.349,286.311c-10.1-2.999-20.721,2.749-23.722,12.858l-27.876,93.848 c-2.096,6.606-4.536,11.777-7.146,15.746c-3.987,5.944-8.002,9.373-13.854,12.093c-5.842,2.664-14.031,4.379-25.416,4.37 c-3.009,0.008-6.215-0.113-9.634-0.355l-54.009-3.363c-10.519-0.661-19.575,7.341-20.227,17.861 c-0.662,10.518,7.342,19.574,17.86,20.226l53.73,3.345c4.211,0.298,8.31,0.448,12.28,0.456c10.072-0.009,19.5-0.988,28.369-3.289 c13.268-3.392,25.315-10.127,34.501-19.892c9.251-9.736,15.531-21.885,19.91-35.609l0.074-0.214l28.015-94.362 C514.206,299.923,508.447,289.302,498.349,286.311z"/><path d="M248.974,81.219L0,21.256v15.14v281.228l248.974-59.962V81.219z M225.123,238.87L23.851,287.355V51.536 l201.272,48.466V238.87z"/><polygon points="204.989,115.189 47.991,84.937 47.991,253.953 204.989,223.692"/></g></svg>';
+
+    /* ---------------- справочники меню ---------------- */
+
+    /** Ряды-кнопки модулей (ContentRows). Ключ вкл/выкл — общий с Настройки → «Каналы» */
+    var TILE_ROWS = [
+        { id: 'surs_buttons',      title: 'surs_rows_nav' },
+        { id: 'streaming_global',  title: 'surs_strmngs_global_title' },
+        { id: 'streaming_russian', title: 'surs_strmngs_russian_title' },
+        { id: 'genres_buttons',    title: 'surs_rows_genres' }
+    ];
+
+    /** Подборки основного источника (одно меню с разделителями) */
+    function collectionItems() {
+        return [
+            { id: 'rows_trending', title: 'surs_title_trend_week' },
+            { id: 'rows_persons',  title: 'surs_rows_persons' },
+            { separator: true, title: 'surs_rows_streaming_sep' },
+            { id: 'getStreamingServices',    title: 'surs_global' },
+            { id: 'getStreamingServicesRUS', title: 'surs_russian' },
+            { separator: true, title: 'surs_top_all_time' },
+            { id: 'getBestContentByGenreMovie', title: 'surs_movies' },
+            { id: 'getBestContentByGenreTV',    title: 'surs_series' },
+            { separator: true, title: 'surs_top_5_years' },
+            { id: 'getBestContentByGenreAndPeriod_movie', title: 'surs_movies' },
+            { id: 'getBestContentByGenreAndPeriod_tv',    title: 'surs_series' }
+        ];
+    }
+
+    function movieRegionItems() {
+        var ua = isUkrainian();
+        var items = [
+            { id: 'getMoviesByGenreGlobal', title: 'surs_global' },
+            { id: 'getMoviesByGenreRus',    title: 'surs_russian' }
+        ];
+        if (ua) items.push({ id: 'getMoviesByGenreUA', title: 'surs_ukrainian', def: true });
+        return items;
+    }
+
+    function tvRegionItems() {
+        var ua = isUkrainian();
+        var items = [
+            { id: 'getTVShowsByGenreGlobal', title: 'surs_global' },
+            { id: 'getTVShowsByGenreRus',    title: 'surs_russian' },
+            { id: 'getTVShowsByGenreKOR',    title: 'surs_korean', def: false },
+            { id: 'getTVShowsByGenreTR',     title: 'surs_turkish' }
+        ];
+        if (ua) items.push({ id: 'getTVShowsByGenreUA', title: 'surs_ukrainian', def: true });
+        return items;
+    }
+
+    var RADIO = {
+        cirillic: {
+            title: 'surs_cyrillic', def: '1',
+            options: [
+                { title: 'surs_cyrillic_enabled',  value: '1' },
+                { title: 'surs_cyrillic_disabled', value: '0' }
+            ]
+        },
+        minVotes: {
+            title: 'surs_rating_validation', def: '10',
+            options: [
+                { title: 'surs_rating_off',      value: '0' },
+                { title: 'surs_rating_standard', value: '10' },
+                { title: 'surs_rating_enhanced', value: '50' },
+                { title: 'surs_rating_maximum',  value: '150' },
+                { title: 'surs_rating_fatality', value: '300' }
+            ]
+        },
+        ageRestrictions: {
+            title: 'surs_age_restriction', def: '',
+            options: [
+                { title: 'surs_age_none',     value: '' },
+                { title: 'surs_age_12',       value: '12+' },
+                { title: 'surs_age_6',        value: '6+' },
+                { title: 'surs_age_toddlers', value: '0+' }
+            ]
+        },
+        without_keywords: {
+            title: 'surs_exclude_asian', def: '1',
+            options: [
+                { title: 'surs_exclude_off',    value: '0' },
+                { title: 'surs_exclude_soft',   value: '1' },
+                { title: 'surs_exclude_strong', value: '2' }
+            ]
+        }
+    };
+
+    function radioValue(key) {
+        if (key === 'without_keywords') return getKeywordLevel();
+        return String(Settings.get(key, RADIO[key].def));
+    }
+
+    function radioLabel(key) {
+        var value = radioValue(key);
+        var option = RADIO[key].options.filter(function (o) { return o.value === value; })[0];
+        return option ? t(option.title) : value;
+    }
+
+    /* ---------------- ряды-кнопки (глобальные ключи ContentRows) ---------------- */
+
+    function tileRowEnabled(id) {
+        return Lampa.Storage.get('content_rows_' + id, true) !== false;
+    }
+
+    /* ---------------- описания с текущим значением ---------------- */
+
+    var descriptions = {};
+
+    function refreshDescriptions() {
+        for (var name in descriptions) {
+            var d = descriptions[name];
+            d.item.find('.settings-param__descr').text(d.describe());
+        }
+    }
+
+    function ofTotal(count, total) {
+        return t('surs_enabled_of').replace('{n}', count).replace('{total}', total);
+    }
+
+    /* ---------------- меню выбора ---------------- */
 
     function currentController() {
         var enabled = Lampa.Controller.enabled();
         return enabled && enabled.name ? enabled.name : 'settings';
     }
 
+    function backTo(controller) {
+        return function () {
+            Lampa.Controller.toggle(controller);
+            refreshDescriptions();
+        };
+    }
+
     /**
      * Меню с чекбоксами.
      * @param {string} title ключ перевода
-     * @param {Array<{id:string,title:string,def?:boolean}>} items
-     * @param {string} prefix префикс ключа настройки
+     * @param {Array} items {id,title,def?} или {separator:true,title}
+     * @param {object} store {get(id,def), set(id,value)}
      * @param {function=} onChange
      */
-    function showCheckboxMenu(title, items, prefix, onChange) {
+    function showCheckboxMenu(title, items, store, onChange) {
         var back = currentController();
 
         Lampa.Select.show({
             title: t(title),
             items: items.map(function (item) {
+                if (item.separator) return { title: t(item.title), separator: true };
+
                 var def = typeof item.def === 'boolean' ? item.def : true;
-                return {
-                    title: t(item.title),
-                    id: item.id,
-                    def: def,
-                    checkbox: true,
-                    checked: !!Settings.get(prefix + item.id, def)
-                };
+
+                return { title: t(item.title), id: item.id, def: def, checkbox: true, checked: !!store.get(item.id, def) };
             }),
-            onBack: function () {
-                Lampa.Controller.toggle(back);
-            },
+            onBack: backTo(back),
             onCheck: function (item) {
-                item.checked = Settings.toggle(prefix + item.id, item.def);
+                store.set(item.id, item.checked); // Select уже переключил item.checked
                 if (onChange) onChange();
             }
         });
     }
 
-    /** Меню с единственным выбором (радио) */
-    function showRadioMenu(title, key, def, options) {
+    /** Хранилища для showCheckboxMenu */
+    function profileStore(prefix) {
+        return {
+            get: function (id, def) { return Settings.get(prefix + id, def); },
+            set: function (id, value) { Settings.set(prefix + id, value); }
+        };
+    }
+
+    var tileStore = {
+        get: function (id) { return tileRowEnabled(id); },
+        set: function (id, value) { Lampa.Storage.set('content_rows_' + id, value); Settings.dirty = true; }
+    };
+
+    /** Выбор одного значения: пункт закрывает меню (в V3 вложенные Select не плодятся) */
+    function showRadioMenu(key) {
+        var back = currentController();
+        var config = RADIO[key];
+        var value = radioValue(key);
+
+        Lampa.Select.show({
+            title: t(config.title),
+            items: config.options.map(function (opt) {
+                return { title: t(opt.title), value: opt.value, selected: opt.value === value, picked: opt.value === value };
+            }),
+            onSelect: function (item) {
+                Settings.set(key, item.value);
+                backTo(back)();
+            },
+            onBack: backTo(back)
+        });
+    }
+
+    function confirmMenu(title, onYes) {
         var back = currentController();
 
-        function render() {
-            var value = String(Settings.get(key, def));
-
-            Lampa.Select.show({
-                title: t(title),
-                items: options.map(function (opt) {
-                    return { title: t(opt.title), value: opt.value, checkbox: true, checked: value === opt.value };
-                }),
-                onBack: function () {
-                    Lampa.Controller.toggle(back);
-                },
-                onCheck: function (item) {
-                    Settings.set(key, item.value);
-                    render();
-                }
-            });
-        }
-
-        render();
+        Lampa.Select.show({
+            title: title,
+            items: [
+                { title: t('surs_yes'), yes: true },
+                { title: t('surs_no') }
+            ],
+            onSelect: function (item) {
+                backTo(back)();
+                if (item.yes) onYes();
+            },
+            onBack: backTo(back)
+        });
     }
+
+    /* ---------------- построение ---------------- */
 
     function addTitle(name, description) {
         Lampa.SettingsApi.addParam({
@@ -1117,150 +1379,163 @@
         });
     }
 
-    function addButton(name, title, description, action) {
+    /**
+     * @param {string} name
+     * @param {string} title
+     * @param {string|function():string} describe — функция = живое описание
+     * @param {function} action
+     */
+    function addButton(name, title, describe, action) {
+        var live = typeof describe === 'function';
+
         Lampa.SettingsApi.addParam({
             component: CONFIG.settingsComponent,
             param: { name: name, type: 'button' },
-            field: { name: title, description: description },
+            field: { name: title, description: live ? describe() : describe },
+            onRender: function (item) {
+                if (live) descriptions[name] = { item: item, describe: describe };
+            },
             onChange: action
+        });
+    }
+
+    function listButton(name, title, items, prefix) {
+        addButton(name, t(title), function () {
+            return ofTotal(Settings.count(items, prefix), items.length);
+        }, function () {
+            showCheckboxMenu(title, items, profileStore(prefix));
+        });
+    }
+
+    function radioButton(name, key, descrKey) {
+        addButton(name, t(RADIO[key].title), function () {
+            return radioLabel(key) + ' — ' + t(descrKey);
+        }, function () {
+            showRadioMenu(key);
         });
     }
 
     function buildSettings() {
         var comp = CONFIG.settingsComponent;
         var names = sourceNames();
-        var lite = isLiteSource(Lampa.Storage.get('source'));
-        var ua = isUkrainian();
+        var source = Lampa.Storage.get('source');
+        var lite = isLiteSource(source);
 
+        descriptions = {};
         Lampa.SettingsApi.removeParams(comp);
 
-        addTitle(t('surs_collections') + ' ' + t('surs_from') + ' ' + names.main, t('surs_main_update'));
-        addTitle(t('surs_settings_interface'));
+        /* ---- 1. Источник и меню ---- */
+
+        addTitle(t('surs_section_source'));
 
         var sourceValues = {};
         [names.main, names.new, names.kids, names.rus].forEach(function (n) { sourceValues[n] = n; });
 
         Lampa.SettingsApi.addParam({
             component: comp,
-            param: { name: 'surs_setSource', type: 'select', values: sourceValues, default: names.main },
+            param: { name: 'surs_setSource', type: 'select', values: sourceValues, default: isSursSource(source) ? source : names.main },
             field: { name: t('surs_set_as_source'), description: t('surs_source_description') },
             onChange: function (value) {
                 Lampa.Storage.set('source', value);
             }
         });
 
-        addButton('surs_setButtons', t('surs_add_to_menu'), t('surs_menu_description'), function () {
+        addButton('surs_setButtons', t('surs_add_to_menu'), function () {
+            var on = sideMenuItems().filter(function (i) { return Settings.get(i.id, false); }).map(function (i) { return i.source; });
+            return on.length ? on.join(', ') : t('surs_none');
+        }, function () {
             showCheckboxMenu('surs_select_menu_sources', sideMenuItems().map(function (i) {
                 return { id: i.id, title: i.source, def: false };
-            }), '', renderMenuButtons);
+            }), profileStore(''), renderMenuButtons);
         });
-
-        addButton('surs_custom_buttons', t('surs_custom_buttons'), t('surs_custom_buttons_description'), function () {
-            var buttons = typeof window.surs_getAllButtons === 'function' ? window.surs_getAllButtons() : [];
-            showCheckboxMenu('surs_custom_buttons', buttons, 'custom_button_');
-        });
-
-        // Фильтры относятся только к основному источнику
-        if (!lite) {
-            addTitle(t('surs_filters'));
-
-            addButton('surs_sort_options', t('surs_sort_types'), t('surs_sort_description'), function () {
-                showCheckboxMenu('surs_sort_types', SORT_OPTIONS, 'sort_');
-            });
-            addButton('surs_genres', t('surs_genres'), t('surs_genres_description'), function () {
-                showCheckboxMenu('surs_genres', GENRES, 'genre_');
-            });
-            addButton('surs_global_streaming', t('surs_global_streaming'), t('surs_global_streaming_description'), function () {
-                showCheckboxMenu('surs_global_streaming', STREAMING_GLOBAL, 'streaming_');
-            });
-            addButton('surs_rus_streaming', t('surs_rus_streaming'), t('surs_rus_streaming_description'), function () {
-                showCheckboxMenu('surs_rus_streaming', STREAMING_RUS, 'streaming_rus_');
-            });
-
-            addTitle(t('surs_geo_filters'));
-
-            addButton('surs_streaming', t('surs_streaming'), t('surs_region_description'), function () {
-                showCheckboxMenu('surs_streaming', [
-                    { id: 'getStreamingServices',    title: 'surs_global' },
-                    { id: 'getStreamingServicesRUS', title: 'surs_russian' }
-                ], '');
-            });
-
-            addButton('surs_getMoviesByGenre', t('surs_movies'), t('surs_region_description'), function () {
-                var items = [
-                    { id: 'getMoviesByGenreGlobal', title: 'surs_global' },
-                    { id: 'getMoviesByGenreRus',    title: 'surs_russian' }
-                ];
-                if (ua) items.push({ id: 'getMoviesByGenreUA', title: 'surs_ukrainian', def: ua });
-                showCheckboxMenu('surs_movies', items, '');
-            });
-
-            addButton('surs_getTVShowsByGenre', t('surs_series'), t('surs_region_description'), function () {
-                var items = [
-                    { id: 'getTVShowsByGenreGlobal', title: 'surs_global' },
-                    { id: 'getTVShowsByGenreRus',    title: 'surs_russian' },
-                    { id: 'getTVShowsByGenreKOR',    title: 'surs_korean', def: false },
-                    { id: 'getTVShowsByGenreTR',     title: 'surs_turkish' }
-                ];
-                if (ua) items.push({ id: 'getTVShowsByGenreUA', title: 'surs_ukrainian', def: ua });
-                showCheckboxMenu('surs_series', items, '');
-            });
-
-            addButton('surs_getBestContentByGenre', t('surs_top_all_time'), t('surs_top_content_description'), function () {
-                showCheckboxMenu('surs_top_all_time', [
-                    { id: 'getBestContentByGenreMovie', title: 'surs_movies' },
-                    { id: 'getBestContentByGenreTV',    title: 'surs_series' }
-                ], '');
-            });
-
-            addButton('surs_best_content', t('surs_top_5_years'), t('surs_top_content_description'), function () {
-                showCheckboxMenu('surs_top_5_years', [
-                    { id: 'getBestContentByGenreAndPeriod_movie', title: 'surs_movies' },
-                    { id: 'getBestContentByGenreAndPeriod_tv',    title: 'surs_series' }
-                ], '');
-            });
-
-            addTitle(t('surs_technical_settings'));
-
-            addButton('surs_cirillic', t('surs_cyrillic'), t('surs_cyrillic_description'), function () {
-                showRadioMenu('surs_cyrillic', 'cirillic', '1', [
-                    { title: 'surs_cyrillic_enabled',  value: '1' },
-                    { title: 'surs_cyrillic_disabled', value: '0' }
-                ]);
-            });
-
-            addButton('surs_minVotes', t('surs_rating_validation'), t('surs_rating_description'), function () {
-                showRadioMenu('surs_rating_validation', 'minVotes', '10', [
-                    { title: 'surs_rating_off',      value: '0' },
-                    { title: 'surs_rating_standard', value: '10' },
-                    { title: 'surs_rating_enhanced', value: '50' },
-                    { title: 'surs_rating_maximum',  value: '150' },
-                    { title: 'surs_rating_fatality', value: '300' }
-                ]);
-            });
-
-            addButton('surs_ageRestrictions', t('surs_age_restriction'), t('surs_age_description'), function () {
-                showRadioMenu('surs_age_restriction', 'ageRestrictions', '', [
-                    { title: 'surs_age_toddlers', value: '0+' },
-                    { title: 'surs_age_6',        value: '6+' },
-                    { title: 'surs_age_12',       value: '12+' },
-                    { title: 'surs_age_none',     value: '' }
-                ]);
-            });
-
-            addButton('surs_withoutKeywords', t('surs_exclude_asian'), t('surs_exclude_asian_description'), function () {
-                showRadioMenu('surs_exclude_asian', 'without_keywords', getKeywordLevel(), [
-                    { title: 'surs_exclude_off',    value: '0' },
-                    { title: 'surs_exclude_soft',   value: '1' },
-                    { title: 'surs_exclude_strong', value: '2' }
-                ]);
-            });
-        }
 
         if (!Lampa.Storage.get('surs_disableCustomName')) {
-            addTitle(t('surs_name'));
-            addButton('surs_setName', t('surs_rename_selections'), t('surs_rename_description') + ' ' + names.main, renameSources);
+            addButton('surs_setName', t('surs_rename_selections'), function () {
+                return t('surs_current_name') + ': ' + names.main;
+            }, renameSources);
         }
+
+        /* ---- 2. Главная страница ---- */
+
+        addTitle(t('surs_section_main'), lite ? t('surs_lite_hint') : '');
+
+        addButton('surs_tile_rows', t('surs_tile_rows'), function () {
+            return ofTotal(TILE_ROWS.filter(function (r) { return tileRowEnabled(r.id); }).length, TILE_ROWS.length) + ' — ' + t('surs_tile_rows_description');
+        }, function () {
+            showCheckboxMenu('surs_tile_rows', TILE_ROWS, tileStore);
+        });
+
+        addButton('surs_custom_buttons', t('surs_custom_buttons'), function () {
+            var buttons = typeof window.surs_getAllButtons === 'function' ? window.surs_getAllButtons() : [];
+            return ofTotal(Settings.count(buttons, 'custom_button_'), buttons.length);
+        }, function () {
+            var buttons = typeof window.surs_getAllButtons === 'function' ? window.surs_getAllButtons() : [];
+            showCheckboxMenu('surs_custom_buttons', buttons, profileStore('custom_button_'));
+        });
+
+        if (!lite) {
+            addButton('surs_collections_types', t('surs_collections_types'), function () {
+                var items = collectionItems().filter(function (i) { return !i.separator; });
+                return ofTotal(Settings.count(items, ''), items.length);
+            }, function () {
+                showCheckboxMenu('surs_collections_types', collectionItems(), profileStore(''));
+            });
+
+            addButton('surs_getMoviesByGenre', t('surs_movies_by_genre'), function () {
+                return regionsLabel(movieRegionItems());
+            }, function () {
+                showCheckboxMenu('surs_movies_by_genre', movieRegionItems(), profileStore(''));
+            });
+
+            addButton('surs_getTVShowsByGenre', t('surs_tv_by_genre'), function () {
+                return regionsLabel(tvRegionItems());
+            }, function () {
+                showCheckboxMenu('surs_tv_by_genre', tvRegionItems(), profileStore(''));
+            });
+
+            /* ---- 3. Состав подборок ---- */
+
+            addTitle(t('surs_section_content'), t('surs_section_content_hint'));
+
+            listButton('surs_genres',           'surs_genres',           GENRES,           'genre_');
+            listButton('surs_sort_options',     'surs_sort_types',       SORT_OPTIONS,     'sort_');
+            listButton('surs_global_streaming', 'surs_global_streaming', STREAMING_GLOBAL, 'streaming_');
+            listButton('surs_rus_streaming',    'surs_rus_streaming',    STREAMING_RUS,    'streaming_rus_');
+
+            /* ---- 4. Фильтры контента ---- */
+
+            addTitle(t('surs_filters'));
+
+            radioButton('surs_cirillic',        'cirillic',         'surs_cyrillic_description');
+            radioButton('surs_minVotes',        'minVotes',         'surs_rating_short');
+            radioButton('surs_ageRestrictions', 'ageRestrictions',  'surs_age_short');
+            radioButton('surs_withoutKeywords', 'without_keywords', 'surs_exclude_short');
+        }
+
+        /* ---- 5. Сервис ---- */
+
+        addTitle(t('surs_section_service'));
+
+        addButton('surs_refresh', t('surs_refresh_main'), t('surs_refresh_main_description'), function () {
+            Settings.dirty = false;
+            openMain(isSursSource(Lampa.Storage.get('source')) ? Lampa.Storage.get('source') : names.main);
+        });
+
+        addButton('surs_reset', t('surs_reset'), t('surs_reset_description'), function () {
+            confirmMenu(t('surs_reset') + '?', function () {
+                Settings.reset();
+                renderMenuButtons();
+                Lampa.Noty.show(t('surs_reset_done'));
+                refreshDescriptions();
+            });
+        });
+    }
+
+    function regionsLabel(items) {
+        var on = items.filter(function (i) {
+            return Settings.get(i.id, typeof i.def === 'boolean' ? i.def : true);
+        }).map(function (i) { return t(i.title); });
+        return on.length ? on.join(', ') : t('surs_none');
     }
 
     function renameSources() {
@@ -1284,6 +1559,18 @@
         });
     }
 
+    /** Перезагрузка главной SURS после выхода из настроек, если что-то менялось */
+    function refreshAfterSettings() {
+        if (!Settings.dirty) return;
+
+        Settings.dirty = false;
+
+        var active = Lampa.Activity.active();
+        var source = active && (active.source || Lampa.Storage.get('source'));
+
+        if (active && active.component === 'main' && isSursSource(source)) Lampa.Activity.replace();
+    }
+
     function initSettings() {
         Lampa.SettingsApi.addComponent({
             component: CONFIG.settingsComponent,
@@ -1296,6 +1583,8 @@
         Lampa.Settings.listener.follow('open', function (e) {
             if (e.name === 'main') buildSettings();
         });
+
+        Lampa.Settings.listener.follow('close', refreshAfterSettings);
     }
 
     /* =====================================================================
@@ -1407,6 +1696,38 @@
             surs_name_saved:             L('Название сохранено. Обновление...', 'Name saved. Updating...', 'Назва збережена. Оновлення...'),
             surs_name_not_entered:       L('Название не введено', 'Name not entered', 'Назва не введена'),
 
+            // меню настроек
+            surs_section_source:         L('Источник и меню', 'Source and menu', 'Джерело та меню'),
+            surs_section_main:           L('Главная страница', 'Main page', 'Головна сторінка'),
+            surs_section_content:        L('Состав подборок', 'Collection content', 'Склад підбірок'),
+            surs_section_content_hint:   L('Из чего случайно собираются подборки при каждом открытии главной', 'What collections are randomly built from on each main page load', 'З чого випадково збираються підбірки при кожному відкритті головної'),
+            surs_section_service:        L('Сервис', 'Service', 'Сервіс'),
+            surs_lite_hint:              L('Для NEW / KIDS / RUS состав подборок фиксированный', 'NEW / KIDS / RUS have a fixed set of collections', 'Для NEW / KIDS / RUS склад підбірок фіксований'),
+            surs_enabled_of:             L('Включено {n} из {total}', 'Enabled {n} of {total}', 'Увімкнено {n} з {total}'),
+            surs_none:                   L('ничего не выбрано', 'nothing selected', 'нічого не вибрано'),
+            surs_yes:                    L('Да', 'Yes', 'Так'),
+            surs_no:                     L('Нет', 'No', 'Ні'),
+            surs_current_name:           L('Сейчас', 'Current', 'Зараз'),
+            surs_tile_rows:              L('Ряды-кнопки', 'Button rows', 'Ряди-кнопки'),
+            surs_tile_rows_description:  L('навигация, стриминги, жанры', 'navigation, streaming, genres', 'навігація, стрімінги, жанри'),
+            surs_rows_nav:               L('Навигационное меню', 'Navigation menu', 'Навігаційне меню'),
+            surs_rows_genres:            L('Жанры', 'Genres', 'Жанри'),
+            surs_rows_persons:           L('Популярные актёры и их фильмы', 'Popular actors and their movies', 'Популярні актори та їхні фільми'),
+            surs_rows_streaming_sep:     L('Подборки со стримингов', 'Streaming collections', 'Підбірки зі стрімінгів'),
+            surs_strmngs_global_title:   L('Глобальные стриминги', 'Global Streaming', 'Глобальні стрімінги'),
+            surs_strmngs_russian_title:  L('Российские стриминги', 'Russian Streaming', 'Російські стрімінги'),
+            surs_collections_types:      L('Виды подборок', 'Collection types', 'Види підбірок'),
+            surs_movies_by_genre:        L('Фильмы по жанрам', 'Movies by genre', 'Фільми за жанрами'),
+            surs_tv_by_genre:            L('Сериалы по жанрам', 'TV shows by genre', 'Серіали за жанрами'),
+            surs_rating_short:           L('отсекает фильмы с малым числом голосов', 'hides titles with few votes', 'відсікає фільми з малою кількістю голосів'),
+            surs_age_short:              L('возрастной рейтинг подборок', 'age rating of collections', 'віковий рейтинг підбірок'),
+            surs_exclude_short:          L('манга, маньхва, донхуа, аниме', 'manga, manhwa, donghua, anime', 'манга, манхва, донхуа, аніме'),
+            surs_refresh_main:           L('Обновить главную', 'Refresh main page', 'Оновити головну'),
+            surs_refresh_main_description: L('Главная SURS также обновляется сама при выходе из настроек, если что-то изменилось', 'SURS main page also refreshes itself when you leave settings after changes', 'Головна SURS також оновлюється сама при виході з налаштувань, якщо щось змінилося'),
+            surs_reset:                  L('Сбросить настройки SURS', 'Reset SURS settings', 'Скинути налаштування SURS'),
+            surs_reset_description:      L('Только для текущего профиля', 'Current profile only', 'Тільки для поточного профілю'),
+            surs_reset_done:             L('Настройки сброшены', 'Settings reset', 'Налаштування скинуто'),
+
             // используются модулем surs_nav_buttons.js
             surs_main:                   L('Главная', 'Main', 'Головна'),
             surs_bookmarks:              L('Избранное', 'Bookmarks', 'Обране'),
@@ -1433,6 +1754,8 @@
             Settings.set('interface_size_initialized', true);
         }
 
+        Settings.dirty = false;
+
         registerSources();
         startSourceListeners();
         renderMenuButtons();
@@ -1450,6 +1773,7 @@
             settings: Settings,
             sourceNames: sourceNames,
             isSursSource: isSursSource,
+            keywordsFilter: UserFilters.keywords,
             openMain: openMain
         };
 
