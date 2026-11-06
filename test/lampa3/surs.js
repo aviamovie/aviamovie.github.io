@@ -21,6 +21,11 @@
         cacheLife: 60 * 6,      // кеш запросов TMDB в минутах (Lampa.Request cache, V3)
         liteScreen: 'surs',     // экран ContentRows для источников NEW / KIDS / RUS
         personsCount: 8,        // сколько рядов «актёр → фильмы» на главной SURS
+        rusPersonsMain: 4,      // рядов российских актёров на главной SURS
+        rusPersonsRus: 8,       // рядов российских актёров на SURS RUS
+        keywordRows: 8,         // рядов по ключевым словам на главной SURS
+        collectionRows: 6,      // рядов-коллекций (франшиз) за одно открытие
+        searchCacheLife: 60 * 24 * 30, // поиск коллекций/актёров по имени — кеш 30 дней
         settingsComponent: 'surs'
     };
 
@@ -152,6 +157,50 @@
         { id: 6704,  title: 'Illumination Entertainment' },
         { id: 2251,  title: 'Sony Pictures Animation' },
         { id: 10342, title: 'Studio Ghibli' }
+    ];
+
+    /*
+     * Коллекции (франшизы) ищутся по названию через search/collection —
+     * числовые id не зашиваем: поиск устойчив к ошибкам в справочнике,
+     * не найденная коллекция просто не показывается. Кеш 30 дней.
+     */
+    var COLLECTIONS = [
+        'Harry Potter', 'The Lord of the Rings', 'The Hobbit', 'Star Wars', 'The Avengers',
+        'Fast & Furious', 'Jurassic Park', 'Mission: Impossible', 'James Bond', 'Pirates of the Caribbean',
+        'The Matrix', 'Back to the Future', 'Indiana Jones', 'Alien', 'The Terminator', 'John Wick',
+        'The Dark Knight', 'The Hunger Games', 'Transformers', 'Rocky', 'Die Hard', 'Men in Black',
+        'X-Men', 'Mad Max', 'Kingsman', "Ocean's", 'The Godfather', 'Planet of the Apes', 'The Bourne',
+        'Rambo', 'Guardians of the Galaxy', 'Dune', 'Sherlock Holmes', 'Lethal Weapon', 'Predator'
+    ];
+
+    var COLLECTIONS_KIDS = [
+        'Toy Story', 'Shrek', 'Ice Age', 'Despicable Me', 'Madagascar', 'Kung Fu Panda',
+        'How to Train Your Dragon', 'Cars', 'Frozen', 'Finding Nemo', 'The Incredibles',
+        'Monsters, Inc.', 'Hotel Transylvania', 'Paddington', 'The Lion King', 'Stuart Little',
+        'Home Alone', 'Alvin and the Chipmunks', 'The Secret Life of Pets', 'Sing', 'Cloudy with a Chance of Meatballs',
+        'Три богатыря'
+    ];
+
+    var COLLECTIONS_RUS = [
+        'Три богатыря', 'Ёлки', 'Холоп', 'Последний богатырь', 'Иван Царевич и Серый Волк',
+        'Особенности национальной', 'Брат', 'Ирония судьбы', 'Кухня', 'Бременские музыканты',
+        'Чебурашка', 'Смешарики', 'Горько', 'Духless', 'Т-34', 'Майор Гром', 'Вий',
+        'Сказка о царе Салтане', 'Гардемарины', 'Мастер и Маргарита'
+    ];
+
+    /*
+     * Российские актёры — тоже по имени (search/person). Из найденных берём того,
+     * у кого в известных работах есть русскоязычный контент.
+     */
+    var RUSSIAN_ACTORS = [
+        'Данила Козловский', 'Константин Хабенский', 'Сергей Безруков', 'Юра Борисов', 'Александр Петров',
+        'Иван Янковский', 'Евгений Миронов', 'Владимир Машков', 'Сергей Гармаш', 'Фёдор Бондарчук',
+        'Сергей Бурунов', 'Милош Бикович', 'Светлана Ходченкова', 'Елизавета Боярская', 'Юлия Снигирь',
+        'Паулина Андреева', 'Любовь Аксёнова', 'Кирилл Кяро', 'Никита Ефремов', 'Гоша Куценко',
+        'Дмитрий Нагиев', 'Иван Охлобыстин', 'Михаил Пореченков', 'Сергей Светлаков', 'Александр Яценко',
+        'Евгений Цыганов', 'Ирина Старшенбаум', 'Аглая Тарасова', 'Тихон Жизневский', 'Максим Матвеев',
+        'Андрей Мерзликин', 'Виктория Исакова', 'Олег Меньшиков', 'Анна Михалкова', 'Евгений Стычкин',
+        'Алексей Серебряков', 'Владимир Вдовиченков', 'Павел Прилучный', 'Сергей Шнуров', 'Алексей Гуськов'
     ];
 
     // TMDB keyword ids
@@ -609,7 +658,15 @@
             });
         });
 
-        parts = shuffle(parts.map(maybeWide));
+        if (Settings.get('rows_keywords', true)) parts = parts.concat(keywordRows(owner, params, CONFIG.keywordRows));
+
+        parts = parts.map(maybeWide);
+
+        // коллекции и российские актёры — без «широкого» вида
+        if (Settings.get('rows_collections', true)) parts = parts.concat(collectionRows(owner, COLLECTIONS, CONFIG.collectionRows));
+        if (Settings.get('rows_persons_rus', true)) parts = parts.concat(russianActorRows(owner, CONFIG.rusPersonsMain));
+
+        parts = shuffle(parts);
 
         // Персоны: ряды добавляются в parts во время загрузки (как Api.partPersons)
         if (Settings.get('rows_persons', true)) parts.splice(Math.min(4, parts.length), 0, personsLoader(owner, parts, CONFIG.personsCount));
@@ -658,50 +715,161 @@
         return loader;
     }
 
-    function personRow(owner, person) {
+    /**
+     * Ряд «персона → фильмы и сериалы».
+     * @param {function(function(person|null))} resolve — получить персону
+     * @param {object=} opt  filter(item) — доп. фильтр работ, min — мин. число работ
+     */
+    function personCreditsRow(owner, resolve, opt) {
+        opt = opt || {};
+
         return function (call) {
-            owner.get('person/' + person.id + '/combined_credits', {}, function (json) {
-                var seen = {};
-                var items = (json && json.cast || []).filter(function (m) {
-                    var key = m.media_type + '_' + m.id;
-                    var talk = m.genre_ids && (contains(m.genre_ids, 10767) || contains(m.genre_ids, 10763));
-                    if (seen[key] || talk || !m.backdrop_path || m.vote_count <= 20) return false;
-                    seen[key] = true;
-                    return true;
-                });
+            resolve(function (person) {
+                if (!person) return call(EMPTY());
 
-                items = filterCyrillic(items).sort(function (a, b) {
-                    var da = a.release_date || a.first_air_date || '';
-                    var db = b.release_date || b.first_air_date || '';
-                    return da < db ? 1 : da > db ? -1 : 0;
-                });
+                owner.get('person/' + person.id + '/combined_credits', {}, function (json) {
+                    var seen = {};
+                    var items = (json && json.cast || []).filter(function (m) {
+                        var key = m.media_type + '_' + m.id;
+                        var talk = m.genre_ids && (contains(m.genre_ids, 10767) || contains(m.genre_ids, 10763));
+                        if (seen[key] || talk || !m.backdrop_path || m.vote_count <= (opt.minVotes || 20)) return false;
+                        if (opt.filter && !opt.filter(m)) return false;
+                        seen[key] = true;
+                        return true;
+                    });
 
-                if (items.length < 6) return call(EMPTY());
+                    items = filterCyrillic(items).sort(function (a, b) {
+                        var da = a.release_date || a.first_air_date || '';
+                        var db = b.release_date || b.first_air_date || '';
+                        return da < db ? 1 : da > db ? -1 : 0;
+                    });
 
-                items.forEach(function (item) {
-                    if (!item.source) item.source = 'tmdb';
-                });
+                    if (items.length < (opt.min || 6)) return call(EMPTY());
 
-                var Line = Lampa.Maker.module('Line');
+                    items.forEach(function (item) {
+                        if (!item.source) item.source = 'tmdb';
+                    });
 
-                call({
-                    title: person.name,
-                    icon_img: person.profile_path ? Lampa.Api.img(person.profile_path, 'w90_and_h90_face') : './img/actor.svg',
-                    results: items.slice(0, 20),
-                    total_pages: 2, // показывает кнопку «Ещё»
-                    params: {
-                        module: Line.add(Line.MASK.base, 'Icon'),
-                        emit: {
-                            onlyMore: function () {
-                                Lampa.Router.call('actor', person);
+                    var Line = Lampa.Maker.module('Line');
+
+                    call({
+                        title: person.name,
+                        icon_img: person.profile_path ? Lampa.Api.img(person.profile_path, 'w90_and_h90_face') : './img/actor.svg',
+                        results: items.slice(0, 20),
+                        total_pages: 2, // показывает кнопку «Ещё»
+                        params: {
+                            module: Line.add(Line.MASK.base, 'Icon'),
+                            emit: {
+                                onlyMore: function () {
+                                    Lampa.Router.call('actor', person);
+                                }
                             }
                         }
-                    }
+                    });
+                }, function () {
+                    call(EMPTY());
+                }, { life: 60 * 24 });
+            });
+        };
+    }
+
+    function personRow(owner, person) {
+        return personCreditsRow(owner, function (done) { done(person); });
+    }
+
+    function isRussianWork(item) {
+        return item.original_language === 'ru' || contains(item.origin_country || [], 'RU');
+    }
+
+    /** Российский актёр по имени: search/person → combined_credits (только русскоязычные работы) */
+    function russianActorRow(owner, name) {
+        return personCreditsRow(owner, function (done) {
+            owner.get('search/person?query=' + encodeURIComponent(name), {}, function (json) {
+                var results = (json && json.results || []).filter(function (p) {
+                    return (p.known_for_department || '').toLowerCase() === 'acting';
                 });
+                var russian = results.filter(function (p) {
+                    return (p.known_for || []).some(isRussianWork);
+                });
+                done(russian[0] || results[0] || null);
+            }, function () {
+                done(null);
+            }, { life: CONFIG.searchCacheLife });
+        }, { filter: isRussianWork, min: 4, minVotes: 2 });
+    }
+
+    function russianActorRows(owner, count) {
+        return shuffle(RUSSIAN_ACTORS.slice()).slice(0, count).map(function (name) {
+            return russianActorRow(owner, name);
+        });
+    }
+
+    /* ---------------- коллекции (франшизы) ---------------- */
+
+    function collectionRow(owner, query) {
+        return function (call) {
+            owner.get('search/collection?query=' + encodeURIComponent(query), {}, function (json) {
+                var found = json && json.results && json.results[0];
+
+                if (!found) return call(EMPTY());
+
+                owner.get('collection/' + found.id, {}, function (collection) {
+                    var parts = (collection && collection.parts || []).filter(function (p) {
+                        return p.poster_path || p.backdrop_path;
+                    }).sort(function (a, b) {
+                        return (a.release_date || '9999') < (b.release_date || '9999') ? -1 : 1;
+                    });
+
+                    if (parts.length < 2) return call(EMPTY());
+
+                    parts.forEach(function (p) {
+                        if (!p.source) p.source = 'tmdb';
+                    });
+
+                    call({
+                        title: t('surs_collection') + ': ' + (collection.name || found.name),
+                        results: parts
+                    });
+                }, function () {
+                    call(EMPTY());
+                }, { life: 60 * 24 * 7 });
             }, function () {
                 call(EMPTY());
-            }, { life: 60 * 24 });
+            }, { life: CONFIG.searchCacheLife });
         };
+    }
+
+    function collectionRows(owner, list, count) {
+        return shuffle(list.slice()).slice(0, count).map(function (query) {
+            return collectionRow(owner, query);
+        });
+    }
+
+    /* ---------------- ключевые слова ----------------
+     * Список и переводы — штатные из Lampa (Api.sources.tmdb.keywords,
+     * ключи filter_keyword_*), как в Api.partKeywords. Отличия: фильтры SURS,
+     * случайная страница выдачи, ограниченное число рядов за открытие.
+     */
+    function keywordRows(owner, params, count) {
+        var lists = Lampa.Api.sources.tmdb.keywords || {};
+        var all = [];
+
+        ['movie', 'tv'].forEach(function (type) {
+            (lists[type] || []).forEach(function (keyword) {
+                all.push({ type: type, keyword: keyword });
+            });
+        });
+
+        return shuffle(all).slice(0, count).map(function (item) {
+            return row(owner, params, function () {
+                var page = 1 + Math.floor(Math.random() * 3);
+                return {
+                    url: UserFilters.all('discover/' + item.type + '?with_keywords=' + item.keyword.id + '&sort_by=popularity.desc&page=' + page),
+                    title: t(item.keyword.title) + ' (' + t(item.type === 'movie' ? 'surs_movies' : 'surs_series') + ')',
+                    filter: filterCyrillic
+                };
+            });
+        });
     }
 
     function trendingRow(owner, params, type) {
@@ -930,7 +1098,9 @@
             return sortByRating(filterCyrillic(items));
         }));
 
-        return shuffle(parts.map(maybeWide));
+        parts = parts.map(maybeWide).concat(collectionRows(owner, COLLECTIONS_KIDS, CONFIG.collectionRows));
+
+        return shuffle(parts);
     }
 
     /* =====================================================================
@@ -981,7 +1151,11 @@
             }));
         });
 
-        return shuffle(parts.map(maybeWide));
+        parts = parts.map(maybeWide)
+            .concat(russianActorRows(owner, CONFIG.rusPersonsRus))
+            .concat(collectionRows(owner, COLLECTIONS_RUS, CONFIG.collectionRows));
+
+        return shuffle(parts);
     }
 
     /* =====================================================================
@@ -1176,6 +1350,9 @@
         return [
             { id: 'rows_trending', title: 'surs_title_trend_week' },
             { id: 'rows_persons',  title: 'surs_rows_persons' },
+            { id: 'rows_persons_rus', title: 'surs_rows_persons_rus' },
+            { id: 'rows_keywords',    title: 'surs_rows_keywords' },
+            { id: 'rows_collections', title: 'surs_rows_collections' },
             { separator: true, title: 'surs_rows_streaming_sep' },
             { id: 'getStreamingServices',    title: 'surs_global' },
             { id: 'getStreamingServicesRUS', title: 'surs_russian' },
@@ -1713,6 +1890,10 @@
             surs_rows_nav:               L('Навигационное меню', 'Navigation menu', 'Навігаційне меню'),
             surs_rows_genres:            L('Жанры', 'Genres', 'Жанри'),
             surs_rows_persons:           L('Популярные актёры и их фильмы', 'Popular actors and their movies', 'Популярні актори та їхні фільми'),
+            surs_rows_persons_rus:       L('Российские актёры и их фильмы', 'Russian actors and their movies', 'Російські актори та їхні фільми'),
+            surs_rows_keywords:          L('Подборки по темам (космос, зомби, шпионы…)', 'Topic collections (space, zombies, spies…)', 'Підбірки за темами (космос, зомбі, шпигуни…)'),
+            surs_rows_collections:       L('Коллекции и франшизы', 'Collections and franchises', 'Колекції та франшизи'),
+            surs_collection:             L('Коллекция', 'Collection', 'Колекція'),
             surs_rows_streaming_sep:     L('Подборки со стримингов', 'Streaming collections', 'Підбірки зі стрімінгів'),
             surs_strmngs_global_title:   L('Глобальные стриминги', 'Global Streaming', 'Глобальні стрімінги'),
             surs_strmngs_russian_title:  L('Российские стриминги', 'Russian Streaming', 'Російські стрімінги'),
