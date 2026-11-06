@@ -1,0 +1,1465 @@
+/*
+ * SURS — подборки на главной для Lampa 3.x (рефакторинг v3 → Lampa V3 API)
+ *
+ * Что изменилось относительно v3/surs.js — см. test/lampa3/README.md
+ *
+ * Требования: Lampa.Manifest.app_digital >= 300
+ */
+(function () {
+    'use strict';
+
+    if (window.plugin_surs_ready) return;
+    window.plugin_surs_ready = true;
+
+    /* =====================================================================
+     *  КОНФИГ
+     * ===================================================================== */
+
+    var CONFIG = {
+        partsLimit: 9,          // сколько рядов грузится за одну порцию (Api.partNext)
+        wideChance: 0.1,        // вероятность, что ряд будет отрисован широкими карточками
+        cacheLife: 60 * 6,      // кеш запросов TMDB в минутах (Lampa.Request cache, V3)
+        liteScreen: 'surs',     // экран ContentRows для источников NEW / KIDS / RUS
+        settingsComponent: 'surs'
+    };
+
+    /* =====================================================================
+     *  СПРАВОЧНИКИ
+     * ===================================================================== */
+
+    var SORT_OPTIONS = [
+        { id: 'vote_count.desc',     title: 'surs_vote_count_desc' },
+        { id: 'vote_average.desc',   title: 'surs_vote_average_desc' },
+        { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' },
+        { id: 'popularity.desc',     title: 'surs_popularity_desc' },
+        { id: 'revenue.desc',        title: 'surs_revenue_desc' }
+    ];
+
+    var SORT_NEW = { id: 'first_air_date.desc', title: 'surs_first_air_date_desc' };
+
+    var GENRES = [
+        { id: 28,    title: 'surs_genre_action' },
+        { id: 35,    title: 'surs_genre_comedy' },
+        { id: 18,    title: 'surs_genre_drama' },
+        { id: 10749, title: 'surs_genre_romance' },
+        { id: 16,    title: 'surs_genre_animation' },
+        { id: 10762, title: 'surs_genre_kids' },
+        { id: 12,    title: 'surs_genre_adventure' },
+        { id: 80,    title: 'surs_genre_crime' },
+        { id: 9648,  title: 'surs_genre_mystery' },
+        { id: 878,   title: 'surs_genre_sci_fi' },
+        { id: 37,    title: 'surs_genre_western' },
+        { id: 53,    title: 'surs_genre_thriller' },
+        { id: 10751, title: 'surs_genre_family' },
+        { id: 14,    title: 'surs_genre_fantasy' },
+        { id: 10764, title: 'surs_genre_reality' },
+        { id: 10759, title: 'surs_genre_action_adventure' },
+        { id: 10766, title: 'surs_genre_soap' },
+        { id: 10767, title: 'surs_genre_talk_show' }
+    ];
+
+    var KIDS_GENRE_IDS = [28, 35, 16, 10762, 12, 878, 10751, 14];
+
+    var STREAMING_GLOBAL = [
+        { id: 49,   title: 'HBO' },
+        { id: 77,   title: 'SyFy' },
+        { id: 2552, title: 'Apple TV+' },
+        { id: 453,  title: 'Hulu' },
+        { id: 1024, title: 'Amazon Prime' },
+        { id: 213,  title: 'Netflix' },
+        { id: 3186, title: 'HBO Max' },
+        { id: 2076, title: 'Paramount network' },
+        { id: 4330, title: 'Paramount+' },
+        { id: 3353, title: 'Peacock' },
+        { id: 2739, title: 'Disney+' },
+        { id: 2,    title: 'ABC' },
+        { id: 6,    title: 'NBC' },
+        { id: 16,   title: 'CBS' },
+        { id: 318,  title: 'Starz' },
+        { id: 174,  title: 'AMC' },
+        { id: 19,   title: 'FOX' },
+        { id: 64,   title: 'Discovery' },
+        { id: 1778, title: 'test' },
+        { id: 493,  title: 'BBC America' },
+        { id: 88,   title: 'FX' },
+        { id: 67,   title: 'Showtime' }
+    ];
+
+    var STREAMING_RUS = [
+        { id: 2493, title: 'Start' },
+        { id: 2859, title: 'Premier' },
+        { id: 4085, title: 'KION' },
+        { id: 3923, title: 'ИВИ' },
+        { id: 412,  title: 'Россия 1' },
+        { id: 558,  title: 'Первый канал' },
+        { id: 3871, title: 'Okko' },
+        { id: 3827, title: 'Кинопоиск' },
+        { id: 5806, title: 'Wink' },
+        { id: 806,  title: 'СТС' },
+        { id: 1191, title: 'ТНТ' },
+        { id: 1119, title: 'НТВ' },
+        { id: 3031, title: 'Пятница' },
+        { id: 3882, title: 'More.TV' }
+    ];
+
+    var STREAMING_KIDS = [
+        { id: 49,   title: 'HBO' },
+        { id: 77,   title: 'SyFy' },
+        { id: 2552, title: 'Apple TV+' },
+        { id: 453,  title: 'Hulu' },
+        { id: 1024, title: 'Amazon Prime' },
+        { id: 213,  title: 'Netflix' },
+        { id: 3186, title: 'HBO Max' },
+        { id: 2076, title: 'Paramount+' },
+        { id: 4330, title: 'Paramount+' },
+        { id: 3353, title: 'Peacock' },
+        { id: 2739, title: 'Disney+' },
+        { id: 44,   title: 'Disney XD' },
+        { id: 281,  title: 'Disney XD' },
+        { id: 2,    title: 'ABC' },
+        { id: 6,    title: 'NBC' },
+        { id: 16,   title: 'CBS' },
+        { id: 318,  title: 'Starz' },
+        { id: 174,  title: 'BBC' },
+        { id: 56,   title: 'Cartoon Network' },
+        { id: 19,   title: 'FOX' },
+        { id: 2686, title: 'FOX kids' },
+        { id: 13,   title: 'Nickelodeon' }
+    ].concat(STREAMING_RUS);
+
+    var KIDS_KEYWORDS = [
+        'Спанч Боб', 'Губка Боб', 'Teenage Mutant Ninja Turtles', 'Черепашки-ниндзя',
+        'Fairly OddParents', 'Джимми Нейтрон', 'Аватар: Легенда об Аанге', 'Аватар: Легенда о Корре',
+        'Lego', 'Том и Джерри', 'Микки Маус', 'Гуфи', 'Снупи', 'Простоквашино', 'Ну, погоди!',
+        'Чип и Дейл', 'DuckTales', 'Looney Tunes', 'Покемон', 'Даша-путешественница', 'Свинка Пеппа',
+        'Барбоскины', 'Смешарики', 'Фиксики', 'Гравити Фолз', 'Чудеса на виражах',
+        'Пингвины из Мадагаскара', 'Король Лев', 'Холодное сердце', 'Как приручить дракона',
+        'Зверополис', 'Миньоны', 'Шрэк', 'Маша и Медведь', 'Котенок по имени Гав', 'Чебурашка',
+        'Малыш и Карлсон', 'Лунтик', 'Три богатыря', 'Иван Царевич и Серый Волк', 'Кот Леопольд',
+        'Варежка', 'Каникулы Бонифация', 'Сказка о царе Салтане', 'Алеша Попович', 'Илья муромец',
+        'Оранжевая корова', 'Малышарики', 'Winnie-the-Pooh', 'Щенячий патруль', 'Tiny Toon',
+        'Обезьянки', 'Буратино'
+    ];
+
+    var KIDS_STUDIOS = [
+        { id: 2,     title: 'Disney' },
+        { id: 3,     title: 'Pixar' },
+        { id: 7501,  title: 'Союзмультфильм' },
+        { id: 14599, title: 'Союзмультфильм (СССР)' },
+        { id: 521,   title: 'DreamWorks Animation' },
+        { id: 9383,  title: 'Blue Sky Studios' },
+        { id: 6704,  title: 'Illumination Entertainment' },
+        { id: 2251,  title: 'Sony Pictures Animation' },
+        { id: 10342, title: 'Studio Ghibli' }
+    ];
+
+    // TMDB keyword ids
+    var KEYWORDS = {
+        base:  ['346488', '158718', '41278'],
+        asian: ['13141', '345822', '315535', '290667', '323477', '290609'],
+        anime: ['210024']
+    };
+
+    var FORBIDDEN_LANGUAGES = ['kr', 'cn', 'jp', 'ko', 'zh', 'ja'];
+    var FORBIDDEN_COUNTRIES = ['KR', 'CN', 'JP'];
+
+    /* =====================================================================
+     *  УТИЛИТЫ
+     * ===================================================================== */
+
+    function t(key) {
+        return Lampa.Lang.translate(key);
+    }
+
+    function pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+        return arr;
+    }
+
+    function assign(target) {
+        for (var i = 1; i < arguments.length; i++) {
+            var src = arguments[i];
+            if (!src) continue;
+            for (var key in src) {
+                if (Object.prototype.hasOwnProperty.call(src, key)) target[key] = src[key];
+            }
+        }
+        return target;
+    }
+
+    /** Склеивает непустые части заголовка через пробел */
+    function join() {
+        return Array.prototype.filter.call(arguments, Boolean).join(' ');
+    }
+
+    function contains(arr, value) {
+        return arr.indexOf(value) !== -1;
+    }
+
+    /** Дата YYYY-MM-DD со смещением в днях/месяцах от сегодня */
+    function isoDate(days, months) {
+        var d = new Date();
+        if (months) d.setMonth(d.getMonth() + months);
+        if (days) d.setDate(d.getDate() + days);
+        return d.toISOString().split('T')[0];
+    }
+
+    /** Пятилетки с 1970 по текущий год (раньше последний период был жёстко 2020–2025) */
+    function getPeriods() {
+        var periods = [];
+        var current = new Date().getFullYear();
+        for (var start = 1970; start <= current; start += 5) {
+            periods.push({ start: start, end: Math.min(start + 4, current) });
+        }
+        return periods;
+    }
+
+    function randomPeriods(count) {
+        return shuffle(getPeriods().slice()).slice(0, count);
+    }
+
+    /* =====================================================================
+     *  НАСТРОЙКИ (раздельно по профилям)
+     * ===================================================================== */
+
+    var Settings = {
+        profileId: function () {
+            return Lampa.Storage.get('lampac_profile_id', '') || 'default';
+        },
+        all: function () {
+            return Lampa.Storage.get('surs_settings') || {};
+        },
+        get: function (key, defaultValue) {
+            var profile = Settings.all()[Settings.profileId()] || {};
+            return Object.prototype.hasOwnProperty.call(profile, key) ? profile[key] : defaultValue;
+        },
+        set: function (key, value) {
+            var all = Settings.all();
+            var id = Settings.profileId();
+            if (!all[id]) all[id] = {};
+            all[id][key] = value;
+            Lampa.Storage.set('surs_settings', all);
+        },
+        toggle: function (key, defaultValue) {
+            var value = !Settings.get(key, defaultValue);
+            Settings.set(key, value);
+            return value;
+        },
+        enabled: function (items, prefix) {
+            return items.filter(function (item) {
+                return Settings.get(prefix + item.id, true);
+            });
+        }
+    };
+
+    function getSortOptions()      { return Settings.enabled(SORT_OPTIONS, 'sort_'); }
+    function getGenres()           { return Settings.enabled(GENRES, 'genre_'); }
+    function getStreamingGlobal()  { return Settings.enabled(STREAMING_GLOBAL, 'streaming_'); }
+    function getStreamingRus()     { return Settings.enabled(STREAMING_RUS, 'streaming_rus_'); }
+    function isUkrainian()         { return Lampa.Storage.get('language') === 'uk'; }
+
+    /**
+     * Уровень исключения ключевых слов.
+     * В v3 меню писало ключ `without_keywords`, а фильтр читал `withoutKeywords`
+     * (настройка не работала) — теперь один ключ, старый учитывается как запасной.
+     */
+    function getKeywordLevel() {
+        return String(Settings.get('without_keywords', Settings.get('withoutKeywords', '1')));
+    }
+
+    /* =====================================================================
+     *  ИМЕНА ИСТОЧНИКОВ
+     * ===================================================================== */
+
+    function sourceNames() {
+        var base = Lampa.Storage.get('surs_name') || 'SURS';
+        return {
+            main: base,
+            new:  base + ' NEW',
+            kids: base + ' KIDS',
+            rus:  base + ' RUS'
+        };
+    }
+
+    function isSursSource(name) {
+        var n = sourceNames();
+        return name === n.main || name === n.new || name === n.kids || name === n.rus;
+    }
+
+    function isLiteSource(name) {
+        var n = sourceNames();
+        return name === n.new || name === n.kids || name === n.rus;
+    }
+
+    /* =====================================================================
+     *  ФИЛЬТРЫ URL и РЕЗУЛЬТАТОВ
+     * ===================================================================== */
+
+    var Url = {
+        minVotes: function (url, votes) {
+            return votes > 0 ? url + '&vote_count.gte=' + votes : url;
+        },
+        certification: function (url, cert) {
+            if (!cert) return url;
+            return url + '&certification_country=RU&certification=' + encodeURIComponent(cert);
+        },
+        withoutKeywords: function (url, ids) {
+            return url + '&without_keywords=' + encodeURIComponent(ids.join(','));
+        },
+        keywordsByLevel: function (level) {
+            var ids = KEYWORDS.base.slice();
+            if (level !== '0') ids = ids.concat(KEYWORDS.asian);
+            if (level === '2') ids = ids.concat(KEYWORDS.anime);
+            return ids;
+        }
+    };
+
+    /** Фильтры из пользовательских настроек (основной источник SURS) */
+    var UserFilters = {
+        minVotes: function (url) {
+            var votes = parseInt(Settings.get('minVotes', '10'), 10);
+            return Url.minVotes(url, isNaN(votes) ? 10 : votes);
+        },
+        age: function (url) {
+            var age = String(Settings.get('ageRestrictions', '') || '').trim();
+            return contains(['0+', '6+', '12+', '16+', '18+'], age) ? Url.certification(url, age) : url;
+        },
+        keywords: function (url) {
+            return Url.withoutKeywords(url, Url.keywordsByLevel(getKeywordLevel()));
+        },
+        all: function (url) {
+            return UserFilters.keywords(UserFilters.age(UserFilters.minVotes(url)));
+        },
+        /** без порога голосов — для рядов с собственным vote_count.gte */
+        safe: function (url) {
+            return UserFilters.keywords(UserFilters.age(url));
+        }
+    };
+
+    function containsCyrillic(value) {
+        if (typeof value === 'string') return /[а-яА-ЯёЁїЇіІєЄґҐ]/.test(value);
+        if (value && typeof value === 'object') {
+            for (var key in value) {
+                if (Object.prototype.hasOwnProperty.call(value, key) && containsCyrillic(value[key])) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Фильтр «кириллица в карточке».
+     * В v3 читалось глобальное Storage 'cirillic', а меню писало в профиль — исправлено.
+     */
+    function filterCyrillic(items) {
+        var lang = Lampa.Storage.get('language');
+        if (lang !== 'ru' && lang !== 'uk') return items;
+        if (String(Settings.get('cirillic', '1')) === '0') return items;
+        return items.filter(containsCyrillic);
+    }
+
+    function filterYearRange(type, start, end) {
+        var field = type === 'movie' ? 'release_date' : 'first_air_date';
+        return function (items) {
+            return items.filter(function (item) {
+                var year = item[field] ? parseInt(item[field].substring(0, 4), 10) : 0;
+                return year >= start && year <= end;
+            });
+        };
+    }
+
+    /* =====================================================================
+     *  СОРТИРОВКИ
+     * ===================================================================== */
+
+    /** Новинки фильмов: release_date.desc в окне [-26 мес; -40 дней] */
+    function movieSort(sort) {
+        var result = assign({}, sort);
+        if (result.id === 'first_air_date.desc') result.id = 'release_date.desc';
+        if (result.id === 'release_date.desc') {
+            result.extra = '&release_date.gte=' + isoDate(0, -26) + '&release_date.lte=' + isoDate(-40);
+        }
+        return result;
+    }
+
+    /** Новинки сериалов: first_air_date.desc в окне [-18 мес; -10 дней] */
+    function tvSort(sort) {
+        var result = assign({}, sort);
+        if (result.id === 'first_air_date.desc') {
+            result.extra = '&first_air_date.gte=' + isoDate(0, -18) + '&first_air_date.lte=' + isoDate(-10);
+        }
+        return result;
+    }
+
+    /* =====================================================================
+     *  ФАБРИКА РЯДОВ
+     *
+     *  Ряд — функция (call) => call({title, results, params}), как требует
+     *  Lampa.Api.partNext. Параметры ряда вычисляются лениво (в момент
+     *  загрузки), поэтому случайные сортировка/жанр меняются при каждом
+     *  открытии главной.
+     * ===================================================================== */
+
+    function EMPTY() {
+        return { results: [] };
+    }
+
+    /**
+     * @param {object} owner  источник (имеет tmdb.get)
+     * @param {object} params параметры активности main
+     * @param {function():{url:string,title:string,filter?:function}} spec
+     */
+    function row(owner, params, spec) {
+        return function (call) {
+            var s = spec();
+            owner.get(s.url, params, function (json) {
+                if (!json || !Array.isArray(json.results)) return call(EMPTY());
+                if (s.filter) json.results = s.filter(json.results);
+                json.title = s.title;
+                call(json);
+            }, function () {
+                call(EMPTY());
+            }, { life: CONFIG.cacheLife });
+        };
+    }
+
+    /** Ряд из нескольких запросов, склеенных в один */
+    function mergedRow(owner, urls, title, postFilter) {
+        return function (call) {
+            var results = [];
+            var left = urls.length;
+
+            function done() {
+                if (--left > 0) return;
+                call({ title: title, results: postFilter ? postFilter(results) : results });
+            }
+
+            urls.forEach(function (url) {
+                owner.get(url, {}, function (json) {
+                    if (json && Array.isArray(json.results)) results = results.concat(json.results);
+                    done();
+                }, done, { life: CONFIG.cacheLife });
+            });
+        };
+    }
+
+    /** Иногда превращает ряд в «широкий» (V3: params.style / params.items) */
+    function maybeWide(part) {
+        return function (call) {
+            part(function (json) {
+                if (json && Array.isArray(json.results) && json.results.length && Math.random() < CONFIG.wideChance) {
+                    json.results.forEach(function (card) {
+                        card.params = assign(card.params || {}, { style: { name: 'wide' } });
+                    });
+                    json.params = assign(json.params || {}, { items: { view: 3 } });
+                }
+                call(json);
+            });
+        };
+    }
+
+    function sortByRating(items) {
+        return items.sort(function (a, b) {
+            return (b.vote_average || 0) - (a.vote_average || 0);
+        });
+    }
+
+    /* =====================================================================
+     *  ИСТОЧНИК SURS (основной)
+     * ===================================================================== */
+
+    var REGION = {
+        // ruTitles: у российских/украинских подборок кириллица есть всегда — фильтр не нужен
+        russian:   { country: 'RU', title: 'surs_russian',   ruTitles: true },
+        ukrainian: { country: 'UA', title: 'surs_ukrainian', ruTitles: true },
+        korean:    { country: 'KR', title: 'surs_korean' },
+        turkish:   { country: 'TR', title: 'surs_turkish' }
+    };
+
+    function buildMain(owner, params) {
+        var parts = [];
+        var genres = getGenres();
+        var rusIds = STREAMING_RUS.map(function (s) { return s.id; });
+        var ua = isUkrainian();
+
+        // --- стриминги ---
+        var services = [];
+        if (Settings.get('getStreamingServices', true)) services = services.concat(getStreamingGlobal());
+        if (Settings.get('getStreamingServicesRUS', true)) services = services.concat(getStreamingRus());
+
+        services.forEach(function (service) {
+            var isRus = contains(rusIds, service.id);
+            var filters = isRus ? UserFilters.safe : UserFilters.all;
+
+            parts.push(row(owner, params, function () {
+                var sort = pick(getSortOptions());
+                var genre = pick(genres);
+                return {
+                    url: filters('discover/tv?with_networks=' + service.id + '&with_genres=' + genre.id + '&sort_by=' + sort.id),
+                    title: t(sort.title) + ' (' + t(genre.title) + ') ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+
+            parts.push(row(owner, params, function () {
+                var sort = pick(getSortOptions());
+                return {
+                    url: filters('discover/tv?with_networks=' + service.id + '&sort_by=' + sort.id),
+                    title: t(sort.title) + ' ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+        });
+
+        // --- фильмы по жанрам ---
+        var movieRegions = [];
+        if (Settings.get('getMoviesByGenreGlobal', true)) movieRegions.push(null);
+        if (Settings.get('getMoviesByGenreRus', true))    movieRegions.push(REGION.russian);
+        if (Settings.get('getMoviesByGenreUA', ua))       movieRegions.push(REGION.ukrainian);
+
+        // --- сериалы по жанрам ---
+        var tvRegions = [];
+        if (Settings.get('getTVShowsByGenreGlobal', true)) tvRegions.push(null);
+        if (Settings.get('getTVShowsByGenreRus', true))    tvRegions.push(REGION.russian);
+        if (Settings.get('getTVShowsByGenreKOR', false))   tvRegions.push(REGION.korean);
+        if (Settings.get('getTVShowsByGenreTR', true))     tvRegions.push(REGION.turkish);
+        if (Settings.get('getTVShowsByGenreUA', ua))       tvRegions.push(REGION.ukrainian);
+
+        genres.forEach(function (genre) {
+            movieRegions.forEach(function (region) {
+                parts.push(row(owner, params, function () {
+                    var sort = movieSort(pick(getSortOptions()));
+                    var url = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;
+                    if (region) url += '&with_origin_country=' + region.country;
+                    if (sort.extra) url += sort.extra;
+                    return {
+                        url: UserFilters.all(url),
+                        title: join(t(sort.title), region && t(region.title), '(' + t(genre.title) + ')'),
+                        filter: region && region.ruTitles ? null : filterCyrillic
+                    };
+                }));
+            });
+
+            tvRegions.forEach(function (region) {
+                parts.push(row(owner, params, function () {
+                    var sort = tvSort(pick(getSortOptions()));
+                    var url = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;
+                    if (region) url += '&with_origin_country=' + region.country;
+                    if (sort.extra) url += sort.extra;
+                    return {
+                        url: UserFilters.all(url),
+                        title: join(t(sort.title), region && t(region.title), t('surs_tv_shows'), '(' + t(genre.title) + ')'),
+                        filter: region && region.ruTitles ? null : filterCyrillic
+                    };
+                }));
+            });
+        });
+
+        // --- топ за всё время ---
+        var bestTypes = [];
+        if (Settings.get('getBestContentByGenreMovie', true)) bestTypes.push('movie');
+        if (Settings.get('getBestContentByGenreTV', true))    bestTypes.push('tv');
+
+        genres.forEach(function (genre) {
+            bestTypes.forEach(function (type) {
+                parts.push(row(owner, params, function () {
+                    return {
+                        url: UserFilters.safe('discover/' + type + '?with_genres=' + genre.id + '&sort_by=vote_average.desc&vote_count.gte=500'),
+                        title: t(type === 'movie' ? 'surs_top_movies' : 'surs_top_tv') + ' (' + t(genre.title) + ')',
+                        filter: filterCyrillic
+                    };
+                }));
+            });
+        });
+
+        // --- топ за пятилетку ---
+        var periodTypes = [];
+        if (Settings.get('getBestContentByGenreAndPeriod_movie', true)) periodTypes.push('movie');
+        if (Settings.get('getBestContentByGenreAndPeriod_tv', true))    periodTypes.push('tv');
+
+        genres.forEach(function (genre) {
+            randomPeriods(2).forEach(function (period) {
+                periodTypes.forEach(function (type) {
+                    parts.push(periodRow(owner, params, type, genre, period, UserFilters.safe));
+                });
+            });
+        });
+
+        parts = shuffle(parts.map(maybeWide));
+
+        // Тренды всегда в начале
+        parts.unshift(trendingRow(owner, params, 'tv'));
+        parts.unshift(trendingRow(owner, params, 'movie'));
+
+        return parts;
+    }
+
+    function trendingRow(owner, params, type) {
+        return row(owner, params, function () {
+            return {
+                url: UserFilters.age('trending/' + type + '/week'),
+                title: t('surs_title_trend_week') + ' ' + t(type === 'movie' ? 'surs_movies' : 'surs_series'),
+                filter: function (items) {
+                    return items.filter(function (item) {
+                        if (type === 'movie') return !contains(FORBIDDEN_LANGUAGES, item.original_language);
+                        return !(item.origin_country || []).some(function (c) { return contains(FORBIDDEN_COUNTRIES, c); });
+                    });
+                }
+            };
+        });
+    }
+
+    function periodRow(owner, params, type, genre, period, filters) {
+        var dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date';
+        return row(owner, params, function () {
+            return {
+                url: filters('discover/' + type + '?with_genres=' + genre.id +
+                    '&sort_by=vote_average.desc&vote_count.gte=100' +
+                    '&' + dateField + '.gte=' + period.start + '-01-01' +
+                    '&' + dateField + '.lte=' + period.end + '-12-31'),
+                title: t(type === 'movie' ? 'surs_top_movies' : 'surs_top_tv') +
+                    ' (' + t(genre.title) + ')' + t('surs_for_period') + period.start + '–' + period.end,
+                filter: function (items) {
+                    return filterYearRange(type, period.start, period.end)(filterCyrillic(items));
+                }
+            };
+        });
+    }
+
+    /* =====================================================================
+     *  ИСТОЧНИК SURS NEW (новинки)
+     * ===================================================================== */
+
+    function newFilters(url) {
+        return Url.withoutKeywords(Url.minVotes(url, 10), KEYWORDS.asian);
+    }
+
+    function buildNew(owner, params) {
+        var parts = [];
+        var genres = getGenres();
+
+        genres.forEach(function (genre) {
+            parts.push(row(owner, params, function () {
+                var sort = movieSort(SORT_NEW);
+                return {
+                    url: newFilters('discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id + sort.extra),
+                    title: t(sort.title) + ' (' + t(genre.title) + ')',
+                    filter: filterCyrillic
+                };
+            }));
+
+            parts.push(row(owner, params, function () {
+                var sort = tvSort(SORT_NEW);
+                return {
+                    url: newFilters('discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + sort.extra),
+                    title: t(sort.title) + ' ' + t('surs_tv_shows') + ' (' + t(genre.title) + ')',
+                    filter: filterCyrillic
+                };
+            }));
+        });
+
+        getStreamingGlobal().forEach(function (service) {
+            parts.push(row(owner, params, function () {
+                var sort = tvSort(SORT_NEW);
+                var genre = pick(genres);
+                return {
+                    url: newFilters('discover/tv?with_networks=' + service.id + '&with_genres=' + genre.id + '&sort_by=' + sort.id + sort.extra),
+                    title: t(sort.title) + ' (' + t(genre.title) + ') ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+
+            parts.push(row(owner, params, function () {
+                var sort = tvSort(SORT_NEW);
+                return {
+                    url: newFilters('discover/tv?with_networks=' + service.id + '&sort_by=' + sort.id + sort.extra),
+                    title: t(sort.title) + ' ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+        });
+
+        return shuffle(parts.map(maybeWide));
+    }
+
+    /* =====================================================================
+     *  ИСТОЧНИК SURS KIDS
+     * ===================================================================== */
+
+    var KIDS_KEYWORDS_ALL = KEYWORDS.base.concat(KEYWORDS.asian);
+
+    function kidsFilters(url) {
+        return Url.withoutKeywords(Url.certification(Url.minVotes(url, 5), '6+'), KIDS_KEYWORDS_ALL);
+    }
+
+    function kidsSafe(url) {
+        return Url.withoutKeywords(Url.certification(url, '6+'), KIDS_KEYWORDS_ALL);
+    }
+
+    function buildKids(owner, params) {
+        var parts = [];
+        var genres = GENRES.filter(function (g) { return contains(KIDS_GENRE_IDS, g.id); });
+        var today = isoDate(0);
+        var rusTitle = function () { return ' — ' + t('surs_russian'); };
+
+        // Стриминги (sort.key в v3 был undefined → sort_by=undefined, исправлено на sort.id)
+        STREAMING_KIDS.forEach(function (service) {
+            parts.push(row(owner, params, function () {
+                var sort = pick(SORT_OPTIONS);
+                var genre = pick(genres);
+                return {
+                    url: kidsFilters('discover/tv?with_networks=' + service.id + '&with_genres=' + genre.id + '&sort_by=' + sort.id + '&air_date.lte=' + today),
+                    title: t(sort.title) + ' (' + t(genre.title) + ') ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+            parts.push(row(owner, params, function () {
+                var sort = pick(SORT_OPTIONS);
+                return {
+                    url: kidsFilters('discover/tv?with_networks=' + service.id + '&sort_by=' + sort.id + '&air_date.lte=' + today),
+                    title: t(sort.title) + ' ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+        });
+
+        genres.forEach(function (genre) {
+            [false, true].forEach(function (russian) {
+                // фильмы
+                parts.push(row(owner, params, function () {
+                    var sort = movieSort(pick(SORT_OPTIONS));
+                    var url = 'discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id;
+                    if (russian) url += '&with_original_language=ru' + (sort.id === 'release_date.desc' ? '&region=RU' : '');
+                    if (sort.extra) url += sort.extra;
+                    return {
+                        url: kidsFilters(url),
+                        title: t(sort.title) + (russian ? rusTitle() : '') + ' (' + t(genre.title) + ')',
+                        filter: russian ? null : filterCyrillic
+                    };
+                }));
+                // сериалы
+                parts.push(row(owner, params, function () {
+                    var sort = pick(SORT_OPTIONS);
+                    var url = 'discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id;
+                    if (russian) url += '&with_origin_country=RU';
+                    return {
+                        url: kidsFilters(url),
+                        title: t(sort.title) + (russian ? rusTitle() : '') + ' ' + t('surs_tv_shows') + ' (' + t(genre.title) + ')',
+                        filter: russian ? null : filterCyrillic
+                    };
+                }));
+            });
+
+            // Топ по жанру: в v3 один ряд дважды вызывал callback — разделено на два ряда
+            ['movie', 'tv'].forEach(function (type) {
+                [false, true].forEach(function (russian) {
+                    parts.push(row(owner, params, function () {
+                        var url = 'discover/' + type + '?with_genres=' + genre.id + '&sort_by=vote_average.desc&vote_count.gte=200';
+                        if (russian) url += '&with_origin_country=RU';
+                        return {
+                            url: kidsSafe(url),
+                            title: (russian ? t('surs_rus') + ' ' : '') + t(type === 'movie' ? 'surs_top_movies' : 'surs_top_tv') + ' (' + t(genre.title) + ')',
+                            filter: filterCyrillic
+                        };
+                    }));
+                });
+            });
+
+            var period = pick(getPeriods());
+            parts.push(periodRow(owner, params, 'movie', genre, period, kidsSafe));
+            parts.push(periodRow(owner, params, 'tv', genre, period, kidsSafe));
+        });
+
+        // Анимация + семейное: по одному ряду на каждую сортировку
+        // (в v3 один ряд вызывал callback по разу на каждую сортировку)
+        SORT_OPTIONS.forEach(function (baseSort) {
+            [false, true].forEach(function (russian) {
+                parts.push(row(owner, params, function () {
+                    var sort = movieSort(baseSort);
+                    var url = 'discover/movie?with_genres=16,10751&sort_by=' + sort.id;
+                    if (russian) url += '&with_original_language=ru' + (sort.id === 'release_date.desc' ? '&region=RU' : '');
+                    if (sort.extra) url += sort.extra;
+                    return {
+                        url: kidsFilters(url),
+                        title: t(sort.title) + (russian ? rusTitle() : '') + ' (' + t('surs_genre_animation') + ', ' + t('surs_genre_kids') + ')',
+                        filter: filterCyrillic
+                    };
+                }));
+            });
+        });
+
+        // Поиск по известным франшизам
+        KIDS_KEYWORDS.forEach(function (keyword) {
+            parts.push(mergedRow(owner, [
+                kidsFilters('search/movie?query=' + encodeURIComponent(keyword)),
+                kidsFilters('search/tv?query=' + encodeURIComponent(keyword))
+            ], keyword, function (items) {
+                return sortByRating(filterCyrillic(items).filter(function (item) {
+                    return (item.vote_average || 0) >= 6.1;
+                }));
+            }));
+        });
+
+        // Студии
+        KIDS_STUDIOS.forEach(function (studio) {
+            ['movie', 'tv'].forEach(function (type) {
+                parts.push(row(owner, params, function () {
+                    return {
+                        url: Url.withoutKeywords('discover/' + type + '?with_companies=' + studio.id + '&sort_by=vote_average.desc', KIDS_KEYWORDS_ALL),
+                        title: t(type === 'movie' ? 'surs_movies' : 'surs_tv_shows') + ' ' + t('surs_from') + ' ' + studio.title,
+                        filter: filterCyrillic
+                    };
+                }));
+            });
+        });
+
+        parts.push(mergedRow(owner, [
+            kidsFilters('discover/movie?with_companies=4'),
+            kidsFilters('discover/tv?with_networks=13')
+        ], 'Nickelodeon', function (items) {
+            return sortByRating(filterCyrillic(items));
+        }));
+
+        return shuffle(parts.map(maybeWide));
+    }
+
+    /* =====================================================================
+     *  ИСТОЧНИК SURS RUS
+     * ===================================================================== */
+
+    function rusKeywords(url) {
+        return Url.withoutKeywords(url, KEYWORDS.base);
+    }
+
+    function buildRus(owner, params) {
+        var parts = [];
+
+        STREAMING_RUS.forEach(function (service) {
+            parts.push(row(owner, params, function () {
+                var sort = tvSort(SORT_NEW);
+                var genre = pick(GENRES);
+                return {
+                    url: rusKeywords('discover/tv?with_networks=' + service.id + '&with_genres=' + genre.id + '&sort_by=' + sort.id + sort.extra),
+                    title: t(sort.title) + ' (' + t(genre.title) + ') ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+            parts.push(row(owner, params, function () {
+                var sort = tvSort(SORT_NEW);
+                return {
+                    url: rusKeywords('discover/tv?with_networks=' + service.id + '&sort_by=' + sort.id + sort.extra),
+                    title: t(sort.title) + ' ' + t('surs_on') + ' ' + service.title,
+                    filter: filterCyrillic
+                };
+            }));
+        });
+
+        GENRES.forEach(function (genre) {
+            parts.push(row(owner, params, function () {
+                var sort = movieSort(SORT_NEW);
+                return {
+                    url: Url.minVotes(rusKeywords('discover/movie?with_genres=' + genre.id + '&sort_by=' + sort.id + sort.extra + '&with_origin_country=RU'), 2),
+                    title: t(sort.title) + ' ' + t('surs_russian') + ' (' + t(genre.title) + ')'
+                };
+            }));
+            parts.push(row(owner, params, function () {
+                var sort = tvSort(SORT_NEW);
+                return {
+                    url: rusKeywords('discover/tv?with_genres=' + genre.id + '&sort_by=' + sort.id + '&with_origin_country=RU' + sort.extra),
+                    title: t(sort.title) + ' ' + t('surs_russian') + ' ' + t('surs_tv_shows') + ' (' + t(genre.title) + ')'
+                };
+            }));
+        });
+
+        return shuffle(parts.map(maybeWide));
+    }
+
+    /* =====================================================================
+     *  СОЗДАНИЕ ИСТОЧНИКОВ (Lampa.Api.sources)
+     * ===================================================================== */
+
+    /**
+     * Источник = копия TMDB с собственным main().
+     * Вместо ручной вставки рядов (кнопки, стриминги, жанры, ближайшие эпизоды)
+     * вызываем штатный Lampa.ContentRows.call — так на главную SURS попадают
+     * все зарегистрированные ряды: «Продолжить просмотр», «Рекомендации»,
+     * «Ближайшие/Недавние эпизоды», ряды других плагинов. Каждый ряд можно
+     * выключить в Настройки → «Каналы» (content_rows).
+     */
+    function createSource(builder, screen) {
+        var source = assign({}, Lampa.Api.sources.tmdb);
+
+        source.discovery = false;
+
+        source.main = function (params, oncomplite, onerror) {
+            params = params || {};
+
+            var parts = builder(source, params);
+
+            Lampa.ContentRows.call(screen, params, parts);
+
+            function loadPart(partLoaded, partEmpty) {
+                Lampa.Api.partNext(parts, CONFIG.partsLimit, partLoaded, partEmpty);
+            }
+
+            loadPart(oncomplite, onerror);
+
+            return loadPart;
+        };
+
+        return source;
+    }
+
+    function registerSources() {
+        if (!Lampa.Api.sources || !Lampa.Api.sources.tmdb) {
+            console.error('SURS', 'Lampa.Api.sources.tmdb недоступен');
+            return;
+        }
+
+        var names = sourceNames();
+        var list = [
+            { key: 'surs_mod',      name: names.main, source: createSource(buildMain, 'main') },
+            { key: 'surs_mod_new',  name: names.new,  source: createSource(buildNew,  CONFIG.liteScreen) },
+            { key: 'surs_mod_kids', name: names.kids, source: createSource(buildKids, CONFIG.liteScreen) },
+            { key: 'surs_mod_rus',  name: names.rus,  source: createSource(buildRus,  CONFIG.liteScreen) }
+        ];
+
+        var options = {};
+
+        list.forEach(function (item) {
+            Lampa.Api.sources[item.key] = item.source;
+            Lampa.Api.sources[item.name] = item.source;
+            options[item.name] = item.name;
+        });
+
+        Lampa.Params.select('source', assign({}, Lampa.Params.values.source, options), 'tmdb');
+    }
+
+    /* =====================================================================
+     *  ПЕРЕКЛЮЧЕНИЕ ИСТОЧНИКА (профили Levende, смена в настройках)
+     * ===================================================================== */
+
+    var sourceChangedByProfile = false;
+
+    function openMain(source) {
+        Lampa.Activity.push({
+            url: '',
+            title: t('title_main') + ' - ' + source.toUpperCase(),
+            component: 'main',
+            source: source,
+            page: 1
+        });
+    }
+
+    function changeSource(source) {
+        if (Lampa.Storage.get('source') === source) return;
+
+        sourceChangedByProfile = true;
+        Lampa.Storage.set('source', source);
+
+        setTimeout(function () {
+            openMain(source);
+            sourceChangedByProfile = false;
+        }, 10);
+    }
+
+    function startSourceListeners() {
+        // профили (https://levende.github.io/lampa-plugins/profiles.js)
+        Lampa.Listener.follow('profile', function (e) {
+            if (e.type !== 'changed' || !e.params || !e.params.surs) return;
+
+            var names = sourceNames();
+
+            if (e.params.forKids) changeSource(names.kids);
+            else if (e.params.onlyRus) changeSource(names.rus);
+            else changeSource(names.main);
+        });
+
+        // источник выбран вручную в настройках
+        Lampa.Storage.listener.follow('change', function (e) {
+            if (e.name !== 'source' || sourceChangedByProfile || !isSursSource(e.value)) return;
+
+            openMain(e.value);
+
+            setTimeout(function () {
+                Lampa.Controller.toggle('settings');
+            }, 100);
+        });
+
+        // главная могла загрузиться раньше, чем зарегистрировались источники
+        var initial = Lampa.Storage.get('source');
+        var startPage = Lampa.Storage.get('start_page');
+
+        if (isSursSource(initial) && (!startPage || startPage === 'main')) {
+            setTimeout(function () {
+                openMain(initial);
+            }, 300);
+        }
+    }
+
+    /* =====================================================================
+     *  БОКОВОЕ МЕНЮ (Lampa.Menu.addButton, V3)
+     * ===================================================================== */
+
+    var MENU_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="2.2em" height="2.2em" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="white"/></svg>';
+    var menuButtons = [];
+
+    function sideMenuItems() {
+        var names = sourceNames();
+        return [
+            { id: 'Button_sourceName',     source: names.main },
+            { id: 'Button_sourceNameKids', source: names.kids },
+            { id: 'Button_sourceNameRus',  source: names.rus }
+        ];
+    }
+
+    function renderMenuButtons() {
+        menuButtons.forEach(function (btn) { btn.remove(); });
+        menuButtons = [];
+
+        sideMenuItems().forEach(function (item) {
+            if (!Settings.get(item.id, false)) return;
+
+            var btn = Lampa.Menu.addButton(MENU_ICON, item.source, function () {
+                openMain(item.source);
+            });
+
+            btn.attr('data-action', 'surs-source');
+            menuButtons.push(btn);
+        });
+    }
+
+    /* =====================================================================
+     *  НАСТРОЙКИ
+     *
+     *  Параметры пересобираются при каждом открытии настроек (как это
+     *  делает сам Lampa для ContentRows), поэтому для NEW/KIDS/RUS фильтры
+     *  просто не добавляются — без DOM-хаков со скрытием элементов.
+     * ===================================================================== */
+
+    var SETTINGS_ICON = '<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><g fill="#ffffff"><path d="M443.724,166.599c27.038-2.293,47.087-26.07,44.786-53.125c-2.292-27.038-26.078-47.087-53.115-44.795 c-27.038,2.301-47.078,26.088-44.776,53.124C392.91,148.85,416.677,168.9,443.724,166.599z"/><path d="M431.752,346.544l30.541-114.485c5.068-19.305-6.466-39.075-25.78-44.144 c-19.304-5.077-39.075,6.448-44.152,25.771v-0.018L365.052,315.64l-78.755-13.276c-17.218-4.304-34.696,5.786-39.578,22.864 l-33.317,133.445c-3.82,13.342,3.913,27.28,17.274,31.1c13.37,3.81,27.298-3.923,31.128-17.283l39.392-98.638l61.286,16.155 C398.863,400.125,421.633,382.927,431.752,346.544z"/><path d="M498.349,286.311c-10.1-2.999-20.721,2.749-23.722,12.858l-27.876,93.848 c-2.096,6.606-4.536,11.777-7.146,15.746c-3.987,5.944-8.002,9.373-13.854,12.093c-5.842,2.664-14.031,4.379-25.416,4.37 c-3.009,0.008-6.215-0.113-9.634-0.355l-54.009-3.363c-10.519-0.661-19.575,7.341-20.227,17.861 c-0.662,10.518,7.342,19.574,17.86,20.226l53.73,3.345c4.211,0.298,8.31,0.448,12.28,0.456c10.072-0.009,19.5-0.988,28.369-3.289 c13.268-3.392,25.315-10.127,34.501-19.892c9.251-9.736,15.531-21.885,19.91-35.609l0.074-0.214l28.015-94.362 C514.206,299.923,508.447,289.302,498.349,286.311z"/><path d="M248.974,81.219L0,21.256v15.14v281.228l248.974-59.962V81.219z M225.123,238.87L23.851,287.355V51.536 l201.272,48.466V238.87z"/><polygon points="204.989,115.189 47.991,84.937 47.991,253.953 204.989,223.692"/></g></svg>';
+
+    function currentController() {
+        var enabled = Lampa.Controller.enabled();
+        return enabled && enabled.name ? enabled.name : 'settings';
+    }
+
+    /**
+     * Меню с чекбоксами.
+     * @param {string} title ключ перевода
+     * @param {Array<{id:string,title:string,def?:boolean}>} items
+     * @param {string} prefix префикс ключа настройки
+     * @param {function=} onChange
+     */
+    function showCheckboxMenu(title, items, prefix, onChange) {
+        var back = currentController();
+
+        Lampa.Select.show({
+            title: t(title),
+            items: items.map(function (item) {
+                var def = typeof item.def === 'boolean' ? item.def : true;
+                return {
+                    title: t(item.title),
+                    id: item.id,
+                    def: def,
+                    checkbox: true,
+                    checked: !!Settings.get(prefix + item.id, def)
+                };
+            }),
+            onBack: function () {
+                Lampa.Controller.toggle(back);
+            },
+            onCheck: function (item) {
+                item.checked = Settings.toggle(prefix + item.id, item.def);
+                if (onChange) onChange();
+            }
+        });
+    }
+
+    /** Меню с единственным выбором (радио) */
+    function showRadioMenu(title, key, def, options) {
+        var back = currentController();
+
+        function render() {
+            var value = String(Settings.get(key, def));
+
+            Lampa.Select.show({
+                title: t(title),
+                items: options.map(function (opt) {
+                    return { title: t(opt.title), value: opt.value, checkbox: true, checked: value === opt.value };
+                }),
+                onBack: function () {
+                    Lampa.Controller.toggle(back);
+                },
+                onCheck: function (item) {
+                    Settings.set(key, item.value);
+                    render();
+                }
+            });
+        }
+
+        render();
+    }
+
+    function addTitle(name, description) {
+        Lampa.SettingsApi.addParam({
+            component: CONFIG.settingsComponent,
+            param: { name: '', type: 'title' },
+            field: { name: name, description: description || '' }
+        });
+    }
+
+    function addButton(name, title, description, action) {
+        Lampa.SettingsApi.addParam({
+            component: CONFIG.settingsComponent,
+            param: { name: name, type: 'button' },
+            field: { name: title, description: description },
+            onChange: action
+        });
+    }
+
+    function buildSettings() {
+        var comp = CONFIG.settingsComponent;
+        var names = sourceNames();
+        var lite = isLiteSource(Lampa.Storage.get('source'));
+        var ua = isUkrainian();
+
+        Lampa.SettingsApi.removeParams(comp);
+
+        addTitle(t('surs_collections') + ' ' + t('surs_from') + ' ' + names.main, t('surs_main_update'));
+        addTitle(t('surs_settings_interface'));
+
+        var sourceValues = {};
+        [names.main, names.new, names.kids, names.rus].forEach(function (n) { sourceValues[n] = n; });
+
+        Lampa.SettingsApi.addParam({
+            component: comp,
+            param: { name: 'surs_setSource', type: 'select', values: sourceValues, default: names.main },
+            field: { name: t('surs_set_as_source'), description: t('surs_source_description') },
+            onChange: function (value) {
+                Lampa.Storage.set('source', value);
+            }
+        });
+
+        addButton('surs_setButtons', t('surs_add_to_menu'), t('surs_menu_description'), function () {
+            showCheckboxMenu('surs_select_menu_sources', sideMenuItems().map(function (i) {
+                return { id: i.id, title: i.source, def: false };
+            }), '', renderMenuButtons);
+        });
+
+        addButton('surs_custom_buttons', t('surs_custom_buttons'), t('surs_custom_buttons_description'), function () {
+            var buttons = typeof window.surs_getAllButtons === 'function' ? window.surs_getAllButtons() : [];
+            showCheckboxMenu('surs_custom_buttons', buttons, 'custom_button_');
+        });
+
+        // Фильтры относятся только к основному источнику
+        if (!lite) {
+            addTitle(t('surs_filters'));
+
+            addButton('surs_sort_options', t('surs_sort_types'), t('surs_sort_description'), function () {
+                showCheckboxMenu('surs_sort_types', SORT_OPTIONS, 'sort_');
+            });
+            addButton('surs_genres', t('surs_genres'), t('surs_genres_description'), function () {
+                showCheckboxMenu('surs_genres', GENRES, 'genre_');
+            });
+            addButton('surs_global_streaming', t('surs_global_streaming'), t('surs_global_streaming_description'), function () {
+                showCheckboxMenu('surs_global_streaming', STREAMING_GLOBAL, 'streaming_');
+            });
+            addButton('surs_rus_streaming', t('surs_rus_streaming'), t('surs_rus_streaming_description'), function () {
+                showCheckboxMenu('surs_rus_streaming', STREAMING_RUS, 'streaming_rus_');
+            });
+
+            addTitle(t('surs_geo_filters'));
+
+            addButton('surs_streaming', t('surs_streaming'), t('surs_region_description'), function () {
+                showCheckboxMenu('surs_streaming', [
+                    { id: 'getStreamingServices',    title: 'surs_global' },
+                    { id: 'getStreamingServicesRUS', title: 'surs_russian' }
+                ], '');
+            });
+
+            addButton('surs_getMoviesByGenre', t('surs_movies'), t('surs_region_description'), function () {
+                var items = [
+                    { id: 'getMoviesByGenreGlobal', title: 'surs_global' },
+                    { id: 'getMoviesByGenreRus',    title: 'surs_russian' }
+                ];
+                if (ua) items.push({ id: 'getMoviesByGenreUA', title: 'surs_ukrainian', def: ua });
+                showCheckboxMenu('surs_movies', items, '');
+            });
+
+            addButton('surs_getTVShowsByGenre', t('surs_series'), t('surs_region_description'), function () {
+                var items = [
+                    { id: 'getTVShowsByGenreGlobal', title: 'surs_global' },
+                    { id: 'getTVShowsByGenreRus',    title: 'surs_russian' },
+                    { id: 'getTVShowsByGenreKOR',    title: 'surs_korean', def: false },
+                    { id: 'getTVShowsByGenreTR',     title: 'surs_turkish' }
+                ];
+                if (ua) items.push({ id: 'getTVShowsByGenreUA', title: 'surs_ukrainian', def: ua });
+                showCheckboxMenu('surs_series', items, '');
+            });
+
+            addButton('surs_getBestContentByGenre', t('surs_top_all_time'), t('surs_top_content_description'), function () {
+                showCheckboxMenu('surs_top_all_time', [
+                    { id: 'getBestContentByGenreMovie', title: 'surs_movies' },
+                    { id: 'getBestContentByGenreTV',    title: 'surs_series' }
+                ], '');
+            });
+
+            addButton('surs_best_content', t('surs_top_5_years'), t('surs_top_content_description'), function () {
+                showCheckboxMenu('surs_top_5_years', [
+                    { id: 'getBestContentByGenreAndPeriod_movie', title: 'surs_movies' },
+                    { id: 'getBestContentByGenreAndPeriod_tv',    title: 'surs_series' }
+                ], '');
+            });
+
+            addTitle(t('surs_technical_settings'));
+
+            addButton('surs_cirillic', t('surs_cyrillic'), t('surs_cyrillic_description'), function () {
+                showRadioMenu('surs_cyrillic', 'cirillic', '1', [
+                    { title: 'surs_cyrillic_enabled',  value: '1' },
+                    { title: 'surs_cyrillic_disabled', value: '0' }
+                ]);
+            });
+
+            addButton('surs_minVotes', t('surs_rating_validation'), t('surs_rating_description'), function () {
+                showRadioMenu('surs_rating_validation', 'minVotes', '10', [
+                    { title: 'surs_rating_off',      value: '0' },
+                    { title: 'surs_rating_standard', value: '10' },
+                    { title: 'surs_rating_enhanced', value: '50' },
+                    { title: 'surs_rating_maximum',  value: '150' },
+                    { title: 'surs_rating_fatality', value: '300' }
+                ]);
+            });
+
+            addButton('surs_ageRestrictions', t('surs_age_restriction'), t('surs_age_description'), function () {
+                showRadioMenu('surs_age_restriction', 'ageRestrictions', '', [
+                    { title: 'surs_age_toddlers', value: '0+' },
+                    { title: 'surs_age_6',        value: '6+' },
+                    { title: 'surs_age_12',       value: '12+' },
+                    { title: 'surs_age_none',     value: '' }
+                ]);
+            });
+
+            addButton('surs_withoutKeywords', t('surs_exclude_asian'), t('surs_exclude_asian_description'), function () {
+                showRadioMenu('surs_exclude_asian', 'without_keywords', getKeywordLevel(), [
+                    { title: 'surs_exclude_off',    value: '0' },
+                    { title: 'surs_exclude_soft',   value: '1' },
+                    { title: 'surs_exclude_strong', value: '2' }
+                ]);
+            });
+        }
+
+        if (!Lampa.Storage.get('surs_disableCustomName')) {
+            addTitle(t('surs_name'));
+            addButton('surs_setName', t('surs_rename_selections'), t('surs_rename_description') + ' ' + names.main, renameSources);
+        }
+    }
+
+    function renameSources() {
+        Lampa.Input.edit({
+            free: true,
+            title: t('surs_enter_new_name'),
+            value: Lampa.Storage.get('surs_name') || ''
+        }, function (value) {
+            value = typeof value === 'string' ? value.trim() : '';
+
+            if (!value) {
+                Lampa.Noty.show(t('surs_name_not_entered'));
+                return;
+            }
+
+            Lampa.Storage.set('surs_name', value);
+            Lampa.Noty.show(t('surs_name_saved'));
+
+            // имена источников регистрируются при старте — нужна перезагрузка
+            setTimeout(function () { location.reload(); }, 1500);
+        });
+    }
+
+    function initSettings() {
+        Lampa.SettingsApi.addComponent({
+            component: CONFIG.settingsComponent,
+            name: t('surs_collections') + ' ' + sourceNames().main,
+            icon: SETTINGS_ICON
+        });
+
+        buildSettings();
+
+        Lampa.Settings.listener.follow('open', function (e) {
+            if (e.name === 'main') buildSettings();
+        });
+    }
+
+    /* =====================================================================
+     *  ЛОКАЛИЗАЦИЯ
+     * ===================================================================== */
+
+    function L(ru, en, uk) {
+        return { ru: ru, en: en, uk: uk };
+    }
+
+    function addTranslations() {
+        Lampa.Lang.add({
+            surs_vote_count_desc:        L('Много голосов', 'Most Votes', 'Багато голосів'),
+            surs_vote_average_desc:      L('Высокий рейтинг', 'High Rating', 'Високий рейтинг'),
+            surs_first_air_date_desc:    L('Новинки', 'New Releases', 'Новинки'),
+            surs_popularity_desc:        L('Популярные', 'Popular', 'Популярні'),
+            surs_revenue_desc:           L('Интерес зрителей', 'Audience Interest', 'Інтерес глядачів'),
+
+            surs_genre_action:           L('боевики', 'action', 'бойовики'),
+            surs_genre_comedy:           L('комедии', 'comedies', 'комедії'),
+            surs_genre_drama:            L('драмы', 'dramas', 'драми'),
+            surs_genre_romance:          L('мелодрамы', 'romance', 'мелодрами'),
+            surs_genre_animation:        L('анимация', 'animations', 'мультфільми'),
+            surs_genre_kids:             L('детское', 'kids', 'дитяче'),
+            surs_genre_adventure:        L('приключения', 'adventures', 'пригоди'),
+            surs_genre_crime:            L('криминал', 'crime', 'кримінал'),
+            surs_genre_mystery:          L('детективы', 'mysteries', 'детективи'),
+            surs_genre_sci_fi:           L('фантастика', 'sci-fi', 'фантастика'),
+            surs_genre_western:          L('вестерны', 'westerns', 'вестерни'),
+            surs_genre_thriller:         L('триллеры', 'thrillers', 'трилери'),
+            surs_genre_family:           L('семейные', 'family', 'сімейні'),
+            surs_genre_fantasy:          L('фэнтези', 'fantasy', 'фентезі'),
+            surs_genre_reality:          L('реалити-шоу', 'reality shows', 'реаліті-шоу'),
+            surs_genre_action_adventure: L('боевики и приключения', 'action & adventure', 'бойовики та пригоди'),
+            surs_genre_soap:             L('мыльные оперы', 'soap operas', 'мильні опери'),
+            surs_genre_talk_show:        L('ток-шоу', 'talk shows', 'ток-шоу'),
+
+            surs_title_trend_week:       L('Тренды недели', 'Trending This Week', 'Тренди тижня'),
+            surs_top_movies:             L('Топ фильмы', 'Top Movies', 'Топ фільми'),
+            surs_top_tv:                 L('Топ сериалы', 'Top TV Shows', 'Топ серіали'),
+            surs_for_period:             L(' за ', ' for ', ' за '),
+            surs_tv_shows:               L('сериалы', 'TV shows', 'серіали'),
+            surs_on:                     L('на', 'on', 'на'),
+            surs_from:                   L('от', 'from', 'від'),
+            surs_movies:                 L('Фильмы', 'Movies', 'Фільми'),
+            surs_series:                 L('Сериалы', 'Series', 'Серіали'),
+            surs_global:                 L('Глобальные', 'Global', 'Глобальні'),
+            surs_russian:                L('Российские', 'Russian', 'Російські'),
+            surs_korean:                 L('Южнокорейские', 'South Korean', 'Південнокорейські'),
+            surs_turkish:                L('турецкие', 'Turkish', 'турецькі'),
+            surs_ukrainian:              L('украинские', 'Ukrainian', 'українські'),
+            surs_rus:                    L('Русское', 'Russian', 'Російське'),
+
+            surs_collections:            L('Главная', 'Main', 'Головна'),
+            surs_main_update:            L('После изменения настроек обновите главную страницу, нажав на её иконку в боковом меню', 'After changing settings, refresh the main page by clicking its icon in the side menu', 'Після зміни налаштувань оновіть головну сторінку, натиснувши на її іконку в бічному меню'),
+            surs_settings_interface:     L('Настройка интерфейса', 'Interface Settings', 'Налаштування інтерфейсу'),
+            surs_set_as_source:          L('Установить в качестве источника', 'Set as Source', 'Встановити як джерело'),
+            surs_source_description:     L('Влияет на отображение контента на главной странице', 'Affects content display on the main page', 'Впливає на відображення контенту на головній сторінці'),
+            surs_add_to_menu:            L('Добавить подборки в боковое меню', 'Add collections to the side menu', 'Додати підбірки до бічного меню'),
+            surs_menu_description:       L('Выберите, какие подборки добавить в боковое меню', 'Choose which collections to add to the side menu', 'Виберіть, які підбірки додати до бічного меню'),
+            surs_select_menu_sources:    L('Выбор источников для бокового меню', 'Select sources for the side menu', 'Вибір джерел для бічного меню'),
+            surs_custom_buttons:         L('Горизонтальное меню', 'Horizontal Menu', 'Горизонтальне меню'),
+            surs_custom_buttons_description: L('Выберите, какие кнопки отображать в интерфейсе', 'Choose which buttons to display in the interface', 'Виберіть, які кнопки відображати в інтерфейсі'),
+
+            surs_filters:                L('Фильтры', 'Filters', 'Фільтри'),
+            surs_sort_types:             L('Виды сортировки подборок', 'Types of selection sorting', 'Типи сортування підбірок'),
+            surs_sort_description:       L('Выбор сортировки подборок', 'Choose sorting for collections', 'Вибір сортування для підбірок'),
+            surs_genres:                 L('Жанры', 'Genres', 'Жанри'),
+            surs_genres_description:     L('Выбор жанров', 'Choose genres', 'Вибір жанрів'),
+            surs_global_streaming:       L('Глобальные стриминги', 'Global streaming services', 'Глобальні стрімінгові сервіси'),
+            surs_global_streaming_description: L('Выбор глобальных стриминговых сервисов', 'Choose global streaming services', 'Вибір глобальних стрімінгових сервісів'),
+            surs_rus_streaming:          L('Российские стриминги', 'Russian streaming services', 'Російські стрімінгові сервіси'),
+            surs_rus_streaming_description: L('Выбор российских стриминговых сервисов', 'Choose Russian streaming services', 'Вибір російських стрімінгових сервісів'),
+            surs_geo_filters:            L('Настройки подборок', 'Collection settings', 'Налаштування підбірок'),
+            surs_streaming:              L('Стриминги', 'Streaming services', 'Стрімінгові сервіси'),
+            surs_region_description:     L('Выберите регион', 'Choose region', 'Виберіть регіон'),
+            surs_top_all_time:           L('Топ за все время', 'Top of all time', 'Топ за весь час'),
+            surs_top_content_description: L('Фильмы, сериалы, или всё вместе', 'Movies, series, or both', 'Фільми, серіали або все разом'),
+            surs_top_5_years:            L('Топ за 5 лет', 'Top for 5 years', 'Топ за 5 років'),
+
+            surs_technical_settings:     L('Технические настройки', 'Technical settings', 'Технічні налаштування'),
+            surs_cyrillic:               L('Кириллица в карточке', 'Cyrillic in card', 'Кирилиця в картці'),
+            surs_cyrillic_description:   L('Фильтрует контент, оставляя только те материалы, у которых есть перевод названия или описание на кириллице', 'Filters content, keeping only materials with titles or descriptions translated into Cyrillic', 'Фільтрує контент, залишаючи лише матеріали з перекладом назви або опису на кирилицю'),
+            surs_cyrillic_enabled:       L('Включен', 'Enabled', 'Увімкнено'),
+            surs_cyrillic_disabled:      L('Выключен', 'Disabled', 'Вимкнено'),
+            surs_rating_validation:      L('Валидация рейтинга', 'Rating validation', 'Валідація рейтингу'),
+            surs_rating_description:     L('Позволяет исключить контент с случайно завышенной оценкой. Однако может также исключить новые фильмы или те, у которых ещё нет рейтинга или мало голосов', 'Excludes content with accidentally inflated ratings. May also exclude new movies or those with no rating or few votes', 'Виключає контент із випадково завищеним рейтингом. Може також виключити нові фільми або ті, у яких ще немає рейтингу чи мало голосів'),
+            surs_rating_off:             L('Выключено', 'Off', 'Вимкнено'),
+            surs_rating_standard:        L('Стандартная', 'Standard', 'Стандартна'),
+            surs_rating_enhanced:        L('Усиленная', 'Enhanced', 'Посилена'),
+            surs_rating_maximum:         L('Максимальная', 'Maximum', 'Максимальна'),
+            surs_rating_fatality:        L('Фаталити', 'Fatality', 'Фаталіті'),
+            surs_age_restriction:        L('Возрастное ограничение', 'Age restriction', 'Вікове обмеження'),
+            surs_age_description:        L('Формирует подборки, которые соответствуют указанному возрастному рейтингу', 'Creates collections that match the specified age rating', 'Формує підбірки, які відповідають вказаному віковому рейтингу'),
+            surs_age_toddlers:           L('Для самых маленьких', 'For toddlers', 'Для найменших'),
+            surs_age_6:                  L('Для детей не старше 6 лет', 'For children up to 6 years', 'Для дітей до 6 років'),
+            surs_age_12:                 L('Для детей не старше 12 лет', 'For children up to 12 years', 'Для дітей до 12 років'),
+            surs_age_none:               L('Без ограничений', 'No restrictions', 'Без обмежень'),
+            surs_exclude_asian:          L('Исключение азиатских жанров', 'Exclude Asian genres', 'Виключення азійських жанрів'),
+            surs_exclude_asian_description: L('Мягкий режим: исключает мангу, маньхву, донхуа. Сильный режим: дополнительно исключает аниме', 'Soft mode: excludes manga, manhwa, donghua. Strong mode: additionally excludes anime', 'М’який режим: виключає мангу, манхву, донхуа. Сильний режим: додатково виключає аніме'),
+            surs_exclude_off:            L('Выключено', 'Off', 'Вимкнено'),
+            surs_exclude_soft:           L('Мягко', 'Soft', 'М’яко'),
+            surs_exclude_strong:         L('Сильно', 'Strong', 'Сильно'),
+
+            surs_name:                   L('Название', 'Name', 'Назва'),
+            surs_rename_selections:      L('Переименование подборок', 'Rename collections', 'Перейменування підбірок'),
+            surs_rename_description:     L('Введите свое название вместо', 'Enter your name instead of', 'Введіть свою назву замість'),
+            surs_enter_new_name:         L('Введите новое название', 'Enter new name', 'Введіть нову назву'),
+            surs_name_saved:             L('Название сохранено. Обновление...', 'Name saved. Updating...', 'Назва збережена. Оновлення...'),
+            surs_name_not_entered:       L('Название не введено', 'Name not entered', 'Назва не введена'),
+
+            // используются модулем surs_nav_buttons.js
+            surs_main:                   L('Главная', 'Main', 'Головна'),
+            surs_bookmarks:              L('Избранное', 'Bookmarks', 'Обране'),
+            surs_history:                L('История', 'History', 'Історія'),
+            surs_select:                 L('Разделы', 'Sections', 'Розділи'),
+            surs_kids:                   L('Детское', 'Kids', 'Дитяче')
+        });
+    }
+
+    /* =====================================================================
+     *  ЗАПУСК
+     * ===================================================================== */
+
+    function init() {
+        if (!(Lampa.Manifest && Lampa.Manifest.app_digital >= 300)) {
+            console.warn('SURS', 'этот модуль только для Lampa 3.0+');
+            return;
+        }
+
+        addTranslations();
+
+        if (!Settings.get('interface_size_initialized', false)) {
+            Lampa.Storage.set('interface_size', 'small');
+            Settings.set('interface_size_initialized', true);
+        }
+
+        registerSources();
+        startSourceListeners();
+        renderMenuButtons();
+
+        Lampa.Listener.follow('profile', function (e) {
+            if (e.type === 'changed') renderMenuButtons();
+        });
+
+        if (!Lampa.Storage.get('surs_disableMenu')) initSettings();
+
+        // API для других модулей
+        window.SURS = {
+            version: 'lampa3-refactor',
+            screen: CONFIG.liteScreen,
+            settings: Settings,
+            sourceNames: sourceNames,
+            isSursSource: isSursSource,
+            openMain: openMain
+        };
+
+        Lampa.Listener.send('surs', { type: 'ready' });
+    }
+
+    if (window.appready) init();
+    else {
+        Lampa.Listener.follow('app', function (e) {
+            if (e.type === 'ready') init();
+        });
+    }
+})();
