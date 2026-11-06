@@ -143,9 +143,7 @@
                 Lampa.Utils.putScriptAsync(  
                     [ 'https://aviamovie.github.io/v3/surs.js',
                       'https://aviamovie.github.io/v3/surs_nav_buttons.js',
-                      'https://aviamovie.github.io/v3/surs_strmngs_row.js',
-                      'https://aviamovie.github.io/v3/surs_genres_row.js'
-
+                      'https://aviamovie.github.io/v3/surs_rows.js'   // стриминги + жанры
                     ],   
                     function () {  
                         console.log('SURS (v3) загружен.');  
