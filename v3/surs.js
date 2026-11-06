@@ -1235,6 +1235,27 @@
         });
     }
 
+    /**
+     * Показать главную источника, не плодя главные в стеке: если сейчас открыта
+     * главная — заменяем её (Activity.replace), иначе открываем новую.
+     * Раньше при старте и смене профиля новая главная ложилась поверх старой,
+     * и «Назад» возвращал на устаревшую главную.
+     */
+    function showMain(source) {
+        var active = Lampa.Activity.active();
+
+        if (active && active.component === 'main') {
+            Lampa.Activity.replace({
+                url: '',
+                title: t('title_main') + ' - ' + source.toUpperCase(),
+                component: 'main',
+                source: source,
+                page: 1
+            });
+        }
+        else openMain(source);
+    }
+
     function changeSource(source) {
         if (Lampa.Storage.get('source') === source) return;
 
@@ -1242,7 +1263,7 @@
         Lampa.Storage.set('source', source);
 
         setTimeout(function () {
-            openMain(source);
+            showMain(source);
             sourceChangedByProfile = false;
         }, 10);
     }
@@ -1259,15 +1280,21 @@
             else changeSource(names.main);
         });
 
-        // источник выбран вручную в настройках
+        // источник сменили (в настройках или программно, например lampainit при первом запуске):
+        // заменяем текущую главную, а не кладём новую поверх
         Lampa.Storage.listener.follow('change', function (e) {
             if (e.name !== 'source' || sourceChangedByProfile || !isSursSource(e.value)) return;
 
-            openMain(e.value);
+            var enabled = Lampa.Controller.enabled();
+            var fromSettings = !!(enabled && /settings|select/.test(enabled.name || ''));
 
-            setTimeout(function () {
-                Lampa.Controller.toggle('settings');
-            }, 100);
+            showMain(e.value);
+
+            if (fromSettings) {
+                setTimeout(function () {
+                    Lampa.Controller.toggle('settings');
+                }, 100);
+            }
         });
 
         // главная могла загрузиться раньше, чем зарегистрировались источники
@@ -1276,7 +1303,11 @@
 
         if (isSursSource(initial) && (!startPage || startPage === 'main')) {
             setTimeout(function () {
-                openMain(initial);
+                // Перезагружаем только уже открытую главную (она могла создаться с TMDB,
+                // пока источники SURS ещё не были зарегистрированы). Если главной ещё нет,
+                // Lampa создаст её сама — уже с источником SURS; своя push дала бы дубль.
+                var active = Lampa.Activity.active();
+                if (active && active.component === 'main') showMain(initial);
             }, 300);
         }
     }
