@@ -6,7 +6,13 @@
  *   'surs' — главные SURS NEW / KIDS / RUS
  *
  * Публичное API для других плагинов (совместимо с v3):
- *   window.surs_addExternalButton({id, title, icon, action})
+ *   window.surs_addExternalButton({id, title, icon, action, position, required})
+ *       position — 1 = второй кнопкой, 'penultimate' = предпоследней (перед «Настройками»),
+ *                  без position — после первых трёх (как раньше)
+ *       required — кнопку нельзя скрыть в настройках «Горизонтальное меню»
+ *   window.surs_nav_pending[key] = true / window.surs_navReady(key)
+ *       модуль может попросить ряд подождать (до NAV_WAIT_MAX мс), пока он
+ *       определится со своими кнопками — например, проверит подписку
  *   window.surs_removeExternalButton(id)
  *   window.surs_clearExternalButtons()
  *   window.surs_getExternalButtons()
@@ -19,6 +25,7 @@
     window.plugin_custom_buttons_ready = true;
 
     var ROW_NAME = 'surs_buttons';
+    var NAV_WAIT_MAX = 3000;
 
     /* ---------------- иконки ---------------- */
 
@@ -100,20 +107,50 @@
         return window.surs_external_buttons || (window.surs_external_buttons = []);
     }
 
-    /** Первые 3 базовые → внешние → остальные базовые (настройки — последней) */
+    function hasPosition(button) {
+        return typeof button.position === 'number' || button.position === 'penultimate';
+    }
+
+    /**
+     * Первые 3 базовые → внешние без позиции → остальные базовые (настройки — последней),
+     * затем внешние с позицией: сначала числовые по возрастанию, потом «предпоследние».
+     */
     function getAllButtons() {
-        return BASE_BUTTONS.slice(0, 3)
-            .concat(getExternalButtons())
+        var external = getExternalButtons();
+        var list = BASE_BUTTONS.slice(0, 3)
+            .concat(external.filter(function (b) { return !hasPosition(b); }))
             .concat(BASE_BUTTONS.slice(3));
+
+        external.filter(function (b) { return typeof b.position === 'number'; })
+            .sort(function (a, b) { return a.position - b.position; })
+            .forEach(function (b) {
+                list.splice(Math.max(0, Math.min(b.position, list.length)), 0, b);
+            });
+
+        external.filter(function (b) { return b.position === 'penultimate'; })
+            .forEach(function (b) {
+                list.splice(Math.max(0, list.length - 1), 0, b);
+            });
+
+        return list;
+    }
+
+    /** Для меню настроек: обязательные кнопки не показываем, их нельзя выключить */
+    function getConfigurableButtons() {
+        return getAllButtons().filter(function (b) { return !b.required; });
     }
 
     function addExternalButton(data) {
-        var list = getExternalButtons();
+        var id = data.id || 'external_' + Date.now();
 
-        list.push({
-            id: data.id || 'external_' + Date.now(),
+        removeExternalButton(id); // повторное добавление заменяет кнопку
+
+        getExternalButtons().push({
+            id: id,
             title: data.title || 'External Button',
             icon: data.icon || '',
+            position: data.position,
+            required: !!data.required,
             action: typeof data.action === 'function' ? data.action : function () {}
         });
     }
@@ -136,6 +173,7 @@
     /* ---------------- настройки (общие с ядром SURS) ---------------- */
 
     function isEnabled(button) {
+        if (button.required) return true;
         if (window.SURS && window.SURS.settings) return window.SURS.settings.get('custom_button_' + button.id, true);
 
         var all = Lampa.Storage.get('surs_settings') || {};
@@ -184,7 +222,7 @@
         };
     }
 
-    function buildRow(call) {
+    function renderRow(call) {
         var results = getAllButtons().filter(isEnabled).map(buttonCard);
 
         if (!results.length) return call({ results: [] });
@@ -196,6 +234,42 @@
                 items: { view: 20, mapping: 'line' }
             }
         });
+    }
+
+    /* ---------------- ожидание внешних модулей ---------------- */
+
+    var waiters = [];
+
+    function hasPending() {
+        var pending = window.surs_nav_pending || {};
+        for (var key in pending) {
+            if (Object.prototype.hasOwnProperty.call(pending, key) && pending[key]) return true;
+        }
+        return false;
+    }
+
+    function navReady(key) {
+        if (window.surs_nav_pending) delete window.surs_nav_pending[key];
+        if (hasPending()) return;
+
+        var list = waiters;
+        waiters = [];
+        list.forEach(function (fn) { fn(); });
+    }
+
+    function buildRow(call) {
+        var done = false;
+
+        function render() {
+            if (done) return;
+            done = true;
+            renderRow(call);
+        }
+
+        if (!hasPending()) return render();
+
+        waiters.push(render);
+        setTimeout(render, NAV_WAIT_MAX);
     }
 
     /* ---------------- стили ---------------- */
@@ -231,7 +305,9 @@
 
         addStyles();
 
-        window.surs_getAllButtons        = getAllButtons;
+        window.surs_getAllButtons        = getConfigurableButtons;
+        window.surs_navReady             = navReady;
+        window.surs_nav_pending          = window.surs_nav_pending || {};
         window.surs_addExternalButton    = addExternalButton;
         window.surs_removeExternalButton = removeExternalButton;
         window.surs_clearExternalButtons = clearExternalButtons;
