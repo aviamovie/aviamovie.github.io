@@ -1949,7 +1949,7 @@
 
         // API для других модулей
         window.SURS = {
-            version: 'lampa3-refactor',
+            version: '3.1',
             screen: CONFIG.liteScreen,
             settings: Settings,
             sourceNames: sourceNames,
