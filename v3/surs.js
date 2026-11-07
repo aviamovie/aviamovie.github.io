@@ -17,14 +17,14 @@
 
     var CONFIG = {
         partsLimit: 9,          // сколько рядов грузится за одну порцию (Api.partNext)
-        wideChance: 0.1,        // вероятность, что ряд будет отрисован широкими карточками
+        wideChance: 0.2,        // вероятность, что ряд будет отрисован широкими карточками
         cacheLife: 60 * 6,      // кеш запросов TMDB в минутах (Lampa.Request cache, V3)
         liteScreen: 'surs',     // экран ContentRows для источников NEW / KIDS / RUS
         personsCount: 8,        // сколько рядов «актёр → фильмы» на главной SURS
-        rusPersonsMain: 4,      // рядов российских актёров на главной SURS
-        rusPersonsRus: 8,       // рядов российских актёров на SURS RUS
-        keywordRows: 8,         // рядов по ключевым словам на главной SURS
-        collectionRows: 6,      // рядов-коллекций (франшиз) за одно открытие
+        rusPersonsMain: 9,      // рядов российских актёров на главной SURS
+        rusPersonsRus: 9,       // рядов российских актёров на SURS RUS
+        keywordRows: 12,         // рядов по ключевым словам на главной SURS
+        collectionRows: 12,      // рядов-коллекций (франшиз) за одно открытие
         searchCacheLife: 60 * 24 * 30, // поиск коллекций/актёров по имени — кеш 30 дней
         settingsComponent: 'surs'
     };
