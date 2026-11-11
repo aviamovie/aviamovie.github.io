@@ -277,15 +277,49 @@
 
     /**
      * Какие варианты (тип × сортировка) дают непустой результат.
-     * Запросы — первая страница через tmdb.get (зеркало и кеш Lampa, 12 ч),
+     * Запускается при нажатии на плитку студии. Запросы — первая страница
+     * через tmdb.get (зеркало и кеш запросов Lampa, 30 суток),
      * все параллельно; ответ ошибкой считаем «есть данные», чтобы из-за сбоя
-     * сети не прятать пункты. Результат запоминается до перезапуска.
+     * сети не прятать пункты. Готовый результат хранится в Lampa.Storage
+     * 30 суток (меню открывается сразу и после перезапуска); если был сбой
+     * сети — не сохраняется, при следующем нажатии проверим заново.
      * callback({movie: ['new', ...], tv: [...]})
      */
-    var availableCache = {};
+    var AVAILABLE_KEY = 'surs_studios_available';
+    var AVAILABLE_LIFE = 1000 * 60 * 60 * 24 * 30; // 30 суток
+
+    function readAll() {
+        var all = Lampa.Storage.get(AVAILABLE_KEY, '{}');
+        if (typeof all === 'string') {
+            try { all = JSON.parse(all || '{}'); } catch (e) { all = {}; }
+        }
+        return all && typeof all === 'object' ? all : {};
+    }
+
+    function readAvailable(cacheKey) {
+        var all = readAll();
+        var entry = all[cacheKey];
+        return entry && entry.data && Date.now() - (entry.at || 0) < AVAILABLE_LIFE ? entry.data : null;
+    }
+
+    function saveAvailable(cacheKey, data) {
+        var all = readAll();
+        var now = Date.now();
+
+        // заодно выбрасываем просроченные записи
+        for (var key in all) {
+            if (Object.prototype.hasOwnProperty.call(all, key) && (!all[key] || now - (all[key].at || 0) >= AVAILABLE_LIFE)) delete all[key];
+        }
+
+        all[cacheKey] = { at: now, data: data };
+        Lampa.Storage.set(AVAILABLE_KEY, all);
+    }
 
     function checkAvailable(cacheKey, types, filter, opt, callback) {
-        if (availableCache[cacheKey]) return callback(availableCache[cacheKey]);
+        var cached = readAvailable(cacheKey);
+        if (cached) return callback(cached);
+
+        var failed = false;
 
         var tmdb = Lampa.Api.sources.tmdb;
         var result = {};
@@ -299,7 +333,8 @@
             });
         });
 
-        function done(type, key, ok) {
+        function done(type, key, ok, error) {
+            if (error) failed = true;
             if (ok) result[type].push(key);
             if (--left) return;
 
@@ -310,7 +345,7 @@
                 });
             });
 
-            availableCache[cacheKey] = result;
+            if (!failed) saveAvailable(cacheKey, result);
             callback(result);
         }
 
@@ -321,8 +356,8 @@
                 tmdb.get(sortUrl(type, filter, sort.key, opt), {}, function (json) {
                     done(type, sort.key, !!(json && json.results && json.results.length));
                 }, function () {
-                    done(type, sort.key, true);
-                }, { life: 60 * 12 });
+                    done(type, sort.key, true, true);
+                }, { life: 60 * 24 * 30 });
             });
         });
     }
