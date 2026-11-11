@@ -1,12 +1,17 @@
 /*
- * SURS — ряды-кнопки «Глобальные стриминги», «Жанры», «Российские стриминги» (Lampa 3.x)
+ * SURS — ряды-кнопки «Глобальные стриминги», «Жанры», «Российские стриминги»,
+ *        «Киностудии», «Российские студии» (Lampa 3.x)
  *
  * Объединяет v3/surs_strmngs_row.js и v3/surs_genres_row.js в один плагин:
  *  - общая фабрика плиток и общий стиль (жанры выглядят так же, как стриминги);
  *  - все ряды регистрируются через Lampa.ContentRows (экран 'main');
  *    ключи вкл/выкл прежние: content_rows_streaming_global / _streaming_russian / _genres_buttons;
- *  - на главной SURS позиции рядов случайные (как в v3), на других источниках — фиксированные;
- *  - фильтр ключевых слов при открытии жанра берётся из настроек SURS.
+ *  - на главной SURS позиции рядов выбирает ядро (случайно на рядах 3–12, не рядом
+ *    друг с другом и со штатными рядами эпизодов), на других источниках — фиксированные;
+ *  - сортировки при открытии стриминга, жанра или студии — те же, что в подборках
+ *    главной: «Новинки», «Популярные», «Высокий рейтинг», «Много голосов»,
+ *    «Интерес зрителей» (только для фильмов: у сериалов в TMDB нет сборов);
+ *  - фильтр ключевых слов берётся из настроек SURS.
  */
 (function () {
     'use strict';
@@ -22,7 +27,6 @@
      *  ДАННЫЕ
      * ===================================================================== */
 
-    var STREAMING_KEYWORDS = '&without_keywords=346488,158718,41278,196034,272265,13141,345822,315535,290667,323477,290609';
     var LOGO_CACHE_MINUTES = 60 * 24 * 7;
 
     var GLOBAL = [
@@ -84,18 +88,90 @@
         { id: 10768, title: 'filter_genre_mp', types: ['tv'], icon: '<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M20 6h3v2h-1v11h1v2H1v-2h1V8H1V6h3V4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2zm0 2H4v11h3v-7h2v7h2v-7h2v7h2v-7h2v7h3V8zM6 5v1h12V5H6z"/></svg>' }
     ];
 
-    var STREAMING_SORTS = [
-        { title: 'surs_strmngs_new',        sort: 'first_air_date.desc', votes: 0,  fresh: true },
-        { title: 'surs_strmngs_top_rated',  sort: 'vote_average.desc',   votes: 10 },
-        { title: 'surs_strmngs_popular',    sort: 'popularity.desc',     votes: 10 },
-        { title: 'surs_strmngs_most_voted', sort: 'vote_count.desc',     votes: 30 }
+    /** Сортировки — как у подборок главной SURS (те же ключи перевода) */
+    var SORTS = [
+        { key: 'new',     title: 'surs_first_air_date_desc' },
+        { key: 'popular', title: 'surs_popularity_desc' },
+        { key: 'rating',  title: 'surs_vote_average_desc' },
+        { key: 'votes',   title: 'surs_vote_count_desc' },
+        { key: 'revenue', title: 'surs_revenue_desc', movieOnly: true }
     ];
 
-    var GENRE_SORTS = [
-        { title: 'title_popular',     sort: 'popularity.desc' },
-        { title: 'title_new',         sort: 'release_date.desc' },
-        { title: 'title_hight_voite', sort: 'vote_average.desc' },
-        { title: 'title_in_top',      sort: 'vote_count.desc' }
+    /*
+     * Киностудии: TMDB company id. Список и группы — по образцу V.Lampa Studios;
+     * логотипы не вшиты (1,8 МБ), а берутся из TMDB (company/{id}), как у стримингов.
+     * mono — логотип тёмный, на тёмной плитке перекрашивается в белый;
+     * light — логотип цветной на светлом фоне, плитка светлая.
+     */
+    var STUDIOS = [
+        { title: "Pixar", ids: [3], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Walt Disney Animation", ids: [6125, 171656], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "DreamWorks Animation", ids: [521, 42141], types: ['movie', 'tv'], group: 'world', light: true },
+        { title: "Illumination", ids: [6704], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Sony Pictures Animation", ids: [2251], types: ['movie', 'tv'], group: 'world' },
+        { title: "LAIKA", ids: [11537], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Aardman", ids: [297], types: ['movie', 'tv'], group: 'world' },
+        { title: "Cartoon Saloon", ids: [23948], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Blue Sky Studios", ids: [9383], types: ['movie', 'tv'], group: 'world' },
+        { title: "Skydance Animation", ids: [115416], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Marvel Studios", ids: [420, 13252], types: ['movie', 'tv'], group: 'world' },
+        { title: "Lucasfilm", ids: [1], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "DC Studios", ids: [184898, 9993], types: ['movie', 'tv'], group: 'world' },
+        { title: "Warner Bros.", ids: [174], types: ['movie', 'tv'], group: 'world' },
+        { title: "Universal Pictures", ids: [33], types: ['movie', 'tv'], group: 'world', light: true },
+        { title: "Paramount Pictures", ids: [4], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Columbia Pictures", ids: [5], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Legendary Pictures", ids: [923], types: ['movie'], group: 'world', mono: true },
+        { title: "Lionsgate", ids: [1632], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "20th Century Studios", ids: [127928, 25], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Metro-Goldwyn-Mayer", ids: [21], types: ['movie', 'tv'], group: 'world' },
+        { title: "New Line Cinema", ids: [12], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Walt Disney Pictures", ids: [2], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Amblin Entertainment", ids: [56], types: ['movie', 'tv'], group: 'world' },
+        { title: "Skydance", ids: [82819], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "DreamWorks Pictures", ids: [7], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Touchstone Pictures", ids: [9195], types: ['movie'], group: 'world' },
+        { title: "A24", ids: [41077], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Blumhouse", ids: [3172, 314016], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "NEON", ids: [90733], types: ['movie'], group: 'world', mono: true },
+        { title: "Searchlight Pictures", ids: [127929, 43], types: ['movie'], group: 'world', mono: true },
+        { title: "Focus Features", ids: [10146], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Sony Pictures Classics", ids: [58], types: ['movie'], group: 'world', mono: true },
+        { title: "Annapurna Pictures", ids: [13184], types: ['movie'], group: 'world', mono: true },
+        { title: "Plan B Entertainment", ids: [81], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Working Title", ids: [10163], types: ['movie', 'tv'], group: 'world', light: true },
+        { title: "Film4 Productions", ids: [6705], types: ['movie', 'tv'], group: 'world', light: true },
+        { title: "BBC Film", ids: [288], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Heyday Films", ids: [437], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Hammer Films", ids: [1314], types: ['movie', 'tv'], group: 'world', light: true },
+        { title: "Syncopy", ids: [9996], types: ['movie'], group: 'world', mono: true },
+        { title: "See-Saw Films", ids: [7217], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Scott Free Productions", ids: [1645], types: ['movie', 'tv'], group: 'world' },
+        { title: "Big Talk Studios", ids: [443], types: ['movie', 'tv'], group: 'world', light: true },
+        { title: "Bad Wolf", ids: [82996], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Warp Films", ids: [12180], types: ['movie', 'tv'], group: 'world', mono: true },
+        { title: "Союзмультфильм", ids: [14599, 7501], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Мосфильм", ids: [344, 170585], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "Ленфильм", ids: [10845, 170208], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Киностудия Горького", ids: [21978, 170204], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "Мельница", ids: [5306], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "СТВ", ids: [318], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "Базелевс", ids: [1038], types: ['movie', 'tv'], group: 'rus', light: true },
+        { title: "ТРИТЭ", ids: [3467, 6453], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Art Pictures Studio", ids: [3451, 114677], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "Централ Партнершип", ids: [3419], types: ['movie', 'tv'], group: 'rus', light: true },
+        { title: "Yellow, Black & White", ids: [42877], types: ['movie', 'tv'], group: 'rus', light: true },
+        { title: "Водород", ids: [100821, 89458, 96396], types: ['movie', 'tv'], group: 'rus', light: true },
+        { title: "Марс Медиа", ids: [54307], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "1-2-3 Production", ids: [113707], types: ['movie', 'tv'], group: 'rus', mono: true },
+        { title: "ПРОФИТ", ids: [100852], types: ['movie', 'tv'], group: 'rus' },
+        { title: "РОК", ids: [42673], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Дирекция кино", ids: [78782], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Воронежская анимационная студия", ids: [46315], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Рики", ids: [123331], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Паровоз", ids: [98898, 162452], types: ['movie', 'tv'], group: 'rus' },
+        { title: "Анимаккорд", ids: [55393], types: ['movie', 'tv'], group: 'rus' },
+        { title: "КиноАтис", ids: [21384], types: ['movie', 'tv'], group: 'rus' }
     ];
 
     /* =====================================================================
@@ -112,14 +188,6 @@
         if (months) d.setMonth(d.getMonth() + months);
         if (days)   d.setDate(d.getDate() + days);
         return d.toISOString().split('T')[0];
-    }
-
-    function randomInt(min, max) {
-        return min + Math.floor(Math.random() * (max - min + 1));
-    }
-
-    function isSursMain(params) {
-        return !!(params && window.SURS && window.SURS.isSursSource(params.source));
     }
 
     /** Исключение ключевых слов по настройке SURS (если ядро загружено) */
@@ -139,8 +207,279 @@
         });
     }
 
+    /**
+     * URL подборки по сортировке.
+     * @param {string} filter например 'with_networks=213' / 'with_genres=35' / 'with_companies=3|7'
+     * @param {object=} opt ratingVotes — порог голосов для «Высокого рейтинга»
+     */
+    function sortUrl(type, filter, key, opt) {
+        opt = opt || {};
+
+        var field = type === 'movie' ? 'primary_release_date' : 'first_air_date';
+        var url = 'discover/' + type + '?' + filter;
+
+        if (key === 'new') {
+            // те же окна, что у «Новинок» на главной SURS
+            url += '&sort_by=' + field + '.desc' +
+                '&' + field + '.gte=' + (type === 'movie' ? isoDate(0, -26) : isoDate(0, -18)) +
+                '&' + field + '.lte=' + (type === 'movie' ? isoDate(-40) : isoDate(-10)) +
+                '&vote_count.gte=5';
+        }
+        else if (key === 'popular') url += '&sort_by=popularity.desc&vote_count.gte=10';
+        else if (key === 'rating')  url += '&sort_by=vote_average.desc&vote_count.gte=' + (opt.ratingVotes || (type === 'movie' ? 300 : 100));
+        else if (key === 'votes')   url += '&sort_by=vote_count.desc';
+        else if (key === 'revenue') url += '&sort_by=revenue.desc';
+
+        return keywordsFilter(url);
+    }
+
+    /** Меню сортировок → category_full */
+    function showSorts(title, type, filter, opt, back) {
+        var typeTitle = t(type === 'movie' ? 'menu_movies' : 'menu_tv');
+
+        Lampa.Select.show({
+            title: title + (opt && opt.showType ? ' — ' + typeTitle : ''),
+            items: SORTS.filter(function (s) {
+                if (s.movieOnly && type !== 'movie') return false;
+                // opt.available — непустые сортировки по типам (см. checkStudio)
+                return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
+            }).map(function (s) {
+                return { title: t(s.title), key: s.key };
+            }),
+            onSelect: function (item) {
+                openCategory(title + ' — ' + item.title, sortUrl(type, filter, item.key, opt), type);
+            },
+            onBack: back || function () {
+                Lampa.Controller.toggle('content');
+            }
+        });
+    }
+
+    /** Если доступны и фильмы, и сериалы — сначала выбор типа */
+    function showTypes(title, types, filter, opt) {
+        if (types.length === 1) return showSorts(title, types[0], filter, assign({ showType: true }, opt));
+
+        Lampa.Select.show({
+            title: title,
+            items: types.map(function (type) {
+                return { title: t(type === 'movie' ? 'menu_movies' : 'menu_tv'), type: type };
+            }),
+            onSelect: function (item) {
+                showSorts(title, item.type, filter, assign({ showType: true }, opt), function () {
+                    showTypes(title, types, filter, opt);
+                });
+            },
+            onBack: function () {
+                Lampa.Controller.toggle('content');
+            }
+        });
+    }
+
     /* =====================================================================
-     *  ОБЩАЯ ПЛИТКА (один дизайн для стримингов и жанров)
+     *  НЕПУСТЫЕ ВАРИАНТЫ СТУДИЙ (фоновая проверка + кеш 30 суток)
+     *
+     *  После загрузки скрипта (через WARM.startDelay, чтобы не мешать главной)
+     *  в фоне по очереди проверяются студии без свежего результата.
+     *  Бережно к TMDB:
+     *   - запросы строго по одному, пауза WARM.delay между ними;
+     *   - ошибка → пауза растёт вдвое (WARM.backoff … WARM.maxBackoff);
+     *   - пока приложение свёрнуто или открыт плеер — ждём;
+     *   - для типа сначала «есть ли вообще что-то» (vote_count.desc без порогов);
+     *     если пусто — остальные сортировки типа не запрашиваем. «Много голосов»
+     *     и «Интерес зрителей» порогов не имеют — непусты, если тип непуст;
+     *   - ответы TMDB в кеш запросов Lampa не кладём (сотни записей в IndexedDB
+     *     телевизора), храним только итог студии — в Lampa.Storage на 30 суток.
+     *  Если при проверке студии была ошибка — итог не сохраняется, студия
+     *  проверится в следующий раз.
+     *
+     *  Открытие студии: итог есть — только непустые пункты; нет — все варианты
+     *  сразу (без ожидания), а студия переходит в начало очереди проверки.
+     *  Формат итога: {movie: ['new', ...], tv: [...]}
+     * ===================================================================== */
+
+    var WARM = {
+        startDelay: 30000,  // старт через 30 с после загрузки скрипта
+        delay: 2000,        // пауза между запросами
+        backoff: 30000,     // пауза после ошибки (растёт вдвое)
+        maxBackoff: 600000, // до 10 минут
+        idleCheck: 30000    // приложение свёрнуто / идёт просмотр — проверяем снова через 30 с
+    };
+    var AVAILABLE_KEY = 'surs_studios_available';
+    var AVAILABLE_LIFE = 1000 * 60 * 60 * 24 * 30; // 30 суток
+
+    function readAll() {
+        var all = Lampa.Storage.get(AVAILABLE_KEY, '{}');
+        if (typeof all === 'string') {
+            try { all = JSON.parse(all || '{}'); } catch (e) { all = {}; }
+        }
+        return all && typeof all === 'object' ? all : {};
+    }
+
+    function readAvailable(cacheKey) {
+        var all = readAll();
+        var entry = all[cacheKey];
+        return entry && entry.data && Date.now() - (entry.at || 0) < AVAILABLE_LIFE ? entry.data : null;
+    }
+
+    function saveAvailable(cacheKey, data) {
+        var all = readAll();
+        var now = Date.now();
+
+        // заодно выбрасываем просроченные записи
+        for (var key in all) {
+            if (Object.prototype.hasOwnProperty.call(all, key) && (!all[key] || now - (all[key].at || 0) >= AVAILABLE_LIFE)) delete all[key];
+        }
+
+        all[cacheKey] = { at: now, data: data };
+        Lampa.Storage.set(AVAILABLE_KEY, all);
+    }
+
+    function studioKey(studio) {
+        return 'studio_' + studio.ids.join('_');
+    }
+
+    function studioFilter(studio) {
+        return 'with_companies=' + studio.ids.join('|');
+    }
+
+    function studioOpt(studio) {
+        return { ratingVotes: studio.group === 'rus' ? 10 : null };
+    }
+
+    var warm = { started: false, pause: 0, queue: [], busy: false };
+
+    /** Можно ли сейчас делать фоновые запросы */
+    function idle() {
+        if (document.hidden) return false;
+        try {
+            if (Lampa.Player && typeof Lampa.Player.opened === 'function' && Lampa.Player.opened()) return false;
+        } catch (e) {}
+        return true;
+    }
+
+    /** Подождать, пока приложение активно и не идёт просмотр */
+    function whenIdle(fn, wait) {
+        setTimeout(function () {
+            if (idle()) fn();
+            else whenIdle(fn, WARM.idleCheck);
+        }, wait);
+    }
+
+    /** Один запрос: есть ли результаты. cb(true/false) или cb(null) при ошибке */
+    function probe(type, studio, key, cb) {
+        Lampa.Api.sources.tmdb.get(sortUrl(type, studioFilter(studio), key, studioOpt(studio)), {}, function (json) {
+            warm.pause = 0;
+            cb(!!(json && json.results && json.results.length));
+        }, function () {
+            warm.pause = warm.pause ? Math.min(warm.pause * 2, WARM.maxBackoff) : WARM.backoff;
+            cb(null);
+        }, false);
+    }
+
+    /** Проверить одну студию (запросы по одному, с паузой). done() по завершении */
+    function checkStudio(studio, done) {
+        var result = {};
+        var failed = false;
+        var types = studio.types.slice();
+
+        function nextType() {
+            var type = types.shift();
+
+            if (!type) {
+                if (!failed) saveAvailable(studioKey(studio), result);
+                return done();
+            }
+
+            result[type] = [];
+
+            // 1) есть ли у типа хоть что-то (= «Много голосов» без порогов)
+            probe(type, studio, 'votes', function (any) {
+                if (any === null) failed = true;
+
+                if (any === false) return whenIdle(nextType, WARM.delay);
+
+                // ошибка — пункты не прячем; есть данные — votes и revenue заведомо непусты
+                var keys = SORTS.filter(function (s) {
+                    return !s.movieOnly || type === 'movie';
+                }).map(function (s) { return s.key; });
+
+                var ask = keys.filter(function (k) { return k === 'new' || k === 'popular' || k === 'rating'; });
+                var found = keys.filter(function (k) { return ask.indexOf(k) < 0; });
+
+                if (any === null) {
+                    result[type] = keys;
+                    return whenIdle(nextType, warm.pause || WARM.delay);
+                }
+
+                (function nextKey() {
+                    var key = ask.shift();
+
+                    if (!key) {
+                        // порядок пунктов — как в SORTS
+                        result[type] = keys.filter(function (k) { return found.indexOf(k) >= 0; });
+                        return whenIdle(nextType, WARM.delay);
+                    }
+
+                    whenIdle(function () {
+                        probe(type, studio, key, function (ok) {
+                            if (ok === null) failed = true;
+                            if (ok !== false) found.push(key);
+                            nextKey();
+                        });
+                    }, warm.pause || WARM.delay);
+                })();
+            });
+        }
+
+        nextType();
+    }
+
+    /** Студия без свежего итога — в начало очереди (например, её только что открыли) */
+    function prioritize(studio) {
+        var key = studioKey(studio);
+
+        warm.queue = warm.queue.filter(function (s) { return studioKey(s) !== key; });
+        warm.queue.unshift(studio);
+    }
+
+    function runQueue() {
+        if (warm.busy) return;
+
+        var studio = warm.queue.shift();
+        if (!studio) return;
+
+        // за время ожидания мог появиться свежий итог
+        if (readAvailable(studioKey(studio))) return runQueue();
+
+        warm.busy = true;
+
+        checkStudio(studio, function () {
+            warm.busy = false;
+            whenIdle(runQueue, warm.pause || WARM.delay);
+        });
+    }
+
+    /** Фоновый проход по студиям без свежего итога — один раз за запуск */
+    function warmUp() {
+        if (warm.started) return;
+        warm.started = true;
+
+        warm.queue = STUDIOS.filter(function (studio) {
+            return !readAvailable(studioKey(studio));
+        });
+
+        if (warm.queue.length) whenIdle(runQueue, WARM.startDelay);
+    }
+
+    function assign(target, src) {
+        for (var key in src) {
+            if (Object.prototype.hasOwnProperty.call(src, key)) target[key] = src[key];
+        }
+        return target;
+    }
+
+    /* =====================================================================
+     *  ОБЩАЯ ПЛИТКА (один дизайн для стримингов, жанров и студий)
      * ===================================================================== */
 
     /**
@@ -149,6 +488,8 @@
      *   icon     — SVG-строка (жанры)
      *   logo     — function(callback(url)) — загрузка логотипа (стриминги)
      *   label    — показывать подпись внизу плитки
+     *   mono     — тёмный логотип перекрасить в белый
+     *   light    — светлая плитка (для цветных логотипов на светлом фоне)
      *   onEnter
      */
     function tile(opt) {
@@ -166,6 +507,7 @@
                         box.className = 'surs-tile__icon';
 
                         this.html.addClass('surs-tile');
+                        if (opt.light) this.html.addClass('surs-tile--light');
                         this.html.find('.card__img').replaceWith(box);
 
                         if (opt.label) {
@@ -189,6 +531,7 @@
                             opt.logo(function (url) {
                                 if (!url) return showName();
                                 var img = document.createElement('img');
+                                if (opt.mono) img.className = 'surs-tile__logo--white';
                                 img.src = url;
                                 img.onerror = function () { img.remove(); showName(); };
                                 box.appendChild(img);
@@ -217,45 +560,30 @@
      *  СТРИМИНГИ
      * ===================================================================== */
 
-    function loadLogo(networkId, callback) {
-        var url = Lampa.TMDB.api('network/' + networkId + '?api_key=' + Lampa.TMDB.key());
+    /** Логотип сети или компании из TMDB (Lampa.Network + кеш запросов, V3) */
+    function loadLogo(kind, id, callback) {
+        var url = Lampa.TMDB.api(kind + '/' + id + '?api_key=' + Lampa.TMDB.key());
 
         Lampa.Network.silent(url, function (data) {
-            callback(data && data.logo_path ? Lampa.TMDB.image('t/p/w154' + data.logo_path) : '');
+            callback(data && data.logo_path ? Lampa.TMDB.image('t/p/w300' + data.logo_path) : '');
         }, function () {
             callback('');
         }, false, { cache: { life: LOGO_CACHE_MINUTES } });
     }
 
-    function openService(service, isGlobal) {
-        Lampa.Select.show({
-            title: service.title,
-            items: STREAMING_SORTS.map(function (s) {
-                return { title: t(s.title), sort: s };
-            }),
-            onSelect: function (item) {
-                var s = item.sort;
-                var url = 'discover/tv?with_networks=' + service.id + '&sort_by=' + s.sort + STREAMING_KEYWORDS;
-
-                if (s.fresh) url += '&first_air_date.gte=' + isoDate(0, 0, -3) + (isGlobal ? '&vote_count.gte=10' : '');
-                else url += '&vote_count.gte=' + s.votes;
-
-                openCategory(service.title + ' — ' + item.title, url, 'tv');
-            },
-            onBack: function () {
-                Lampa.Controller.toggle('content');
-            }
-        });
+    function openService(service) {
+        // стриминги — сериалы (with_networks есть только у discover/tv)
+        showSorts(service.title, 'tv', 'with_networks=' + service.id, { ratingVotes: 50 });
     }
 
-    function streamingRow(services, isGlobal, titleKey) {
+    function streamingRow(services, titleKey) {
         return function (call) {
             call(tilesRow(t(titleKey), services.map(function (service) {
                 return tile({
                     id: 'streaming_' + service.id,
                     title: service.title,
-                    logo: function (cb) { loadLogo(service.id, cb); },
-                    onEnter: function () { openService(service, isGlobal); }
+                    logo: function (cb) { loadLogo('network', service.id, cb); },
+                    onEnter: function () { openService(service); }
                 });
             })));
         };
@@ -265,52 +593,8 @@
      *  ЖАНРЫ
      * ===================================================================== */
 
-    function genreUrl(genre, type, sort) {
-        var url = 'discover/' + type + '?with_genres=' + genre.id + '&sort_by=' + sort;
-
-        if (sort === 'release_date.desc') {
-            var field = type === 'movie' ? 'primary_release_date' : 'first_air_date';
-            url += '&' + field + '.lte=' + isoDate(-10) + '&' + field + '.gte=' + isoDate(0, -9) + '&vote_count.gte=20';
-            if (type === 'tv') url = url.replace('sort_by=release_date.desc', 'sort_by=first_air_date.desc');
-        }
-
-        if (sort === 'vote_average.desc') url += '&vote_count.gte=400';
-
-        return keywordsFilter(url);
-    }
-
-    function showGenreSorts(genre, type, back) {
-        Lampa.Select.show({
-            title: t(genre.title) + ' — ' + t(type === 'movie' ? 'menu_movies' : 'menu_tv'),
-            items: GENRE_SORTS.map(function (s) {
-                return { title: t(s.title), sort: s.sort };
-            }),
-            onSelect: function (item) {
-                openCategory(t(genre.title) + ' — ' + item.title, genreUrl(genre, type, item.sort), type);
-            },
-            onBack: back
-        });
-    }
-
     function openGenre(genre) {
-        if (genre.types.length === 1) {
-            return showGenreSorts(genre, genre.types[0], function () {
-                Lampa.Controller.toggle('content');
-            });
-        }
-
-        Lampa.Select.show({
-            title: t(genre.title),
-            items: genre.types.map(function (type) {
-                return { title: t(type === 'movie' ? 'menu_movies' : 'menu_tv'), type: type };
-            }),
-            onSelect: function (item) {
-                showGenreSorts(genre, item.type, function () { openGenre(genre); });
-            },
-            onBack: function () {
-                Lampa.Controller.toggle('content');
-            }
-        });
+        showTypes(t(genre.title), genre.types, 'with_genres=' + genre.id, {});
     }
 
     function genresRow(call) {
@@ -326,31 +610,80 @@
     }
 
     /* =====================================================================
+     *  СТУДИИ
+     * ===================================================================== */
+
+    /**
+     * Студия: если фоновая проверка уже была — показываем только непустые
+     * типы и сортировки, иначе все варианты сразу (и проверяем её первой).
+     */
+    function openStudio(studio) {
+        var available = readAvailable(studioKey(studio));
+        var opt = studioOpt(studio);
+
+        if (!available) {
+            // проверки ещё не было — все варианты сразу, а студию проверим первой
+            prioritize(studio);
+            if (warm.started && !warm.busy) whenIdle(runQueue, WARM.delay);
+            return showTypes(studio.title, studio.types, studioFilter(studio), opt);
+        }
+
+        var types = studio.types.filter(function (type) {
+            return available[type] && available[type].length;
+        });
+
+        if (!types.length) {
+            Lampa.Noty.show(t('surs_studio_empty'));
+            return;
+        }
+
+        showTypes(studio.title, types, studioFilter(studio), assign({ available: available }, opt));
+    }
+
+    function studiosRow(group, titleKey) {
+        return function (call) {
+            call(tilesRow(t(titleKey), STUDIOS.filter(function (s) {
+                return s.group === group;
+            }).map(function (studio) {
+                return tile({
+                    id: 'studio_' + studio.ids[0],
+                    title: studio.title,
+                    mono: studio.mono,
+                    light: studio.light,
+                    logo: function (cb) { loadLogo('company', studio.ids[0], cb); },
+                    onEnter: function () { openStudio(studio); }
+                });
+            })));
+        };
+    }
+
+    /* =====================================================================
      *  РЕГИСТРАЦИЯ РЯДОВ
      * ===================================================================== */
 
     /**
-     * name  — имя в ContentRows (= ключ вкл/выкл, совместим с v3)
-     * index — позиция на обычной главной
-     * range — диапазон случайной позиции на главной SURS (не пересекаются)
+     * name  — имя в ContentRows (= ключ вкл/выкл в Настройки → Каналы)
+     * index — позиция на главной TMDB/CUB; на главной SURS позицию выбирает
+     *         ядро (loader.__surs_spread — метка «разносимого» ряда)
      */
     var ROWS = [
-        { name: 'streaming_global',  title: 'surs_strmngs_global_title',  index: 3, range: [2, 5],   loader: streamingRow(GLOBAL, true, 'surs_strmngs_global_title') },
-        { name: 'genres_buttons',    title: 'title_genre',                index: 5, range: [7, 10],  loader: genresRow },
-        { name: 'streaming_russian', title: 'surs_strmngs_russian_title', index: 7, range: [12, 16], loader: streamingRow(RUSSIAN, false, 'surs_strmngs_russian_title') }
+        { name: 'streaming_global',  title: 'surs_strmngs_global_title',  index: 3,  loader: streamingRow(GLOBAL, 'surs_strmngs_global_title') },
+        { name: 'genres_buttons',    title: 'title_genre',                index: 5,  loader: genresRow },
+        { name: 'streaming_russian', title: 'surs_strmngs_russian_title', index: 7,  loader: streamingRow(RUSSIAN, 'surs_strmngs_russian_title') },
+        { name: 'studios_world',     title: 'surs_studios_world_title',   index: 9,  loader: studiosRow('world', 'surs_studios_world_title') },
+        { name: 'studios_russian',   title: 'surs_studios_russian_title', index: 11, loader: studiosRow('rus', 'surs_studios_russian_title') }
     ];
 
     function register() {
         ROWS.forEach(function (row) {
+            row.loader.__surs_spread = row.name;
+
             Lampa.ContentRows.add({
                 index: row.index,
                 name: row.name,
                 title: t(row.title),
                 screen: ['main'],
-                // ContentRows.call читает row.index ПОСЛЕ вызова call(),
-                // поэтому позицию можно выбрать здесь
-                call: function (params) {
-                    this.index = isSursMain(params) ? randomInt(row.range[0], row.range[1]) : row.index;
+                call: function () {
                     return row.loader;
                 }
             });
@@ -370,6 +703,9 @@
             '.surs-tile__icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45%;height:45%;display:flex;align-items:center;justify-content:center;color:#fff}',
             '.surs-tile--labeled .surs-tile__icon{top:42%;width:38%;height:38%}',
             '.surs-tile__icon img{width:100%;height:100%;object-fit:contain}',
+            '.surs-tile__logo--white{filter:brightness(0) invert(1)}',
+            '.surs-tile--light .card__view{background-color:rgba(225,228,234,.85)}',
+            '.surs-tile--light.hover .card__view,.surs-tile--light.focus .card__view{background-color:rgba(240,242,246,.95)}',
             '.surs-tile__icon svg{width:100%!important;height:100%!important}',
             '.surs-tile__icon svg path,.surs-tile__icon svg polygon{fill:rgba(255,255,255,.85)}',
             '.surs-tile__icon svg [fill="none"]{fill:none}',
@@ -395,14 +731,22 @@
         Lampa.Lang.add({
             surs_strmngs_global_title:  { ru: 'Глобальные стриминги', en: 'Global Streaming', uk: 'Глобальні стрімінги' },
             surs_strmngs_russian_title: { ru: 'Российские стриминги', en: 'Russian Streaming', uk: 'Російські стрімінги' },
-            surs_strmngs_new:           { ru: 'Новинки', en: 'New', uk: 'Новинки' },
-            surs_strmngs_top_rated:     { ru: 'Высокий рейтинг', en: 'Top Rated', uk: 'Високий рейтинг' },
-            surs_strmngs_popular:       { ru: 'Популярные', en: 'Popular', uk: 'Популярні' },
-            surs_strmngs_most_voted:    { ru: 'Много голосов', en: 'Most Voted', uk: 'Багато голосів' }
+            surs_studios_world_title:   { ru: 'Киностудии', en: 'Film studios', uk: 'Кіностудії' },
+            surs_studios_russian_title: { ru: 'Российские студии', en: 'Russian studios', uk: 'Російські студії' },
+            surs_studio_empty:          { ru: 'У студии нет фильмов и сериалов для показа', en: 'This studio has nothing to show', uk: 'У студії немає фільмів і серіалів для показу' },
+            // сортировки — те же ключи и тексты, что у подборок в ядре SURS
+            surs_first_air_date_desc:   { ru: 'Новинки', en: 'New Releases', uk: 'Новинки' },
+            surs_popularity_desc:       { ru: 'Популярные', en: 'Popular', uk: 'Популярні' },
+            surs_vote_average_desc:     { ru: 'Высокий рейтинг', en: 'High Rating', uk: 'Високий рейтинг' },
+            surs_vote_count_desc:       { ru: 'Много голосов', en: 'Most Votes', uk: 'Багато голосів' },
+            surs_revenue_desc:          { ru: 'Интерес зрителей', en: 'Audience Interest', uk: 'Інтерес глядачів' }
         });
 
         addStyles();
         register();
+
+        // фоновая проверка студий — при загрузке скрипта (старт через WARM.startDelay)
+        warmUp();
 
         // совместимость с API v3
         function buttons(list) {
@@ -413,6 +757,8 @@
         window.streaming_getAllRussianButtons = function () { return buttons(RUSSIAN); };
         window.genres_getAllGenres = function () { return GENRES.slice(); };
         window.genres_openGenre    = openGenre;
+        window.surs_getStudios     = function () { return STUDIOS.slice(); };
+        window.surs_openStudio     = openStudio;
     }
 
     if (Lampa.Manifest.app_digital >= 300) {

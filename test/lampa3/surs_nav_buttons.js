@@ -318,7 +318,9 @@
             name: ROW_NAME,
             title: Lampa.Lang.translate('surs_buttons_title'),
             screen: ['main', 'surs'],
+            // метка для ядра SURS: ряд кнопок всегда первым
             call: function () {
+                buildRow.__surs_nav = true;
                 return buildRow;
             }
         });
