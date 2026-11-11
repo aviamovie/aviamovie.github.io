@@ -1,23 +1,3 @@
-/*
- * SURS — горизонтальное навигационное меню (Lampa 3.x)
- *
- * Регистрирует ряд через Lampa.ContentRows на экранах:
- *   'main' — главная любого источника (TMDB, CUB, SURS)
- *   'surs' — главные SURS NEW / KIDS / RUS
- *
- * Публичное API для других плагинов (совместимо с v3):
- *   window.surs_addExternalButton({id, title, icon, action, position, required})
- *       position — 1 = второй кнопкой, 'penultimate' = предпоследней (перед «Настройками»),
- *                  без position — после первых трёх (как раньше)
- *       required — кнопку нельзя скрыть в настройках «Горизонтальное меню»
- *   window.surs_nav_pending[key] = true / window.surs_navReady(key)
- *       модуль может попросить ряд подождать (до NAV_WAIT_MAX мс), пока он
- *       определится со своими кнопками — например, проверит подписку
- *   window.surs_removeExternalButton(id)
- *   window.surs_clearExternalButtons()
- *   window.surs_getExternalButtons()
- *   window.surs_getAllButtons()
- */
 (function () {
     'use strict';
 
@@ -318,7 +298,9 @@
             name: ROW_NAME,
             title: Lampa.Lang.translate('surs_buttons_title'),
             screen: ['main', 'surs'],
+            // метка для ядра SURS: ряд кнопок всегда первым
             call: function () {
+                buildRow.__surs_nav = true;
                 return buildRow;
             }
         });
