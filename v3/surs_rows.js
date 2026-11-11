@@ -1,19 +1,22 @@
 (function () {
     'use strict';
-
+ 
     if (window.surs_rows_ready) return;
     window.surs_rows_ready = true;
-
+ 
     // старые модули не должны регистрировать свои ряды повторно
     window.streaming_buttons_ready = true;
     window.surs_genres_buttons_ready = true;
-
+ 
     /* =====================================================================
      *  ДАННЫЕ
      * ===================================================================== */
-
+ 
     var LOGO_CACHE_MINUTES = 60 * 24 * 7;
-
+ 
+    /** Сортировка, активная при открытии страницы (стриминги, жанры, студии) */
+    var DEFAULT_SORT = 'popular';
+ 
     var GLOBAL = [
         { id: 213,  title: 'Netflix' },
         { id: 2739, title: 'Disney+' },
@@ -32,7 +35,7 @@
         { id: 88,   title: 'FX' },
         { id: 174,  title: 'AMC' }
     ];
-
+ 
     var RUSSIAN = [
         { id: 3827, title: 'Кинопоиск HD' },
         { id: 2493, title: 'Start' },
@@ -48,7 +51,7 @@
         { id: 1191, title: 'ТНТ' },
         { id: 3031, title: 'Пятница!' }
     ];
-
+ 
     /** types — где жанр есть в TMDB (movie / tv); title — ключ перевода Lampa */
     var GENRES = [
         { id: 28, title: 'filter_genre_ac', types: ['movie'], icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M30 4C28.896 4 28 4.896 28 6C28 7.104 28.896 8 30 8C31.104 8 32 7.104 32 6C32 4.896 31.104 4 30 4ZM23.91 5.01599L13.757 0.285004C13.258 0.0530037 12.66 0.269005 12.428 0.768005C12.195 1.26901 12.411 1.86398 12.911 2.09698L22.746 6.67999L23.085 7.01999L19.082 11.022C18.618 10.18 18.018 9.39499 17.344 8.82999L9.345 2.12C8.556 1.46 7.31902 1.459 6.52802 2.121L6.17401 2.41901L4.48599 0H1C0.447 0 0 0.447 0 1C0 1.553 0.447 2 1 2H3.44299L10.862 12.636C11.709 13.848 12.534 16.121 12.664 17.598L13.758 30.091C13.851 31.161 14.766 32 15.841 32H20V18.997C26.609 18.951 28.932 18.305 28.977 11.506C28.983 10.687 28.564 9.669 27.981 9.086L23.91 5.01599ZM18 30H15.841C15.808 30 15.753 29.95 15.75 29.917L14.656 17.424C14.496 15.597 13.55 12.99 12.502 11.49L7.32101 4.06299L7.811 3.65201C7.864 3.60901 8.00799 3.60901 8.05899 3.65201L16.058 10.36C17.092 11.228 17.999 12.961 17.999 14.068V30H18ZM20 16.998C20 16.998 20.001 14.021 20 14H26.848C26.476 16.725 25.066 16.977 20 16.998ZM26.968 12H20.933L24.5 8.43399L26.566 10.5C26.767 10.701 26.978 11.211 26.976 11.492C26.976 11.672 26.971 11.832 26.968 12Z"/></svg>' },
@@ -72,7 +75,7 @@
         { id: 10765, title: 'filter_genre_hf', types: ['tv'], icon: '<svg fill="currentColor" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M52.71,42.72H36.9A5.89,5.89,0,0,0,32,45.34a5.89,5.89,0,0,0-4.9-2.62H11.29A4.29,4.29,0,0,0,7,47v7.57A2.42,2.42,0,0,0,9.42,57H54.58A2.42,2.42,0,0,0,57,54.58V47A4.29,4.29,0,0,0,52.71,42.72Zm-15.81,2H52.71A2.3,2.3,0,0,1,55,47v.6H39.48a1,1,0,0,0,0,2H55v1.48H33V48.62A3.91,3.91,0,0,1,36.9,44.72Zm-25.61,0H27.1a3.91,3.91,0,0,1,3.9,3.9v2.47H9V49.61H24.52a1,1,0,0,0,0-2H9V47A2.29,2.29,0,0,1,11.29,44.72ZM9,54.58V53.09H31V55H9.42A.42.42,0,0,1,9,54.58Zm46,0a.42.42,0,0,1-.42.42H33V53.09H55Z"/><path d="M20.38,25.17a1,1,0,0,0-1.21.61,10.44,10.44,0,0,0,1.48,9.67A13.17,13.17,0,0,0,32,41.2c5.91,0,12.42-3,13.24-8.83,1.25-8.78-3.19-10.83-3.38-10.91a1,1,0,0,0-1.28,1.38,3.72,3.72,0,0,1,.25,2.74,2.17,2.17,0,0,1-.68.84c-.07-2.52-2-5.38-5.5-8.26-2.71-2.21-.15-5.95,0-6.11a1,1,0,0,0,0-1.14,1,1,0,0,0-1.06-.4c-4.12,1-11.46,5.09-9.78,13.14.6,2.92.21,4.37-.36,4.76a1.32,1.32,0,0,1-1.35-.2,2,2,0,0,1-1-1.87A1,1,0,0,0,20.38,25.17ZM35.2,37.84c-.22.73-1,1.17-2.29,1.31-.4,0-.82,0-1.26,0-1,0-2.21-.22-2.67-.92-.78-1.18.38-3.92,1.23-5.92.31-.72.59-1.38.81-2C33.49,32.46,35.74,36,35.2,37.84ZM24.5,30.07c1-.71,2.1-2.46,1.19-6.83-1.19-5.77,3.24-8.72,6.09-10a5.6,5.6,0,0,0,1.58,6.46c3.69,3,5.39,6,4.54,8a1,1,0,0,0,1.18,1.36,5,5,0,0,0,3.55-2.69,3.37,3.37,0,0,0,.22-.68,12.9,12.9,0,0,1,.38,6.39c-.35,2.49-2.36,5-6.1,6.25.94-3.39-3-8.48-6.16-10.52a1,1,0,0,0-1.54.75,13.3,13.3,0,0,1-1.06,3c-.93,2.19-2,4.62-1.56,6.57a11.21,11.21,0,0,1-4.51-3.82,9.49,9.49,0,0,1-1.72-4.69l.34.25A3.19,3.19,0,0,0,24.5,30.07Z"/><path d="M9.06,13.13c-1.24.63-2.06,1-2.06,1.95S7.82,16.4,9.06,17a9.28,9.28,0,0,1,4.07,4.08c.63,1.23,1,2,1.95,2s1.32-.82,1.94-2A9.25,9.25,0,0,1,21.1,17c1.23-.62,2-1,2-1.94s-.82-1.32-2-1.95A9.23,9.23,0,0,1,17,9.06C16.4,7.82,16,7,15.08,7s-1.32.82-1.95,2.06A9.26,9.26,0,0,1,9.06,13.13ZM14.92,10c0-.09.1-.2.16-.31l.15.31a11.24,11.24,0,0,0,5,5l.31.16-.31.15a11.32,11.32,0,0,0-5,5c0,.09-.1.19-.15.31-.06-.12-.12-.22-.16-.31a11.35,11.35,0,0,0-5-5l-.32-.15.32-.16A11.27,11.27,0,0,0,14.92,10Z"/><path d="M55.33,18.11a6.6,6.6,0,0,1-2.91-2.91c-.47-.93-.84-1.67-1.67-1.67s-1.2.74-1.67,1.67a6.6,6.6,0,0,1-2.91,2.91h0c-.93.47-1.67.84-1.67,1.67s.74,1.21,1.67,1.68a6.58,6.58,0,0,1,2.91,2.9c.47.94.84,1.67,1.67,1.67s1.2-.73,1.67-1.67a6.58,6.58,0,0,1,2.91-2.9C56.26,21,57,20.62,57,19.78S56.26,18.58,55.33,18.11Zm-4.58,5.14a8.69,8.69,0,0,0-3.46-3.47,8.66,8.66,0,0,0,3.46-3.46,8.63,8.63,0,0,0,3.47,3.46A8.65,8.65,0,0,0,50.75,23.25Z"/></svg>' },
         { id: 10768, title: 'filter_genre_mp', types: ['tv'], icon: '<svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M20 6h3v2h-1v11h1v2H1v-2h1V8H1V6h3V4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2zm0 2H4v11h3v-7h2v7h2v-7h2v7h2v-7h2v7h3V8zM6 5v1h12V5H6z"/></svg>' }
     ];
-
+ 
     /** Сортировки — как у подборок главной SURS (те же ключи перевода) */
     var SORTS = [
         { key: 'new',     title: 'surs_first_air_date_desc' },
@@ -81,7 +84,7 @@
         { key: 'votes',   title: 'surs_vote_count_desc' },
         { key: 'revenue', title: 'surs_revenue_desc', movieOnly: true }
     ];
-
+ 
     /*
      * Киностудии: TMDB company id. Список и группы — по образцу V.Lampa Studios;
      * логотипы не вшиты (1,8 МБ), а берутся из TMDB (company/{id}), как у стримингов.
@@ -158,15 +161,15 @@
         { title: "Анимаккорд", ids: [55393], types: ['movie', 'tv'], group: 'rus' },
         { title: "КиноАтис", ids: [21384], types: ['movie', 'tv'], group: 'rus' }
     ];
-
+ 
     /* =====================================================================
      *  УТИЛИТЫ
      * ===================================================================== */
-
+ 
     function t(key) {
         return Lampa.Lang.translate(key);
     }
-
+ 
     function isoDate(days, months, years) {
         var d = new Date();
         if (years)  d.setFullYear(d.getFullYear() + years);
@@ -174,13 +177,13 @@
         if (days)   d.setDate(d.getDate() + days);
         return d.toISOString().split('T')[0];
     }
-
+ 
     /** Исключение ключевых слов по настройке SURS (если ядро загружено) */
     function keywordsFilter(url) {
         if (window.SURS && typeof window.SURS.keywordsFilter === 'function') return window.SURS.keywordsFilter(url);
         return url + '&without_keywords=346488,158718,41278,13141,345822,315535,290667,323477,290609';
     }
-
+ 
     function openCategory(title, url, type) {
         Lampa.Activity.push({
             url: url,
@@ -191,7 +194,7 @@
             page: 1
         });
     }
-
+ 
     /**
      * URL подборки по сортировке.
      * @param {string} filter например 'with_networks=213' / 'with_genres=35' / 'with_companies=3|7'
@@ -199,10 +202,10 @@
      */
     function sortUrl(type, filter, key, opt) {
         opt = opt || {};
-
+ 
         var field = type === 'movie' ? 'primary_release_date' : 'first_air_date';
         var url = 'discover/' + type + '?' + filter;
-
+ 
         if (key === 'new') {
             // те же окна, что у «Новинок» на главной SURS
             url += '&sort_by=' + field + '.desc' +
@@ -214,22 +217,26 @@
         else if (key === 'rating')  url += '&sort_by=vote_average.desc&vote_count.gte=' + (opt.ratingVotes || (type === 'movie' ? 300 : 100));
         else if (key === 'votes')   url += '&sort_by=vote_count.desc';
         else if (key === 'revenue') url += '&sort_by=revenue.desc';
-
+ 
         return keywordsFilter(url);
     }
-
-    /** Меню сортировок → category_full */
+ 
+    /** Сортировки, доступные для типа (с учётом opt.available — см. checkStudio) */
+    function sortsFor(type, opt) {
+        return SORTS.filter(function (s) {
+            if (s.movieOnly && type !== 'movie') return false;
+            return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
+        });
+    }
+ 
+    /** Меню сортировок → category_full (запасной вариант без страницы) */
     function showSorts(title, type, filter, opt, back) {
         var typeTitle = t(type === 'movie' ? 'menu_movies' : 'menu_tv');
-
+ 
         Lampa.Select.show({
             title: title + (opt && opt.showType ? ' — ' + typeTitle : ''),
-            items: SORTS.filter(function (s) {
-                if (s.movieOnly && type !== 'movie') return false;
-                // opt.available — непустые сортировки по типам (см. checkStudio)
-                return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
-            }).map(function (s) {
-                return { title: t(s.title), key: s.key };
+            items: sortsFor(type, opt).map(function (s) {
+                return { title: t(s.title), key: s.key, selected: s.key === DEFAULT_SORT };
             }),
             onSelect: function (item) {
                 openCategory(title + ' — ' + item.title, sortUrl(type, filter, item.key, opt), type);
@@ -239,14 +246,17 @@
             }
         });
     }
-
-    /** Если доступны и фильмы, и сериалы — сначала выбор типа */
+ 
+    /**
+     * Если доступны и фильмы, и сериалы — сначала выбор типа.
+     * Дальше — страница с навигацией по сортировкам (Lampa 3) или меню сортировок.
+     */
     function showTypes(title, types, filter, opt) {
-        var next = opt && opt.page ? function (type, o) { openSorted(title, type, filter, o); }
+        var next = pageSupported() ? function (type, o) { openSorted(title, type, filter, o); }
             : function (type, o, back) { showSorts(title, type, filter, o, back); };
-
+ 
         if (types.length === 1) return next(types[0], assign({ showType: true }, opt));
-
+ 
         Lampa.Select.show({
             title: title,
             items: types.map(function (type) {
@@ -262,7 +272,7 @@
             }
         });
     }
-
+ 
     /* =====================================================================
      *  СТРАНИЦА С НАВИГАЦИЕЙ ПО СОРТИРОВКАМ
      *
@@ -273,21 +283,21 @@
      *  object.surs_base — заголовок без сортировки,
      *  object.surs_auto — варианты не проверены: пустой — сразу следующий.
      * ===================================================================== */
-
+ 
     var PAGE = 'surs_sorted';
-
+ 
     function pageSupported() {
         return !!(Lampa.Component && typeof Lampa.Component.get === 'function' &&
             typeof Lampa.Component.add === 'function' && Lampa.Component.get('category_full') &&
             Lampa.Activity && typeof Lampa.Activity.replace === 'function');
     }
-
+ 
     function sortedObject(base, type, sorts, key, auto) {
         var active = null;
-
+ 
         sorts.forEach(function (s) { if (s.key === key) active = s; });
         active = active || sorts[0];
-
+ 
         return {
             url: active.url,
             title: base + ' — ' + active.title,
@@ -301,11 +311,11 @@
             surs_auto: !!auto
         };
     }
-
+ 
     function switchSort(object, key, sorts) {
         Lampa.Activity.replace(sortedObject(object.surs_base, object.card_type, sorts || object.surs_sorts, key, object.surs_auto));
     }
-
+ 
     function SortedPage(object) {
         var Category = Lampa.Component.get('category_full');
         var comp = new Category(object);
@@ -314,21 +324,21 @@
         var sorts = object.surs_sorts || [];
         var buttons = [];
         var destroyed = false;
-
+ 
         comp.create = function () {
             create.apply(this, arguments);
-
+ 
             if (sorts.length < 2) return;
-
+ 
             var self = this;
             var bar = document.createElement('div');
             bar.className = 'surs-sortbar';
-
+ 
             sorts.forEach(function (sort) {
                 var btn = document.createElement('div');
                 btn.className = 'surs-sortbar__btn selector' + (sort.key === object.surs_active ? ' active' : '');
                 btn.textContent = sort.title;
-
+ 
                 btn.addEventListener('hover:focus', function () {
                     self.last = btn;
                     if (self.scroll && self.scroll.update) self.scroll.update(btn);
@@ -336,15 +346,15 @@
                 btn.addEventListener('hover:enter', function () {
                     if (sort.key !== object.surs_active) switchSort(object, sort.key);
                 });
-
+ 
                 if (sort.key === object.surs_active) self.last = btn; // фокус при открытии
                 buttons.push(btn);
                 bar.appendChild(btn);
             });
-
+ 
             if (this.body && this.body.parentNode) this.body.parentNode.insertBefore(bar, this.body);
         };
-
+ 
         // каталог при прокрутке задаёт навигацию только по карточкам — возвращаем кнопки
         if (typeof comp.use === 'function') {
             comp.use({
@@ -358,7 +368,7 @@
                 }
             });
         }
-
+ 
         // варианты не проверены, а этот пуст — открываем следующий, а пустой убираем.
         // Только «пусто» (status не задан), не ошибка сети, и только пока страница открыта
         comp.empty = function (status) {
@@ -368,29 +378,27 @@
             }
             return empty.apply(this, arguments);
         };
-
+ 
         return comp;
     }
-
-    /** Открыть страницу с первой доступной сортировкой */
+ 
+    /** Открыть страницу; активна DEFAULT_SORT («Популярные»), если доступна, иначе первая */
     function openSorted(title, type, filter, opt) {
-        var keys = SORTS.filter(function (s) {
-            if (s.movieOnly && type !== 'movie') return false;
-            return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
-        });
-
+        var keys = sortsFor(type, opt);
+ 
         if (!keys.length) return Lampa.Noty.show(t('surs_studio_empty'));
-
+ 
         var sorts = keys.map(function (s) {
             return { key: s.key, title: t(s.title), url: sortUrl(type, filter, s.key, opt) };
         });
         var base = title + (opt && opt.showType ? ' — ' + t(type === 'movie' ? 'menu_movies' : 'menu_tv') : '');
-
-        Lampa.Activity.push(sortedObject(base, type, sorts, sorts[0].key, !(opt && opt.available)));
+ 
+        // sortedObject сам возьмёт первую, если DEFAULT_SORT нет среди доступных
+        Lampa.Activity.push(sortedObject(base, type, sorts, DEFAULT_SORT, !(opt && opt.available)));
     }
-
+ 
     /* =====================================================================
-     *  НЕПУСТЫЕ ВАРИАНТЫ СТУДИЙ (фоновая проверка + кеш 30 суток)
+     *  НЕПУСТЫЕ ВАРИАНТЫ СТУДИЙ (фоновая проверка + кеш)
      *
      *  После загрузки скрипта (через WARM.startDelay, чтобы не мешать главной)
      *  в фоне по очереди проверяются студии без свежего результата.
@@ -402,7 +410,7 @@
      *     если пусто — остальные сортировки типа не запрашиваем. «Много голосов»
      *     и «Интерес зрителей» порогов не имеют — непусты, если тип непуст;
      *   - ответы TMDB в кеш запросов Lampa не кладём (сотни записей в IndexedDB
-     *     телевизора), храним только итог студии — в Lampa.Storage на 30 суток.
+     *     телевизора), храним только итог студии — в Lampa.Storage.
      *  Если при проверке студии была ошибка — итог не сохраняется, студия
      *  проверится в следующий раз.
      *
@@ -410,17 +418,17 @@
      *  сразу (без ожидания), а студия переходит в начало очереди проверки.
      *  Формат итога: {movie: ['new', ...], tv: [...]}
      * ===================================================================== */
-
+ 
     var WARM = {
-        startDelay: 15000,  // старт через 30 с после загрузки скрипта
+        startDelay: 15000,  // старт через 15 с после загрузки скрипта
         delay: 1000,        // пауза между запросами
         backoff: 30000,     // пауза после ошибки (растёт вдвое)
         maxBackoff: 600000, // до 10 минут
-        idleCheck: 10000    // приложение свёрнуто / идёт просмотр — проверяем снова через 30 с
+        idleCheck: 10000    // приложение свёрнуто / идёт просмотр — проверяем снова через 10 с
     };
     var AVAILABLE_KEY = 'surs_studios_available';
     var AVAILABLE_LIFE = 1000 * 60 * 60 * 24 * 60; // 60 суток
-
+ 
     function readAll() {
         var all = Lampa.Storage.get(AVAILABLE_KEY, '{}');
         if (typeof all === 'string') {
@@ -428,40 +436,40 @@
         }
         return all && typeof all === 'object' ? all : {};
     }
-
+ 
     function readAvailable(cacheKey) {
         var all = readAll();
         var entry = all[cacheKey];
         return entry && entry.data && Date.now() - (entry.at || 0) < AVAILABLE_LIFE ? entry.data : null;
     }
-
+ 
     function saveAvailable(cacheKey, data) {
         var all = readAll();
         var now = Date.now();
-
+ 
         // заодно выбрасываем просроченные записи
         for (var key in all) {
             if (Object.prototype.hasOwnProperty.call(all, key) && (!all[key] || now - (all[key].at || 0) >= AVAILABLE_LIFE)) delete all[key];
         }
-
+ 
         all[cacheKey] = { at: now, data: data };
         Lampa.Storage.set(AVAILABLE_KEY, all);
     }
-
+ 
     function studioKey(studio) {
         return 'studio_' + studio.ids.join('_');
     }
-
+ 
     function studioFilter(studio) {
         return 'with_companies=' + studio.ids.join('|');
     }
-
+ 
     function studioOpt(studio) {
         return { ratingVotes: studio.group === 'rus' ? 10 : null };
     }
-
+ 
     var warm = { started: false, pause: 0, queue: [], busy: false };
-
+ 
     /** Можно ли сейчас делать фоновые запросы */
     function idle() {
         if (document.hidden) return false;
@@ -470,7 +478,7 @@
         } catch (e) {}
         return true;
     }
-
+ 
     /** Подождать, пока приложение активно и не идёт просмотр */
     function whenIdle(fn, wait) {
         setTimeout(function () {
@@ -478,7 +486,7 @@
             else whenIdle(fn, WARM.idleCheck);
         }, wait);
     }
-
+ 
     /** Один запрос: есть ли результаты. cb(true/false) или cb(null) при ошибке */
     function probe(type, studio, key, cb) {
         Lampa.Api.sources.tmdb.get(sortUrl(type, studioFilter(studio), key, studioOpt(studio)), {}, function (json) {
@@ -489,51 +497,51 @@
             cb(null);
         }, false);
     }
-
+ 
     /** Проверить одну студию (запросы по одному, с паузой). done() по завершении */
     function checkStudio(studio, done) {
         var result = {};
         var failed = false;
         var types = studio.types.slice();
-
+ 
         function nextType() {
             var type = types.shift();
-
+ 
             if (!type) {
                 if (!failed) saveAvailable(studioKey(studio), result);
                 return done();
             }
-
+ 
             result[type] = [];
-
+ 
             // 1) есть ли у типа хоть что-то (= «Много голосов» без порогов)
             probe(type, studio, 'votes', function (any) {
                 if (any === null) failed = true;
-
+ 
                 if (any === false) return whenIdle(nextType, WARM.delay);
-
+ 
                 // ошибка — пункты не прячем; есть данные — votes и revenue заведомо непусты
                 var keys = SORTS.filter(function (s) {
                     return !s.movieOnly || type === 'movie';
                 }).map(function (s) { return s.key; });
-
+ 
                 var ask = keys.filter(function (k) { return k === 'new' || k === 'popular' || k === 'rating'; });
                 var found = keys.filter(function (k) { return ask.indexOf(k) < 0; });
-
+ 
                 if (any === null) {
                     result[type] = keys;
                     return whenIdle(nextType, warm.pause || WARM.delay);
                 }
-
+ 
                 (function nextKey() {
                     var key = ask.shift();
-
+ 
                     if (!key) {
                         // порядок пунктов — как в SORTS
                         result[type] = keys.filter(function (k) { return found.indexOf(k) >= 0; });
                         return whenIdle(nextType, WARM.delay);
                     }
-
+ 
                     whenIdle(function () {
                         probe(type, studio, key, function (ok) {
                             if (ok === null) failed = true;
@@ -544,58 +552,58 @@
                 })();
             });
         }
-
+ 
         nextType();
     }
-
+ 
     /** Студия без свежего итога — в начало очереди (например, её только что открыли) */
     function prioritize(studio) {
         var key = studioKey(studio);
-
+ 
         warm.queue = warm.queue.filter(function (s) { return studioKey(s) !== key; });
         warm.queue.unshift(studio);
     }
-
+ 
     function runQueue() {
         if (warm.busy) return;
-
+ 
         var studio = warm.queue.shift();
         if (!studio) return;
-
+ 
         // за время ожидания мог появиться свежий итог
         if (readAvailable(studioKey(studio))) return runQueue();
-
+ 
         warm.busy = true;
-
+ 
         checkStudio(studio, function () {
             warm.busy = false;
             whenIdle(runQueue, warm.pause || WARM.delay);
         });
     }
-
+ 
     /** Фоновый проход по студиям без свежего итога — один раз за запуск */
     function warmUp() {
         if (warm.started) return;
         warm.started = true;
-
+ 
         warm.queue = STUDIOS.filter(function (studio) {
             return !readAvailable(studioKey(studio));
         });
-
+ 
         if (warm.queue.length) whenIdle(runQueue, WARM.startDelay);
     }
-
+ 
     function assign(target, src) {
         for (var key in src) {
             if (Object.prototype.hasOwnProperty.call(src, key)) target[key] = src[key];
         }
         return target;
     }
-
+ 
     /* =====================================================================
      *  ОБЩАЯ ПЛИТКА (один дизайн для стримингов, жанров и студий)
      * ===================================================================== */
-
+ 
     /**
      * @param {object} opt
      *   id, title
@@ -619,11 +627,11 @@
                     onCreate: function () {
                         var box = document.createElement('div');
                         box.className = 'surs-tile__icon';
-
+ 
                         this.html.addClass('surs-tile');
                         if (opt.light) this.html.addClass('surs-tile--light');
                         this.html.find('.card__img').replaceWith(box);
-
+ 
                         if (opt.label) {
                             var label = document.createElement('div');
                             label.className = 'surs-tile__label';
@@ -631,14 +639,14 @@
                             this.html.find('.card__view').appendChild(label);
                             this.html.addClass('surs-tile--labeled');
                         }
-
+ 
                         function showName() {
                             var name = document.createElement('div');
                             name.className = 'surs-tile__name';
                             name.textContent = opt.title;
                             box.appendChild(name);
                         }
-
+ 
                         if (opt.icon) {
                             box.innerHTML = opt.icon;
                         } else if (opt.logo) {
@@ -659,7 +667,7 @@
             }
         };
     }
-
+ 
     function tilesRow(title, results) {
         return {
             title: title,
@@ -669,27 +677,32 @@
             }
         };
     }
-
+ 
     /* =====================================================================
      *  СТРИМИНГИ
      * ===================================================================== */
-
+ 
     /** Логотип сети или компании из TMDB (Lampa.Network + кеш запросов, V3) */
     function loadLogo(kind, id, callback) {
         var url = Lampa.TMDB.api(kind + '/' + id + '?api_key=' + Lampa.TMDB.key());
-
+ 
         Lampa.Network.silent(url, function (data) {
             callback(data && data.logo_path ? Lampa.TMDB.image('t/p/w300' + data.logo_path) : '');
         }, function () {
             callback('');
         }, false, { cache: { life: LOGO_CACHE_MINUTES } });
     }
-
+ 
     function openService(service) {
         // стриминги — сериалы (with_networks есть только у discover/tv)
-        showSorts(service.title, 'tv', 'with_networks=' + service.id, { ratingVotes: 50 });
+        var filter = 'with_networks=' + service.id;
+        var opt = { ratingVotes: 50 };
+ 
+        // страница с навигацией по сортировкам (Lampa 3); иначе — меню сортировок
+        if (pageSupported()) return openSorted(service.title, 'tv', filter, opt);
+        showSorts(service.title, 'tv', filter, opt);
     }
-
+ 
     function streamingRow(services, titleKey) {
         return function (call) {
             call(tilesRow(t(titleKey), services.map(function (service) {
@@ -702,15 +715,15 @@
             })));
         };
     }
-
+ 
     /* =====================================================================
      *  ЖАНРЫ
      * ===================================================================== */
-
+ 
     function openGenre(genre) {
         showTypes(t(genre.title), genre.types, 'with_genres=' + genre.id, {});
     }
-
+ 
     function genresRow(call) {
         call(tilesRow(t('title_genre'), GENRES.map(function (genre) {
             return tile({
@@ -722,11 +735,11 @@
             });
         })));
     }
-
+ 
     /* =====================================================================
      *  СТУДИИ
      * ===================================================================== */
-
+ 
     /**
      * Студия: если фоновая проверка уже была — показываем только непустые
      * типы и сортировки, иначе все варианты сразу (и проверяем её первой).
@@ -734,29 +747,26 @@
     function openStudio(studio) {
         var available = readAvailable(studioKey(studio));
         var opt = studioOpt(studio);
-
-        // страница с навигацией по сортировкам (Lampa 3); иначе — меню сортировок
-        opt.page = pageSupported();
-
+ 
         if (!available) {
             // проверки ещё не было — все варианты сразу, а студию проверим первой
             prioritize(studio);
             if (warm.started && !warm.busy) whenIdle(runQueue, WARM.delay);
             return showTypes(studio.title, studio.types, studioFilter(studio), opt);
         }
-
+ 
         var types = studio.types.filter(function (type) {
             return available[type] && available[type].length;
         });
-
+ 
         if (!types.length) {
             Lampa.Noty.show(t('surs_studio_empty'));
             return;
         }
-
+ 
         showTypes(studio.title, types, studioFilter(studio), assign({ available: available }, opt));
     }
-
+ 
     function studiosRow(group, titleKey) {
         return function (call) {
             call(tilesRow(t(titleKey), STUDIOS.filter(function (s) {
@@ -773,11 +783,11 @@
             })));
         };
     }
-
+ 
     /* =====================================================================
      *  РЕГИСТРАЦИЯ РЯДОВ
      * ===================================================================== */
-
+ 
     /**
      * name  — имя в ContentRows (= ключ вкл/выкл в Настройки → Каналы)
      * index — позиция на главной TMDB/CUB; на главной SURS позицию выбирает
@@ -790,11 +800,11 @@
         { name: 'studios_world',     title: 'surs_studios_world_title',   index: 9,  loader: studiosRow('world', 'surs_studios_world_title') },
         { name: 'studios_russian',   title: 'surs_studios_russian_title', index: 11, loader: studiosRow('rus', 'surs_studios_russian_title') }
     ];
-
+ 
     function register() {
         ROWS.forEach(function (row) {
             row.loader.__surs_spread = row.name;
-
+ 
             Lampa.ContentRows.add({
                 index: row.index,
                 name: row.name,
@@ -806,11 +816,11 @@
             });
         });
     }
-
+ 
     /* =====================================================================
      *  СТИЛИ
      * ===================================================================== */
-
+ 
     function addStyles() {
         var css = [
             '.surs-tile{width:12.75em!important}',
@@ -839,15 +849,15 @@
             '.surs-tile__label{font-size:.8em}',
             '}'
         ].join('');
-
+ 
         Lampa.Template.add('surs_rows_style', '<style>' + css + '</style>');
         $('body').append(Lampa.Template.get('surs_rows_style', {}, true));
     }
-
+ 
     /* =====================================================================
      *  ЗАПУСК
      * ===================================================================== */
-
+ 
     function init() {
         Lampa.Lang.add({
             surs_strmngs_global_title:  { ru: 'Глобальные стриминги', en: 'Global Streaming', uk: 'Глобальні стрімінги' },
@@ -861,19 +871,19 @@
             surs_vote_count_desc:       { ru: 'Много голосов', en: 'Most Votes', uk: 'Багато голосів' },
             surs_revenue_desc:          { ru: 'Интерес зрителей', en: 'Audience Interest', uk: 'Інтерес глядачів' }
         });
-
+ 
         addStyles();
         register();
         if (pageSupported()) Lampa.Component.add(PAGE, SortedPage);
-
+ 
         // фоновая проверка студий — при загрузке скрипта (старт через WARM.startDelay)
         warmUp();
-
+ 
         // совместимость с API v3
         function buttons(list) {
             return list.map(function (s) { return { id: 'streaming_' + s.id, title: s.title, service: s }; });
         }
-
+ 
         window.streaming_getAllGlobalButtons  = function () { return buttons(GLOBAL); };
         window.streaming_getAllRussianButtons = function () { return buttons(RUSSIAN); };
         window.genres_getAllGenres = function () { return GENRES.slice(); };
@@ -881,7 +891,7 @@
         window.surs_getStudios     = function () { return STUDIOS.slice(); };
         window.surs_openStudio     = openStudio;
     }
-
+ 
     if (Lampa.Manifest.app_digital >= 300) {
         if (window.appready) init();
         else Lampa.Listener.follow('app', function (e) {
