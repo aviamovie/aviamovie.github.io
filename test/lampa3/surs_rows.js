@@ -257,7 +257,10 @@
 
     /** Если доступны и фильмы, и сериалы — сначала выбор типа */
     function showTypes(title, types, filter, opt) {
-        if (types.length === 1) return showSorts(title, types[0], filter, assign({ showType: true }, opt));
+        var next = opt && opt.page ? function (type, o) { openSorted(title, type, filter, o); }
+            : function (type, o, back) { showSorts(title, type, filter, o, back); };
+
+        if (types.length === 1) return next(types[0], assign({ showType: true }, opt));
 
         Lampa.Select.show({
             title: title,
@@ -265,7 +268,7 @@
                 return { title: t(type === 'movie' ? 'menu_movies' : 'menu_tv'), type: type };
             }),
             onSelect: function (item) {
-                showSorts(title, item.type, filter, assign({ showType: true }, opt), function () {
+                next(item.type, assign({ showType: true }, opt), function () {
                     showTypes(title, types, filter, opt);
                 });
             },
@@ -273,6 +276,132 @@
                 Lampa.Controller.toggle('content');
             }
         });
+    }
+
+    /* =====================================================================
+     *  СТРАНИЦА С НАВИГАЦИЕЙ ПО СОРТИРОВКАМ
+     *
+     *  Каталог Lampa (category_full), над сеткой — строка кнопок
+     *  «Новинки / Популярные / …». Кнопка переключает сортировку на месте
+     *  (Activity.replace — история «Назад» не растёт).
+     *  object.surs_sorts = [{key, title, url}], object.surs_active = key,
+     *  object.surs_base — заголовок без сортировки,
+     *  object.surs_auto — варианты не проверены: пустой — сразу следующий.
+     * ===================================================================== */
+
+    var PAGE = 'surs_sorted';
+
+    function pageSupported() {
+        return !!(Lampa.Component && typeof Lampa.Component.get === 'function' &&
+            typeof Lampa.Component.add === 'function' && Lampa.Component.get('category_full') &&
+            Lampa.Activity && typeof Lampa.Activity.replace === 'function');
+    }
+
+    function sortedObject(base, type, sorts, key, auto) {
+        var active = null;
+
+        sorts.forEach(function (s) { if (s.key === key) active = s; });
+        active = active || sorts[0];
+
+        return {
+            url: active.url,
+            title: base + ' — ' + active.title,
+            component: PAGE,
+            source: 'tmdb',
+            card_type: type,
+            page: 1,
+            surs_base: base,
+            surs_sorts: sorts,
+            surs_active: active.key,
+            surs_auto: !!auto
+        };
+    }
+
+    function switchSort(object, key, sorts) {
+        Lampa.Activity.replace(sortedObject(object.surs_base, object.card_type, sorts || object.surs_sorts, key, object.surs_auto));
+    }
+
+    function SortedPage(object) {
+        var Category = Lampa.Component.get('category_full');
+        var comp = new Category(object);
+        var create = comp.create;
+        var empty = comp.empty;
+        var sorts = object.surs_sorts || [];
+        var buttons = [];
+        var destroyed = false;
+
+        comp.create = function () {
+            create.apply(this, arguments);
+
+            if (sorts.length < 2) return;
+
+            var self = this;
+            var bar = document.createElement('div');
+            bar.className = 'surs-sortbar';
+
+            sorts.forEach(function (sort) {
+                var btn = document.createElement('div');
+                btn.className = 'surs-sortbar__btn selector' + (sort.key === object.surs_active ? ' active' : '');
+                btn.textContent = sort.title;
+
+                btn.addEventListener('hover:focus', function () {
+                    self.last = btn;
+                    if (self.scroll && self.scroll.update) self.scroll.update(btn);
+                });
+                btn.addEventListener('hover:enter', function () {
+                    if (sort.key !== object.surs_active) switchSort(object, sort.key);
+                });
+
+                if (sort.key === object.surs_active) self.last = btn; // фокус при открытии
+                buttons.push(btn);
+                bar.appendChild(btn);
+            });
+
+            if (this.body && this.body.parentNode) this.body.parentNode.insertBefore(bar, this.body);
+        };
+
+        // каталог при прокрутке задаёт навигацию только по карточкам — возвращаем кнопки
+        if (typeof comp.use === 'function') {
+            comp.use({
+                onScroll: function () {
+                    try {
+                        if (buttons.length && Lampa.Controller.own(this)) Lampa.Controller.collectionAppend(buttons);
+                    } catch (e) {}
+                },
+                onDestroy: function () {
+                    destroyed = true;
+                }
+            });
+        }
+
+        // варианты не проверены, а этот пуст — открываем следующий, а пустой убираем.
+        // Только «пусто» (status не задан), не ошибка сети, и только пока страница открыта
+        comp.empty = function (status) {
+            if (object.surs_auto && typeof status === 'undefined' && !destroyed) {
+                var rest = sorts.filter(function (s) { return s.key !== object.surs_active; });
+                if (rest.length) return switchSort(object, rest[0].key, rest);
+            }
+            return empty.apply(this, arguments);
+        };
+
+        return comp;
+    }
+
+    /** Открыть страницу с первой доступной сортировкой */
+    function openSorted(title, type, filter, opt) {
+        var keys = SORTS.filter(function (s) {
+            if (s.movieOnly && type !== 'movie') return false;
+            return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
+        });
+
+        if (!keys.length) return Lampa.Noty.show(t('surs_studio_empty'));
+
+        var sorts = keys.map(function (s) {
+            return { key: s.key, title: t(s.title), url: sortUrl(type, filter, s.key, opt) };
+        });
+        var base = title + (opt && opt.showType ? ' — ' + t(type === 'movie' ? 'menu_movies' : 'menu_tv') : '');
+
+        Lampa.Activity.push(sortedObject(base, type, sorts, sorts[0].key, !(opt && opt.available)));
     }
 
     /* =====================================================================
@@ -621,6 +750,9 @@
         var available = readAvailable(studioKey(studio));
         var opt = studioOpt(studio);
 
+        // страница с навигацией по сортировкам (Lampa 3); иначе — меню сортировок
+        opt.page = pageSupported();
+
         if (!available) {
             // проверки ещё не было — все варианты сразу, а студию проверим первой
             prioritize(studio);
@@ -704,6 +836,10 @@
             '.surs-tile--labeled .surs-tile__icon{top:42%;width:38%;height:38%}',
             '.surs-tile__icon img{width:100%;height:100%;object-fit:contain}',
             '.surs-tile__logo--white{filter:brightness(0) invert(1)}',
+            '.surs-sortbar{display:flex;flex-wrap:wrap;padding:0 1.5em 1em 1.5em}',
+            '.surs-sortbar__btn{padding:.55em 1.2em;margin:0 .8em .8em 0;border-radius:1em;background-color:rgba(255,255,255,.1);font-size:1.25em;white-space:nowrap}',
+            '.surs-sortbar__btn.active{background-color:rgba(255,255,255,.3)}',
+            '.surs-sortbar__btn.focus,.surs-sortbar__btn.hover{background-color:#fff;color:#000}',
             '.surs-tile--light .card__view{background-color:rgba(225,228,234,.85)}',
             '.surs-tile--light.hover .card__view,.surs-tile--light.focus .card__view{background-color:rgba(240,242,246,.95)}',
             '.surs-tile__icon svg{width:100%!important;height:100%!important}',
@@ -744,6 +880,7 @@
 
         addStyles();
         register();
+        if (pageSupported()) Lampa.Component.add(PAGE, SortedPage);
 
         // фоновая проверка студий — при загрузке скрипта (старт через WARM.startDelay)
         warmUp();
