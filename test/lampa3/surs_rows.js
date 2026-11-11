@@ -240,7 +240,9 @@
         Lampa.Select.show({
             title: title + (opt && opt.showType ? ' — ' + typeTitle : ''),
             items: SORTS.filter(function (s) {
-                return !s.movieOnly || type === 'movie';
+                if (s.movieOnly && type !== 'movie') return false;
+                // opt.available — непустые сортировки по типам (см. checkAvailable)
+                return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
             }).map(function (s) {
                 return { title: t(s.title), key: s.key };
             }),
@@ -255,7 +257,7 @@
 
     /** Если доступны и фильмы, и сериалы — сначала выбор типа */
     function showTypes(title, types, filter, opt) {
-        if (types.length === 1) return showSorts(title, types[0], filter, opt);
+        if (types.length === 1) return showSorts(title, types[0], filter, assign({ showType: true }, opt));
 
         Lampa.Select.show({
             title: title,
@@ -271,6 +273,65 @@
                 Lampa.Controller.toggle('content');
             }
         });
+    }
+
+    /**
+     * Какие варианты (тип × сортировка) дают непустой результат.
+     * Запросы — первая страница через tmdb.get (зеркало и кеш Lampa, 12 ч),
+     * все параллельно; ответ ошибкой считаем «есть данные», чтобы из-за сбоя
+     * сети не прятать пункты. Результат запоминается до перезапуска.
+     * callback({movie: ['new', ...], tv: [...]})
+     */
+    var availableCache = {};
+
+    function checkAvailable(cacheKey, types, filter, opt, callback) {
+        if (availableCache[cacheKey]) return callback(availableCache[cacheKey]);
+
+        var tmdb = Lampa.Api.sources.tmdb;
+        var result = {};
+        var left = 0;
+
+        types.forEach(function (type) {
+            result[type] = [];
+            SORTS.forEach(function (sort) {
+                if (sort.movieOnly && type !== 'movie') return;
+                left++;
+            });
+        });
+
+        function done(type, key, ok) {
+            if (ok) result[type].push(key);
+            if (--left) return;
+
+            // порядок пунктов — как в SORTS
+            types.forEach(function (tp) {
+                result[tp] = SORTS.map(function (s) { return s.key; }).filter(function (k) {
+                    return result[tp].indexOf(k) >= 0;
+                });
+            });
+
+            availableCache[cacheKey] = result;
+            callback(result);
+        }
+
+        types.forEach(function (type) {
+            SORTS.forEach(function (sort) {
+                if (sort.movieOnly && type !== 'movie') return;
+
+                tmdb.get(sortUrl(type, filter, sort.key, opt), {}, function (json) {
+                    done(type, sort.key, !!(json && json.results && json.results.length));
+                }, function () {
+                    done(type, sort.key, true);
+                }, { life: 60 * 12 });
+            });
+        });
+    }
+
+    function loading(status) {
+        try {
+            if (status) Lampa.Loading.start();
+            else Lampa.Loading.stop();
+        } catch (e) {}
     }
 
     function assign(target, src) {
@@ -415,9 +476,31 @@
      *  СТУДИИ
      * ===================================================================== */
 
+    /**
+     * Студия: перед меню проверяем, какие типы и сортировки не пустые, и
+     * показываем только их. «Новинки» считаются по скользящему окну дат,
+     * поэтому проверка при открытии, а не зашитый список.
+     */
     function openStudio(studio) {
-        showTypes(studio.title, studio.types, 'with_companies=' + studio.ids.join('|'), {
-            ratingVotes: studio.group === 'rus' ? 10 : null
+        var filter = 'with_companies=' + studio.ids.join('|');
+        var opt = { ratingVotes: studio.group === 'rus' ? 10 : null };
+
+        loading(true);
+
+        checkAvailable('studio_' + studio.ids.join('_'), studio.types, filter, opt, function (available) {
+            loading(false);
+            Lampa.Controller.toggle('content');
+
+            var types = studio.types.filter(function (type) {
+                return available[type] && available[type].length;
+            });
+
+            if (!types.length) {
+                Lampa.Noty.show(t('surs_studio_empty'));
+                return;
+            }
+
+            showTypes(studio.title, types, filter, assign({ available: available }, opt));
         });
     }
 
@@ -514,6 +597,7 @@
             surs_strmngs_russian_title: { ru: 'Российские стриминги', en: 'Russian Streaming', uk: 'Російські стрімінги' },
             surs_studios_world_title:   { ru: 'Киностудии', en: 'Film studios', uk: 'Кіностудії' },
             surs_studios_russian_title: { ru: 'Российские студии', en: 'Russian studios', uk: 'Російські студії' },
+            surs_studio_empty:          { ru: 'У студии нет фильмов и сериалов для показа', en: 'This studio has nothing to show', uk: 'У студії немає фільмів і серіалів для показу' },
             // сортировки — те же ключи и тексты, что у подборок в ядре SURS
             surs_first_air_date_desc:   { ru: 'Новинки', en: 'New Releases', uk: 'Новинки' },
             surs_popularity_desc:       { ru: 'Популярные', en: 'Popular', uk: 'Популярні' },
