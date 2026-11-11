@@ -21,11 +21,13 @@
         cacheLife: 60 * 6,      // кеш запросов TMDB в минутах (Lampa.Request cache, V3)
         liteScreen: 'surs',     // экран ContentRows для источников NEW / KIDS / RUS
         personsCount: 8,        // сколько рядов «актёр → фильмы» на главной SURS
-        rusPersonsMain: 9,      // рядов российских актёров на главной SURS
+        rusPersonsMain: 6,      // рядов российских актёров на главной SURS
         rusPersonsRus: 9,       // рядов российских актёров на SURS RUS
-        keywordRows: 12,         // рядов по ключевым словам на главной SURS
-        collectionRows: 12,      // рядов-коллекций (франшиз) за одно открытие
+        keywordRows: 10,         // рядов по ключевым словам на главной SURS
+        collectionRows: 10,      // рядов-коллекций (франшиз) за одно открытие
         searchCacheLife: 60 * 24 * 30, // поиск коллекций/актёров по имени — кеш 30 дней
+        spreadFrom: 3,          // «разносимые» ряды (стриминги, жанры, студии, продолжить просмотр,
+        spreadTo: 20,           //  ближайшие/недавние эпизоды) — случайно на рядах 3–20, не рядом друг с другом
         settingsComponent: 'surs'
     };
 
@@ -712,6 +714,9 @@
             }, { life: 60 * 24 });
         };
 
+        // служебная часть: сама ряда не показывает (см. layoutMain)
+        loader.__surs_empty = true;
+
         return loader;
     }
 
@@ -1170,6 +1175,200 @@
      * «Ближайшие/Недавние эпизоды», ряды других плагинов. Каждый ряд можно
      * выключить в Настройки → «Каналы» (content_rows).
      */
+    /* =====================================================================
+     *  РАСКЛАДКА РЯДОВ НА ГЛАВНОЙ SURS
+     *
+     *  Ряды из ContentRows сортируются на три группы:
+     *   - кнопки навигации — первым рядом;
+     *   - «разносимые»: ряды-плитки SURS (стриминги, жанры, студии) и штатные
+     *     ряды Lampa «Продолжить просмотр», «Ближайшие выходы эпизодов»,
+     *     «Недавние выходы эпизодов» — в случайные позиции на рядах 3–12,
+     *     никакие два не рядом. Если им там тесно (больше 5 штук), диапазон
+     *     расширяется вниз, а ряды Lampa всё равно занимают места в пределах 3–12;
+     *   - остальные (рекомендации, ряды других плагинов) — как раньше, сверху.
+     *
+     *  Ряды-плитки помечены (loader.__surs_spread). Штатные ряды Lampa меток не
+     *  имеют — их узнаём по названию: они отдают данные синхронно, поэтому
+     *  вызываем загрузчик один раз заранее и запоминаем результат.
+     *
+     *  Разносимые ряды не ставятся в очередь заранее: часть обычных рядов
+     *  оказывается пустой только после загрузки (актёр/коллекция не найдены),
+     *  Lampa их не показывает, и заранее расставленные ряды съехались бы
+     *  вплотную. Поэтому они вставляются в момент выдачи порции — по реальному
+     *  числу уже показанных рядов (их данные известны сразу).
+     * ===================================================================== */
+
+    var LAMPA_SPREAD = {
+        title_continue: 'continue',
+        title_upcoming_episodes: 'upcoming',
+        title_recent_episodes: 'recent'
+    };
+
+    /** Загрузить ряд один раз и запомнить результат (для штатных рядов Lampa) */
+    function memoRow(fn) {
+        var done = false;
+        var result = null;
+        var waiting = [];
+
+        try {
+            fn(function (data) {
+                done = true;
+                result = data;
+                waiting.forEach(function (call) { call(data); });
+                waiting = [];
+            });
+        } catch (e) {
+            done = true;
+            result = null;
+        }
+
+        var row = function (call) {
+            if (done) call(result);
+            else waiting.push(call);
+        };
+
+        row.__probe = done ? result : undefined;
+
+        return row;
+    }
+
+    /** Какой это штатный ряд Lampa (по названию), иначе '' */
+    function lampaSpreadKind(row) {
+        var data = row.__probe;
+        if (!data || !data.title) return '';
+
+        for (var key in LAMPA_SPREAD) {
+            if (Object.prototype.hasOwnProperty.call(LAMPA_SPREAD, key) && data.title === Lampa.Lang.translate(key)) return LAMPA_SPREAD[key];
+        }
+        return '';
+    }
+
+    /**
+     * k случайных позиций в [from; to] без соседних: выбираем k чисел из
+     * (n - k + 1) позиций и раздвигаем i-е на i.
+     */
+    function spreadPositions(k, from, to) {
+        var n = to - from + 1;
+        var free = n - (k - 1);
+        var pool = [];
+
+        for (var i = 0; i < free; i++) pool.push(i);
+
+        return shuffle(pool).slice(0, k).sort(function (a, b) { return a - b; }).map(function (v, idx) {
+            return from + v + idx;
+        });
+    }
+
+    function layoutMain(parts, extra) {
+        var nav = [];
+        var tiles = [];
+        var lampa = [];
+        var other = [];
+
+        extra.forEach(function (row) {
+            if (typeof row !== 'function') return other.push(row);
+            if (row.__surs_nav) return nav.push(row);
+            if (row.__surs_spread) return tiles.push(row);
+
+            var memo = memoRow(row);
+            var kind = lampaSpreadKind(memo);
+
+            if (kind) lampa.push(memo);
+            else if (memo.__probe === undefined || (memo.__probe && memo.__probe.results && memo.__probe.results.length)) other.push(memo);
+            // синхронно пустой ряд не нужен
+        });
+
+        var list = nav.concat(other).concat(parts);
+
+        // данные разносимых рядов — сразу (плитки и ряды Lampa отдают синхронно)
+        function resolve(row) {
+            var data = row.__probe;
+            if (data === undefined) {
+                row(function (d) { data = d; });
+            }
+            return data && data.results && data.results.length ? data : null;
+        }
+
+        var lampaData = lampa.map(resolve).filter(Boolean);
+        var tileData = [];
+
+        tiles.forEach(function (row) {
+            var data = resolve(row);
+            if (data) tileData.push(data);
+            else list.push(row); // асинхронный — просто в очередь
+        });
+
+        var k = tileData.length + lampaData.length;
+        var plan = [];
+
+        if (k) {
+            // ряды 3–12 (1 — кнопки навигации); если тесно — расширяем вниз
+            var from = CONFIG.spreadFrom;
+            var to = Math.max(CONFIG.spreadTo, from + 2 * (k - 1));
+            var positions = spreadPositions(k, from, to);
+
+            // ряды Lampa — на позиции в пределах 3–12, плитки — на оставшиеся
+            var inRange = shuffle(positions.filter(function (p) { return p <= CONFIG.spreadTo; }));
+            var outRange = positions.filter(function (p) { return p > CONFIG.spreadTo; });
+
+            shuffle(lampaData).forEach(function (data) {
+                plan.push({ pos: inRange.length ? inRange.shift() : outRange.shift(), data: data });
+            });
+
+            var rest = shuffle(inRange.concat(outRange));
+
+            shuffle(tileData).forEach(function (data) {
+                plan.push({ pos: rest.shift(), data: data });
+            });
+
+            plan.sort(function (a, b) { return a.pos - b.pos; });
+        }
+
+        return { list: list, plan: plan };
+    }
+
+    /**
+     * Выдача порций с подмешиванием разносимых рядов на их позиции.
+     * shown — сколько рядов уже отдано на экран (позиции 1-based).
+     */
+    function spreadLoader(layout) {
+        var shown = 0;
+        var plan = layout.plan.slice();
+
+        function mix(data) {
+            var out = [];
+
+            function flushDue() {
+                while (plan.length && plan[0].pos <= shown + 1) {
+                    out.push(plan.shift().data);
+                    shown++;
+                }
+            }
+
+            flushDue();
+
+            data.forEach(function (row) {
+                out.push(row);
+                shown++;
+                flushDue();
+            });
+
+            return out;
+        }
+
+        return function (partLoaded, partEmpty) {
+            Lampa.Api.partNext(layout.list, CONFIG.partsLimit, function (data) {
+                partLoaded(mix(data));
+            }, function () {
+                // обычные ряды кончились — отдаём оставшиеся разносимые
+                var tail = plan.map(function (p) { return p.data; });
+                plan = [];
+                if (tail.length) partLoaded(tail);
+                else if (partEmpty) partEmpty();
+            });
+        };
+    }
+
     function createSource(builder, screen) {
         var source = assign({}, Lampa.Api.sources.tmdb);
 
@@ -1180,10 +1379,19 @@
 
             var parts = builder(source, params);
 
-            Lampa.ContentRows.call(screen, params, parts);
+            var loadPart;
 
-            function loadPart(partLoaded, partEmpty) {
-                Lampa.Api.partNext(parts, CONFIG.partsLimit, partLoaded, partEmpty);
+            if (screen === 'main') {
+                var extra = [];
+                Lampa.ContentRows.call(screen, params, extra);
+                loadPart = spreadLoader(layoutMain(parts, extra));
+            }
+            else {
+                Lampa.ContentRows.call(screen, params, parts);
+
+                loadPart = function (partLoaded, partEmpty) {
+                    Lampa.Api.partNext(parts, CONFIG.partsLimit, partLoaded, partEmpty);
+                };
             }
 
             loadPart(oncomplite, onerror);
@@ -1373,7 +1581,9 @@
         { id: 'surs_buttons',      title: 'surs_rows_nav' },
         { id: 'streaming_global',  title: 'surs_strmngs_global_title' },
         { id: 'streaming_russian', title: 'surs_strmngs_russian_title' },
-        { id: 'genres_buttons',    title: 'surs_rows_genres' }
+        { id: 'genres_buttons',    title: 'surs_rows_genres' },
+        { id: 'studios_world',     title: 'surs_studios_world_title' },
+        { id: 'studios_russian',   title: 'surs_studios_russian_title' }
     ];
 
     /** Подборки основного источника (одно меню с разделителями) */
@@ -1917,9 +2127,11 @@
             surs_no:                     L('Нет', 'No', 'Ні'),
             surs_current_name:           L('Сейчас', 'Current', 'Зараз'),
             surs_tile_rows:              L('Ряды-кнопки', 'Button rows', 'Ряди-кнопки'),
-            surs_tile_rows_description:  L('навигация, стриминги, жанры', 'navigation, streaming, genres', 'навігація, стрімінги, жанри'),
+            surs_tile_rows_description:  L('навигация, стриминги, жанры, студии', 'navigation, streaming, genres, studios', 'навігація, стрімінги, жанри, студії'),
             surs_rows_nav:               L('Навигационное меню', 'Navigation menu', 'Навігаційне меню'),
             surs_rows_genres:            L('Жанры', 'Genres', 'Жанри'),
+            surs_studios_world_title:    L('Киностудии', 'Film studios', 'Кіностудії'),
+            surs_studios_russian_title:  L('Российские студии', 'Russian studios', 'Російські студії'),
             surs_rows_persons:           L('Популярные актёры и их фильмы', 'Popular actors and their movies', 'Популярні актори та їхні фільми'),
             surs_rows_persons_rus:       L('Российские актёры и их фильмы', 'Russian actors and their movies', 'Російські актори та їхні фільми'),
             surs_rows_keywords:          L('Подборки по темам (космос, зомби, шпионы…)', 'Topic collections (space, zombies, spies…)', 'Підбірки за темами (космос, зомбі, шпигуни…)'),
