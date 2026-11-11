@@ -241,7 +241,7 @@
             title: title + (opt && opt.showType ? ' — ' + typeTitle : ''),
             items: SORTS.filter(function (s) {
                 if (s.movieOnly && type !== 'movie') return false;
-                // opt.available — непустые сортировки по типам (см. checkAvailable)
+                // opt.available — непустые сортировки по типам (см. checkStudio)
                 return !(opt && opt.available) || (opt.available[type] || []).indexOf(s.key) >= 0;
             }).map(function (s) {
                 return { title: t(s.title), key: s.key };
@@ -275,16 +275,35 @@
         });
     }
 
-    /**
-     * Какие варианты (тип × сортировка) дают непустой результат.
-     * Запускается при нажатии на плитку студии. Запросы — первая страница
-     * через tmdb.get (зеркало и кеш запросов Lampa, 30 суток),
-     * все параллельно; ответ ошибкой считаем «есть данные», чтобы из-за сбоя
-     * сети не прятать пункты. Готовый результат хранится в Lampa.Storage
-     * 30 суток (меню открывается сразу и после перезапуска); если был сбой
-     * сети — не сохраняется, при следующем нажатии проверим заново.
-     * callback({movie: ['new', ...], tv: [...]})
-     */
+    /* =====================================================================
+     *  НЕПУСТЫЕ ВАРИАНТЫ СТУДИЙ (фоновая проверка + кеш 30 суток)
+     *
+     *  После загрузки скрипта (через WARM.startDelay, чтобы не мешать главной)
+     *  в фоне по очереди проверяются студии без свежего результата.
+     *  Бережно к TMDB:
+     *   - запросы строго по одному, пауза WARM.delay между ними;
+     *   - ошибка → пауза растёт вдвое (WARM.backoff … WARM.maxBackoff);
+     *   - пока приложение свёрнуто или открыт плеер — ждём;
+     *   - для типа сначала «есть ли вообще что-то» (vote_count.desc без порогов);
+     *     если пусто — остальные сортировки типа не запрашиваем. «Много голосов»
+     *     и «Интерес зрителей» порогов не имеют — непусты, если тип непуст;
+     *   - ответы TMDB в кеш запросов Lampa не кладём (сотни записей в IndexedDB
+     *     телевизора), храним только итог студии — в Lampa.Storage на 30 суток.
+     *  Если при проверке студии была ошибка — итог не сохраняется, студия
+     *  проверится в следующий раз.
+     *
+     *  Открытие студии: итог есть — только непустые пункты; нет — все варианты
+     *  сразу (без ожидания), а студия переходит в начало очереди проверки.
+     *  Формат итога: {movie: ['new', ...], tv: [...]}
+     * ===================================================================== */
+
+    var WARM = {
+        startDelay: 30000,  // старт через 30 с после загрузки скрипта
+        delay: 2000,        // пауза между запросами
+        backoff: 30000,     // пауза после ошибки (растёт вдвое)
+        maxBackoff: 600000, // до 10 минут
+        idleCheck: 30000    // приложение свёрнуто / идёт просмотр — проверяем снова через 30 с
+    };
     var AVAILABLE_KEY = 'surs_studios_available';
     var AVAILABLE_LIFE = 1000 * 60 * 60 * 24 * 30; // 30 суток
 
@@ -315,58 +334,141 @@
         Lampa.Storage.set(AVAILABLE_KEY, all);
     }
 
-    function checkAvailable(cacheKey, types, filter, opt, callback) {
-        var cached = readAvailable(cacheKey);
-        if (cached) return callback(cached);
+    function studioKey(studio) {
+        return 'studio_' + studio.ids.join('_');
+    }
 
-        var failed = false;
+    function studioFilter(studio) {
+        return 'with_companies=' + studio.ids.join('|');
+    }
 
-        var tmdb = Lampa.Api.sources.tmdb;
+    function studioOpt(studio) {
+        return { ratingVotes: studio.group === 'rus' ? 10 : null };
+    }
+
+    var warm = { started: false, pause: 0, queue: [], busy: false };
+
+    /** Можно ли сейчас делать фоновые запросы */
+    function idle() {
+        if (document.hidden) return false;
+        try {
+            if (Lampa.Player && typeof Lampa.Player.opened === 'function' && Lampa.Player.opened()) return false;
+        } catch (e) {}
+        return true;
+    }
+
+    /** Подождать, пока приложение активно и не идёт просмотр */
+    function whenIdle(fn, wait) {
+        setTimeout(function () {
+            if (idle()) fn();
+            else whenIdle(fn, WARM.idleCheck);
+        }, wait);
+    }
+
+    /** Один запрос: есть ли результаты. cb(true/false) или cb(null) при ошибке */
+    function probe(type, studio, key, cb) {
+        Lampa.Api.sources.tmdb.get(sortUrl(type, studioFilter(studio), key, studioOpt(studio)), {}, function (json) {
+            warm.pause = 0;
+            cb(!!(json && json.results && json.results.length));
+        }, function () {
+            warm.pause = warm.pause ? Math.min(warm.pause * 2, WARM.maxBackoff) : WARM.backoff;
+            cb(null);
+        }, false);
+    }
+
+    /** Проверить одну студию (запросы по одному, с паузой). done() по завершении */
+    function checkStudio(studio, done) {
         var result = {};
-        var left = 0;
+        var failed = false;
+        var types = studio.types.slice();
 
-        types.forEach(function (type) {
+        function nextType() {
+            var type = types.shift();
+
+            if (!type) {
+                if (!failed) saveAvailable(studioKey(studio), result);
+                return done();
+            }
+
             result[type] = [];
-            SORTS.forEach(function (sort) {
-                if (sort.movieOnly && type !== 'movie') return;
-                left++;
+
+            // 1) есть ли у типа хоть что-то (= «Много голосов» без порогов)
+            probe(type, studio, 'votes', function (any) {
+                if (any === null) failed = true;
+
+                if (any === false) return whenIdle(nextType, WARM.delay);
+
+                // ошибка — пункты не прячем; есть данные — votes и revenue заведомо непусты
+                var keys = SORTS.filter(function (s) {
+                    return !s.movieOnly || type === 'movie';
+                }).map(function (s) { return s.key; });
+
+                var ask = keys.filter(function (k) { return k === 'new' || k === 'popular' || k === 'rating'; });
+                var found = keys.filter(function (k) { return ask.indexOf(k) < 0; });
+
+                if (any === null) {
+                    result[type] = keys;
+                    return whenIdle(nextType, warm.pause || WARM.delay);
+                }
+
+                (function nextKey() {
+                    var key = ask.shift();
+
+                    if (!key) {
+                        // порядок пунктов — как в SORTS
+                        result[type] = keys.filter(function (k) { return found.indexOf(k) >= 0; });
+                        return whenIdle(nextType, WARM.delay);
+                    }
+
+                    whenIdle(function () {
+                        probe(type, studio, key, function (ok) {
+                            if (ok === null) failed = true;
+                            if (ok !== false) found.push(key);
+                            nextKey();
+                        });
+                    }, warm.pause || WARM.delay);
+                })();
             });
-        });
-
-        function done(type, key, ok, error) {
-            if (error) failed = true;
-            if (ok) result[type].push(key);
-            if (--left) return;
-
-            // порядок пунктов — как в SORTS
-            types.forEach(function (tp) {
-                result[tp] = SORTS.map(function (s) { return s.key; }).filter(function (k) {
-                    return result[tp].indexOf(k) >= 0;
-                });
-            });
-
-            if (!failed) saveAvailable(cacheKey, result);
-            callback(result);
         }
 
-        types.forEach(function (type) {
-            SORTS.forEach(function (sort) {
-                if (sort.movieOnly && type !== 'movie') return;
+        nextType();
+    }
 
-                tmdb.get(sortUrl(type, filter, sort.key, opt), {}, function (json) {
-                    done(type, sort.key, !!(json && json.results && json.results.length));
-                }, function () {
-                    done(type, sort.key, true, true);
-                }, { life: 60 * 24 * 30 });
-            });
+    /** Студия без свежего итога — в начало очереди (например, её только что открыли) */
+    function prioritize(studio) {
+        var key = studioKey(studio);
+
+        warm.queue = warm.queue.filter(function (s) { return studioKey(s) !== key; });
+        warm.queue.unshift(studio);
+    }
+
+    function runQueue() {
+        if (warm.busy) return;
+
+        var studio = warm.queue.shift();
+        if (!studio) return;
+
+        // за время ожидания мог появиться свежий итог
+        if (readAvailable(studioKey(studio))) return runQueue();
+
+        warm.busy = true;
+
+        checkStudio(studio, function () {
+            warm.busy = false;
+            whenIdle(runQueue, warm.pause || WARM.delay);
         });
     }
 
-    function loading(status) {
-        try {
-            if (status) Lampa.Loading.start();
-            else Lampa.Loading.stop();
-        } catch (e) {}
+    /** Фоновый проход по студиям без свежего итога — один раз за запуск */
+    function warmUp() {
+        if (warm.started) return;
+        warm.started = true;
+
+        warm.queue = STUDIOS.filter(function (studio) {
+            return !readAvailable(studioKey(studio));
+        });
+
+        if (warm.queue.length) whenIdle(runQueue, WARM.startDelay);
     }
 
     function assign(target, src) {
@@ -512,31 +614,30 @@
      * ===================================================================== */
 
     /**
-     * Студия: перед меню проверяем, какие типы и сортировки не пустые, и
-     * показываем только их. «Новинки» считаются по скользящему окну дат,
-     * поэтому проверка при открытии, а не зашитый список.
+     * Студия: если фоновая проверка уже была — показываем только непустые
+     * типы и сортировки, иначе все варианты сразу (и проверяем её первой).
      */
     function openStudio(studio) {
-        var filter = 'with_companies=' + studio.ids.join('|');
-        var opt = { ratingVotes: studio.group === 'rus' ? 10 : null };
+        var available = readAvailable(studioKey(studio));
+        var opt = studioOpt(studio);
 
-        loading(true);
+        if (!available) {
+            // проверки ещё не было — все варианты сразу, а студию проверим первой
+            prioritize(studio);
+            if (warm.started && !warm.busy) whenIdle(runQueue, WARM.delay);
+            return showTypes(studio.title, studio.types, studioFilter(studio), opt);
+        }
 
-        checkAvailable('studio_' + studio.ids.join('_'), studio.types, filter, opt, function (available) {
-            loading(false);
-            Lampa.Controller.toggle('content');
-
-            var types = studio.types.filter(function (type) {
-                return available[type] && available[type].length;
-            });
-
-            if (!types.length) {
-                Lampa.Noty.show(t('surs_studio_empty'));
-                return;
-            }
-
-            showTypes(studio.title, types, filter, assign({ available: available }, opt));
+        var types = studio.types.filter(function (type) {
+            return available[type] && available[type].length;
         });
+
+        if (!types.length) {
+            Lampa.Noty.show(t('surs_studio_empty'));
+            return;
+        }
+
+        showTypes(studio.title, types, studioFilter(studio), assign({ available: available }, opt));
     }
 
     function studiosRow(group, titleKey) {
@@ -643,6 +744,9 @@
 
         addStyles();
         register();
+
+        // фоновая проверка студий — при загрузке скрипта (старт через WARM.startDelay)
+        warmUp();
 
         // совместимость с API v3
         function buttons(list) {
