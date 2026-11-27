@@ -46,7 +46,8 @@
         surs_ny_title:       { ru: 'Новогодние каникулы', en: 'New Year holidays', uk: 'Новорічні канікули' },
         surs_ny_collection:  { ru: 'Коллекция', en: 'Collection', uk: 'Колекція' },
         surs_ny_russian:     { ru: 'Российские новогодние фильмы', en: 'Russian New Year movies', uk: 'Російські новорічні фільми' },
-        surs_ny_soviet:      { ru: 'Советская новогодняя классика', en: 'Soviet New Year classics', uk: 'Радянська новорічна класика' },
+        surs_ny_soviet:      { ru: 'Советская классика на праздники', en: 'Soviet classics for the holidays', uk: 'Радянська класика на свята' },
+        surs_ny_hits:        { ru: 'Хиты прошлых каникул', en: 'Last holidays\' hits', uk: 'Хіти минулих канікул' },
         surs_ny_christmas:   { ru: 'Рождественские фильмы', en: 'Christmas movies', uk: 'Різдвяні фільми' },
         surs_ny_family:      { ru: 'Семейные новогодние комедии', en: 'Family holiday comedies', uk: 'Сімейні новорічні комедії' },
         surs_ny_animation:   { ru: 'Новогодние мультфильмы', en: 'Holiday cartoons', uk: 'Новорічні мультфільми' },
@@ -87,31 +88,72 @@
     }
 
     /**
+     * Подборки из того, что в России смотрят на новогодних каникулах.
+     * id проверены по TMDB (ноябрь 2026):
+     *  HITS   — топ Кинопоиска за каникулы 31.12.2025–11.01.2026 и «Мажор. Фильм» —
+     *           рекорд КиноПоиск HD за прошлые каникулы;
+     *  SOVIET — классика, которую пересматривают каждый Новый год (опросы КИОНа,
+     *           поиск Иви в новогоднюю ночь: «Ирония судьбы», «Морозко», «Девчата»,
+     *           «Служебный роман»…).
+     */
+    var HITS = [
+        ['movie', 1533843], // Невероятные приключения Шурика (2025)
+        ['movie', 1228477], // Чебурашка 2 (2026)
+        ['movie', 1259232], // Горыныч (2025)
+        ['movie', 1417539], // Алиса в Стране Чудес (2025)
+        ['movie', 1419300], // Ёлки 12 (2025)
+        ['tv', 64446],      // Метод
+        ['tv', 256467],     // Ландыши (2025)
+        ['movie', 761332]   // Мажор. Фильм (2021)
+    ];
+
+    var SOVIET = [
+        ['movie', 43430],   // Ирония судьбы, или С лёгким паром!
+        ['movie', 20803],   // Иван Васильевич меняет профессию
+        ['movie', 20932],   // Морозко
+        ['movie', 63258],   // Карнавальная ночь
+        ['movie', 41977],   // Чародеи
+        ['movie', 20871],   // Джентльмены удачи
+        ['movie', 31139],   // Служебный роман
+        ['movie', 20975],   // Девчата
+        ['movie', 20875],   // Операция «Ы» и другие приключения Шурика
+        ['movie', 20873],   // Бриллиантовая рука
+        ['movie', 20878],   // Кавказская пленница
+        ['movie', 21028]    // Москва слезам не верит
+    ];
+
+    /**
      * Ряды страницы, сверху вниз. type:
      *  collection — коллекция TMDB по названию (queries — варианты названия);
+     *  list       — фильмы и сериалы по id TMDB (items — [тип, id]);
      *  discover   — discover/{media} с ключевыми словами (keywords — группы из KEYWORDS,
      *               объединяются через «или») и доп. параметрами.
      */
     function rows() {
         return [
             { type: 'collection', queries: ['Harry Potter'], prefix: true },
+            { type: 'list', title: 'surs_ny_hits', items: HITS },
+            { type: 'collection', queries: ['Home Alone'], prefix: true },
+            { type: 'list', title: 'surs_ny_soviet', items: SOVIET },
             { type: 'discover', title: 'surs_ny_russian', media: 'movie', keywords: ['newyear', 'christmas', 'santa'],
               params: 'with_origin_country=RU&sort_by=vote_count.desc&vote_count.gte=5' },
+            { type: 'collection', queries: ['Ёлки', 'Yolki'], prefix: true },
             { type: 'discover', title: 'surs_ny_christmas', media: 'movie', keywords: ['christmas'],
               params: 'sort_by=popularity.desc&vote_count.gte=300' },
-            { type: 'collection', queries: ['Home Alone'], prefix: true },
-            { type: 'discover', title: 'surs_ny_soviet', media: 'movie', keywords: ['newyear', 'christmas', 'santa'],
-              params: 'with_origin_country=SU&sort_by=vote_count.desc&vote_count.gte=5' },
+            { type: 'collection', queries: ['Последний богатырь', 'The Last Warrior'], prefix: true },
             { type: 'discover', title: 'surs_ny_animation', media: 'movie', keywords: ['christmas', 'newyear', 'santa'],
               params: 'with_genres=' + GENRES.animation + '&sort_by=vote_count.desc&vote_count.gte=50' },
-            { type: 'collection', queries: ['Ёлки', 'Yolki'], prefix: true },
+            { type: 'collection', queries: ['Три богатыря'], prefix: true },
             { type: 'discover', title: 'surs_ny_family', media: 'movie', keywords: ['christmas', 'newyear'],
               params: 'with_genres=' + GENRES.family + ',' + GENRES.comedy + '&sort_by=vote_count.desc&vote_count.gte=100' },
+            { type: 'collection', queries: ['Холоп'], prefix: true },
             { type: 'collection', queries: ['The Santa Clause'], prefix: true },
             { type: 'discover', title: 'surs_ny_series', media: 'tv', keywords: ['christmas', 'newyear', 'santa'],
               params: 'sort_by=vote_count.desc&vote_count.gte=20' },
+            { type: 'collection', queries: ['Чебурашка'], prefix: true },
             { type: 'discover', title: 'surs_ny_winter', media: 'movie', keywords: ['winter'],
               params: 'with_genres=' + GENRES.fantasy + '|' + GENRES.family + '&sort_by=vote_count.desc&vote_count.gte=100' },
+            { type: 'collection', queries: ['Иван Царевич и Серый волк'], prefix: true },
             { type: 'collection', queries: ['The Chronicles of Narnia', 'Narnia'], prefix: true },
             { type: 'discover', title: 'surs_ny_romance', media: 'movie', keywords: ['christmas', 'newyear'],
               params: 'with_genres=' + GENRES.romance + '&sort_by=vote_count.desc&vote_count.gte=50' },
@@ -198,6 +240,29 @@
         };
     }
 
+    /** Фильмы и сериалы по id: запросы параллельно, порядок как в списке, кеш 30 дней */
+    function listRow(owner, spec) {
+        return function (call) {
+            var results = [];
+            var left = spec.items.length;
+
+            spec.items.forEach(function (item, index) {
+                owner.get(item[0] + '/' + item[1], {}, function (json) {
+                    if (json && json.id && (json.poster_path || json.backdrop_path)) {
+                        json.source = 'tmdb';
+                        results[index] = json;
+                    }
+                    done();
+                }, done, { life: CONFIG.searchLife });
+            });
+
+            function done() {
+                if (--left) return;
+                call({ title: t(spec.title), results: results.filter(Boolean) });
+            }
+        };
+    }
+
     function collectionRow(owner, spec) {
         return function (call) {
             var queries = spec.queries.slice();
@@ -261,7 +326,9 @@
 
         source.main = function (params, oncomplite, onerror) {
             var parts = rows().map(function (spec) {
-                return spec.type === 'collection' ? collectionRow(source, spec) : discoverRow(source, spec);
+                if (spec.type === 'collection') return collectionRow(source, spec);
+                if (spec.type === 'list') return listRow(source, spec);
+                return discoverRow(source, spec);
             });
 
             var loadPart = function (partLoaded, partEmpty) {
@@ -291,12 +358,16 @@
      *  КНОПКА В НАВИГАЦИОННОМ РЯДУ SURS
      * ===================================================================== */
 
-    var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M12 2l1.1 2.2 2.4.3-1.8 1.6.5 2.4L12 7.3 9.8 8.5l.5-2.4-1.8-1.6 2.4-.3z" fill="#ffd23f" stroke="#ffd23f" stroke-width="1"/>' +
-        '<path d="M12 8.5l-4 5h2.2L7 17.5h3V21h4v-3.5h3l-3.2-4H16z"/>' +
-        '<circle cx="10.4" cy="14.8" r=".7" fill="#ff4d4d" stroke="none"/>' +
-        '<circle cx="13.8" cy="16.6" r=".7" fill="#4dc3ff" stroke="none"/>' +
-        '<circle cx="12.6" cy="12.4" r=".6" fill="#ffd23f" stroke="none"/>' +
+    // новогодний шарик: петелька, колпачок, шар с узором
+    var ICON = '<svg viewBox="2 0.4 20 23.8" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M10.2 2.6a1.8 1.8 0 0 1 3.6 0" stroke="#ffd23f" stroke-width="1.6" stroke-linecap="round"/>' +
+        '<rect x="9.3" y="2.9" width="5.4" height="2.8" rx=".7" fill="#ffd23f"/>' +
+        '<circle cx="12" cy="14.2" r="8.8" stroke="#ffffff" stroke-width="2"/>' +
+        '<path d="M3.9 11.3c2.6 1.7 5.3 1.7 8.1 0s5.5-1.7 8.1 0" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>' +
+        '<path d="M3.9 17.1c2.6-1.7 5.3-1.7 8.1 0s5.5 1.7 8.1 0" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>' +
+        '<circle cx="7.6" cy="14.2" r="1.25" fill="#ff4d4d"/>' +
+        '<circle cx="12" cy="14.2" r="1.25" fill="#ffd23f"/>' +
+        '<circle cx="16.4" cy="14.2" r="1.25" fill="#4dc3ff"/>' +
         '</svg>';
 
     function inSeason() {
