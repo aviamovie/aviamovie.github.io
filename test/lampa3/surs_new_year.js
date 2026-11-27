@@ -43,7 +43,7 @@
      * ===================================================================== */
 
     Lampa.Lang.add({
-        surs_ny_button:      { ru: 'Новый год', en: 'New Year', uk: 'Новий рік' },
+        surs_ny_button:      { ru: 'Новогодние каникулы', en: 'New Year holidays', uk: 'Новорічні канікули' },
         surs_ny_title:       { ru: 'Новогодние каникулы', en: 'New Year holidays', uk: 'Новорічні канікули' },
         surs_ny_collection:  { ru: 'Коллекция', en: 'Collection', uk: 'Колекція' },
         surs_ny_russian:     { ru: 'Российские новогодние фильмы', en: 'Russian New Year movies', uk: 'Російські новорічні фільми' },
@@ -245,10 +245,8 @@
             { type: 'collection', id: 85943, prefix: true },                // Ночь в музее
             { type: 'collection', id: 527439, prefix: true },               // Мэри Поппинс
             { type: 'collection', id: 435259, name: 'Фантастические твари', prefix: true },
-            { type: 'collection', id: 529, prefix: true },                  // Уоллес и Громит
             // …и романтические
             { type: 'collection', id: 526203, prefix: true },               // Принц на Рождество
-            { type: 'collection', id: 713330, name: 'На месте принцессы', prefix: true },
             { type: 'collection', id: 8936, prefix: true },                 // Бриджит Джонс
             { type: 'discover', title: 'surs_ny_fresh', media: 'movie', keywords: ['christmas', 'newyear'],
               params: 'primary_release_date.gte=' + isoDate(365 * 2) + '&primary_release_date.lte=' + isoDate(0) + '&sort_by=popularity.desc&vote_count.gte=10' }
