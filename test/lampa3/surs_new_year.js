@@ -34,7 +34,8 @@
         season: { from: '12-01', to: '01-15' },  // ММ-ДД, через Новый год
         partsLimit: 6,            // рядов за одну порцию загрузки
         cacheLife: 60 * 24,       // кеш выдачи — сутки (минуты)
-        searchLife: 60 * 24 * 30  // кеш поиска коллекций и ключевых слов — 30 суток
+        searchLife: 60 * 24 * 30, // кеш поиска коллекций и ключевых слов — 30 суток
+        snow: true                // снег на странице (в простом интерфейсе — нет)
     };
 
     /* =====================================================================
@@ -49,10 +50,10 @@
         surs_ny_soviet:      { ru: 'Советская классика на праздники', en: 'Soviet classics for the holidays', uk: 'Радянська класика на свята' },
         surs_ny_soviet_ny:   { ru: 'Советские новогодние фильмы', en: 'Soviet New Year movies', uk: 'Радянські новорічні фільми' },
         surs_ny_christmas:   { ru: 'Рождественские фильмы', en: 'Christmas movies', uk: 'Різдвяні фільми' },
-        surs_ny_family:      { ru: 'Семейные новогодние комедии', en: 'Family holiday comedies', uk: 'Сімейні новорічні комедії' },
+        surs_ny_world_family:  { ru: 'Семейная рождественская классика мира', en: 'Family Christmas classics', uk: 'Сімейна різдвяна класика світу' },
+        surs_ny_world_romance: { ru: 'Рождественские романтические комедии', en: 'Christmas romantic comedies', uk: 'Різдвяні романтичні комедії' },
         surs_ny_animation:   { ru: 'Новогодние мультфильмы', en: 'Holiday cartoons', uk: 'Новорічні мультфільми' },
         surs_ny_winter:      { ru: 'Зимние сказки', en: 'Winter fairy tales', uk: 'Зимові казки' },
-        surs_ny_romance:     { ru: 'Рождественская романтика', en: 'Christmas romance', uk: 'Різдвяна романтика' },
         surs_ny_fresh:       { ru: 'Новые рождественские фильмы', en: 'New Christmas movies', uk: 'Нові різдвяні фільми' },
         surs_ny_marathon:    { ru: 'Марафон на каникулы', en: 'Holiday marathon', uk: 'Марафон на канікули' }
     });
@@ -155,13 +156,54 @@
         21028  // Москва слезам не верит
     ];
 
+    /**
+     * Что смотрят на Рождество и Новый год в других странах (США, Великобритания,
+     * Европа) — семейное и романтическое. id проверены по TMDB (ноябрь 2026).
+     */
+    var WORLD_FAMILY = [
+        10719,  // Эльф
+        5255,   // Полярный экспресс
+        508965, // Клаус
+        51052,  // Секретная служба Санта-Клауса (Arthur Christmas)
+        10437,  // Рождественская сказка Маппетов
+        1585,   // Эта замечательная жизнь
+        8871,   // Гринч — похититель Рождества (2000)
+        360920, // Гринч (2018)
+        9479,   // Кошмар перед Рождеством
+        5825,   // Рождественские каникулы
+        10510,  // Чудо на 34-й улице
+        17979,  // Рождественская история (2009)
+        5375,   // Фред Клаус, брат Санты
+        454467, // Николь (Noelle)
+        13673,  // Рождество с неудачниками
+        9745    // Джек Фрост
+    ];
+
+    var WORLD_ROMANCE = [
+        508,    // Реальная любовь
+        1581,   // Отпуск по обмену
+        549053, // Рождество на двоих (Last Christmas)
+        12193,  // Четыре Рождества
+        9778,   // Интуиция (Serendipity)
+        2064,   // Пока ты спал
+        9043,   // Привет семье!
+        520172, // Самый счастливый сезон
+        615665, // Пара на праздники (Holidate)
+        833097, // Незабываемое Рождество
+        295151, // Пусть идёт снег
+        810873, // Компания на праздники
+        734265, // Неуловимый аромат любви
+        555850  // Праздничный календарь
+    ];
+
     function movies(ids) {
         return ids.map(function (id) { return ['movie', id]; });
     }
 
     /**
      * Ряды страницы (порядок перемешивается при каждом открытии). type:
-     *  collection — коллекция TMDB по названию (queries — варианты названия);
+     *  collection — коллекция TMDB: id (надёжно) или queries — варианты названия;
+     *               name — своё название вместо названия TMDB;
      *  list       — фильмы по id TMDB (items — [тип, id]; limit — сколько
      *               случайных взять за открытие, без него — все по порядку);
      *  discover   — discover/{media} с ключевыми словами (keywords — группы из KEYWORDS,
@@ -181,19 +223,33 @@
             { type: 'discover', title: 'surs_ny_animation', media: 'movie', keywords: ['christmas', 'newyear', 'santa'],
               params: 'with_genres=' + GENRES.animation + '&sort_by=vote_count.desc&vote_count.gte=50' },
             { type: 'collection', queries: ['Три богатыря'], prefix: true },
-            { type: 'discover', title: 'surs_ny_family', media: 'movie', keywords: ['christmas', 'newyear'],
-              params: 'with_genres=' + GENRES.family + ',' + GENRES.comedy + '&sort_by=vote_count.desc&vote_count.gte=100' },
+            { type: 'list', title: 'surs_ny_world_family', items: movies(WORLD_FAMILY), limit: WORLD_FAMILY.length },
             { type: 'collection', queries: ['Холоп'], prefix: true },
             { type: 'collection', queries: ['Чебурашка'], prefix: true },
             { type: 'discover', title: 'surs_ny_winter', media: 'movie', keywords: ['winter'],
               params: 'with_genres=' + GENRES.fantasy + '|' + GENRES.family + '&sort_by=vote_count.desc&vote_count.gte=100' },
             { type: 'collection', queries: ['Иван Царевич и Серый волк'], prefix: true },
             { type: 'collection', queries: ['The Chronicles of Narnia', 'Narnia'], prefix: true },
-            { type: 'discover', title: 'surs_ny_romance', media: 'movie', keywords: ['christmas', 'newyear'],
-              params: 'with_genres=' + GENRES.romance + '&sort_by=vote_count.desc&vote_count.gte=50' },
+            { type: 'list', title: 'surs_ny_world_romance', items: movies(WORLD_ROMANCE), limit: WORLD_ROMANCE.length },
             { type: 'collection', queries: ['Frozen'], prefix: true },
             { type: 'collection', queries: ['The Lord of the Rings'], title: 'surs_ny_marathon' },
             { type: 'collection', queries: ['The Hobbit'], title: 'surs_ny_marathon' },
+
+            // зарубежные коллекции на каникулы: семейные…
+            { type: 'collection', id: 488924, prefix: true },               // Приключения Паддингтона
+            { type: 'collection', id: 743824, prefix: true },               // Рождественские хроники
+            { type: 'collection', id: 239595, name: 'Лучшее Рождество', prefix: true }, // Nativity!
+            { type: 'collection', id: 307637, prefix: true },               // Подарок на Рождество
+            { type: 'collection', id: 201873, prefix: true },               // Рождественская история (A Christmas Story)
+            { type: 'collection', id: 99727, prefix: true },                // Стюарт Литтл
+            { type: 'collection', id: 85943, prefix: true },                // Ночь в музее
+            { type: 'collection', id: 527439, prefix: true },               // Мэри Поппинс
+            { type: 'collection', id: 435259, name: 'Фантастические твари', prefix: true },
+            { type: 'collection', id: 529, prefix: true },                  // Уоллес и Громит
+            // …и романтические
+            { type: 'collection', id: 526203, prefix: true },               // Принц на Рождество
+            { type: 'collection', id: 713330, name: 'На месте принцессы', prefix: true },
+            { type: 'collection', id: 8936, prefix: true },                 // Бриджит Джонс
             { type: 'discover', title: 'surs_ny_fresh', media: 'movie', keywords: ['christmas', 'newyear'],
               params: 'primary_release_date.gte=' + isoDate(365 * 2) + '&primary_release_date.lte=' + isoDate(0) + '&sort_by=popularity.desc&vote_count.gte=10' }
         ];
@@ -312,7 +368,37 @@
 
     function collectionRow(owner, spec) {
         return function (call) {
-            var queries = spec.queries.slice();
+            var queries = (spec.queries || []).slice();
+
+            function load(found) {
+                owner.get('collection/' + found.id, {}, function (collection) {
+                    var today = isoDate(0);
+                    // только вышедшие части (без анонсов вроде «Холодное сердце 3»)
+                    var parts = withPictures(collection && collection.parts).filter(function (p) {
+                        return p.release_date && p.release_date <= today;
+                    }).sort(function (a, b) {
+                        return (a.release_date || '9999') < (b.release_date || '9999') ? -1 : 1;
+                    });
+
+                    if (parts.length < 2) return call(EMPTY());
+
+                    parts.forEach(function (p) { if (!p.source) p.source = 'tmdb'; });
+
+                    // «Гарри Поттер (Коллекция)» → «Гарри Поттер»
+                    var name = spec.name || String(collection.name || found.name || '')
+                        .replace(/\s*\((коллекция|колекція|collection)\)\s*$/i, '')
+                        .replace(/\s+(collection|коллекция)\s*$/i, '');
+
+                    call({
+                        title: spec.title ? t(spec.title) + ': ' + name : t('surs_ny_collection') + ': ' + name,
+                        results: parts
+                    });
+                }, function () {
+                    call(EMPTY());
+                }, { life: CONFIG.searchLife });
+            }
+
+            if (spec.id) return load({ id: spec.id });
 
             function next() {
                 var query = queries.shift();
@@ -321,32 +407,7 @@
                 owner.get('search/collection?query=' + encodeURIComponent(query), {}, function (json) {
                     var found = json && json.results && json.results[0];
                     if (!found) return next();
-
-                    owner.get('collection/' + found.id, {}, function (collection) {
-                        var today = isoDate(0);
-                        // только вышедшие части (без анонсов вроде «Холодное сердце 3»)
-                        var parts = withPictures(collection && collection.parts).filter(function (p) {
-                            return p.release_date && p.release_date <= today;
-                        }).sort(function (a, b) {
-                            return (a.release_date || '9999') < (b.release_date || '9999') ? -1 : 1;
-                        });
-
-                        if (parts.length < 2) return call(EMPTY());
-
-                        parts.forEach(function (p) { if (!p.source) p.source = 'tmdb'; });
-
-                        // «Гарри Поттер (Коллекция)» → «Гарри Поттер»
-                        var name = String(collection.name || found.name || '')
-                            .replace(/\s*\((коллекция|колекція|collection)\)\s*$/i, '')
-                            .replace(/\s+(collection|коллекция)\s*$/i, '');
-
-                        call({
-                            title: spec.title ? t(spec.title) + ': ' + name : t('surs_ny_collection') + ': ' + name,
-                            results: parts
-                        });
-                    }, function () {
-                        call(EMPTY());
-                    }, { life: CONFIG.searchLife });
+                    load(found);
                 }, function () {
                     next();
                 }, { life: CONFIG.searchLife });
@@ -406,15 +467,17 @@
      * ===================================================================== */
 
     // новогодний шарик: петелька, колпачок, шар с узором
+    // красный новогодний шарик: золотые петелька и колпачок, белый узор, блик
     var ICON = '<svg viewBox="2 0.4 20 23.8" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         '<path d="M10.2 2.6a1.8 1.8 0 0 1 3.6 0" stroke="#ffd23f" stroke-width="1.6" stroke-linecap="round"/>' +
         '<rect x="9.3" y="2.9" width="5.4" height="2.8" rx=".7" fill="#ffd23f"/>' +
-        '<circle cx="12" cy="14.2" r="8.8" stroke="#ffffff" stroke-width="2"/>' +
-        '<path d="M3.9 11.3c2.6 1.7 5.3 1.7 8.1 0s5.5-1.7 8.1 0" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>' +
-        '<path d="M3.9 17.1c2.6-1.7 5.3-1.7 8.1 0s5.5 1.7 8.1 0" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>' +
-        '<circle cx="7.6" cy="14.2" r="1.25" fill="#ff4d4d"/>' +
-        '<circle cx="12" cy="14.2" r="1.25" fill="#ffd23f"/>' +
-        '<circle cx="16.4" cy="14.2" r="1.25" fill="#4dc3ff"/>' +
+        '<circle cx="12" cy="14.2" r="8.8" fill="#e53935" stroke="#ff8a80" stroke-width="1"/>' +
+        '<path d="M3.6 11.4c2.7 1.6 5.5 1.6 8.4 0s5.7-1.6 8.4 0" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>' +
+        '<path d="M3.6 17c2.7-1.6 5.5-1.6 8.4 0s5.7 1.6 8.4 0" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>' +
+        '<circle cx="7.6" cy="14.2" r="1.2" fill="#ffd23f"/>' +
+        '<circle cx="12" cy="14.2" r="1.2" fill="#ffffff"/>' +
+        '<circle cx="16.4" cy="14.2" r="1.2" fill="#ffd23f"/>' +
+        '<path d="M7.4 8.6a6.2 6.2 0 0 1 3-1.6" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>' +
         '</svg>';
 
     function inSeason() {
@@ -449,6 +512,78 @@
     }
 
     /* =====================================================================
+     *  СНЕГ НА СТРАНИЦЕ
+     *  Лёгкий: SNOW.count снежинок — точки из CSS, анимация только transform
+     *  (её считает видеокарта, без JS-цикла и перерисовки страницы).
+     *  Слой — внутри страницы: уходит вместе с ней, под меню и плеером не виден.
+     *  Нет в простом интерфейсе («Для старых устройств») и при CONFIG.snow = false.
+     * ===================================================================== */
+
+    var SNOW = { count: 28, minSize: 4, maxSize: 9, minTime: 9, maxTime: 20 };
+    var snowStyles = false;
+
+    function snowAllowed() {
+        if (!CONFIG.snow) return false;
+        if (Lampa.Storage.get('surs_simple_interface', 'full') === 'simple') return false;
+        return true;
+    }
+
+    function addSnowStyles() {
+        if (snowStyles) return;
+        snowStyles = true;
+
+        var style = document.createElement('style');
+        style.textContent = [
+            '.surs-snow{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;pointer-events:none;z-index:5}',
+            '.surs-snow i{position:absolute;top:-2%;display:block;border-radius:50%;background:#fff;will-change:transform;',
+            '-webkit-animation:surs-snow-a linear infinite;animation:surs-snow-a linear infinite}',
+            '.surs-snow i.b{-webkit-animation-name:surs-snow-b;animation-name:surs-snow-b}',
+            '@-webkit-keyframes surs-snow-a{from{-webkit-transform:translate3d(0,-10vh,0)}to{-webkit-transform:translate3d(6vw,105vh,0)}}',
+            '@keyframes surs-snow-a{from{transform:translate3d(0,-10vh,0)}to{transform:translate3d(6vw,105vh,0)}}',
+            '@-webkit-keyframes surs-snow-b{from{-webkit-transform:translate3d(0,-10vh,0)}to{-webkit-transform:translate3d(-6vw,105vh,0)}}',
+            '@keyframes surs-snow-b{from{transform:translate3d(0,-10vh,0)}to{transform:translate3d(-6vw,105vh,0)}}'
+        ].join('');
+        document.head.appendChild(style);
+    }
+
+    function rnd(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    function addSnow(layer) {
+        if (!layer || !snowAllowed() || layer.querySelector('.surs-snow')) return;
+
+        addSnowStyles();
+
+        var box = document.createElement('div');
+        box.className = 'surs-snow';
+
+        var html = '';
+        for (var i = 0; i < SNOW.count; i++) {
+            var size = rnd(SNOW.minSize, SNOW.maxSize).toFixed(1);
+            var time = rnd(SNOW.minTime, SNOW.maxTime).toFixed(1);
+            var delay = rnd(0, time).toFixed(1);
+            html += '<i class="' + (i % 2 ? 'b' : '') + '" style="left:' + rnd(0, 100).toFixed(1) + '%;width:' + size + 'px;height:' + size + 'px;' +
+                'opacity:' + rnd(0.35, 0.9).toFixed(2) + ';' +
+                '-webkit-animation-duration:' + time + 's;animation-duration:' + time + 's;' +
+                // отрицательная задержка — снег сразу по всему экрану, а не «из-за верхнего края»
+                '-webkit-animation-delay:-' + delay + 's;animation-delay:-' + delay + 's"></i>';
+        }
+        box.innerHTML = html;
+
+        layer.appendChild(box);
+    }
+
+    function followSnow() {
+        Lampa.Listener.follow('activity', function (e) {
+            if (e.type !== 'start' || !e.object || e.object.source !== CONFIG.source) return;
+            try {
+                addSnow(e.object.activity && e.object.activity.render(true));
+            } catch (err) {}
+        });
+    }
+
+    /* =====================================================================
      *  ЗАПУСК
      * ===================================================================== */
 
@@ -459,6 +594,8 @@
         }
 
         if (inSeason()) addNavButton();
+
+        followSnow();
 
         // API для других плагинов и отладки
         window.surs_new_year = { open: openPage, rows: rows };
