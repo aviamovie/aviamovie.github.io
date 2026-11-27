@@ -47,11 +47,10 @@
         surs_ny_collection:  { ru: 'Коллекция', en: 'Collection', uk: 'Колекція' },
         surs_ny_russian:     { ru: 'Российские новогодние фильмы', en: 'Russian New Year movies', uk: 'Російські новорічні фільми' },
         surs_ny_soviet:      { ru: 'Советская классика на праздники', en: 'Soviet classics for the holidays', uk: 'Радянська класика на свята' },
-        surs_ny_hits:        { ru: 'Хиты прошлых каникул', en: 'Last holidays\' hits', uk: 'Хіти минулих канікул' },
+        surs_ny_soviet_ny:   { ru: 'Советские новогодние фильмы', en: 'Soviet New Year movies', uk: 'Радянські новорічні фільми' },
         surs_ny_christmas:   { ru: 'Рождественские фильмы', en: 'Christmas movies', uk: 'Різдвяні фільми' },
         surs_ny_family:      { ru: 'Семейные новогодние комедии', en: 'Family holiday comedies', uk: 'Сімейні новорічні комедії' },
         surs_ny_animation:   { ru: 'Новогодние мультфильмы', en: 'Holiday cartoons', uk: 'Новорічні мультфільми' },
-        surs_ny_series:      { ru: 'Новогодние сериалы и спецвыпуски', en: 'Holiday series and specials', uk: 'Новорічні серіали та спецвипуски' },
         surs_ny_winter:      { ru: 'Зимние сказки', en: 'Winter fairy tales', uk: 'Зимові казки' },
         surs_ny_romance:     { ru: 'Рождественская романтика', en: 'Christmas romance', uk: 'Різдвяна романтика' },
         surs_ny_fresh:       { ru: 'Новые рождественские фильмы', en: 'New Christmas movies', uk: 'Нові різдвяні фільми' },
@@ -88,55 +87,93 @@
     }
 
     /**
-     * Подборки из того, что в России смотрят на новогодних каникулах.
-     * id проверены по TMDB (ноябрь 2026):
-     *  HITS   — топ Кинопоиска за каникулы 31.12.2025–11.01.2026 и «Мажор. Фильм» —
-     *           рекорд КиноПоиск HD за прошлые каникулы;
-     *  SOVIET — классика, которую пересматривают каждый Новый год (опросы КИОНа,
-     *           поиск Иви в новогоднюю ночь: «Ирония судьбы», «Морозко», «Девчата»,
-     *           «Служебный роман»…).
+     * Подборки по рейтингу Кинопоиска «Лучшие российские и советские фильмы
+     * про Новый год и Рождество» и тому, что пересматривают на праздниках.
+     * id проверены по TMDB (ноябрь 2026): название, год, режиссёр.
+     * Не вошли: «Юбилей» (2007 — в TMDB нет), «Лузер», «Убить карпа»,
+     * «Дед Мороз поневоле» (в TMDB без постера), «Ёлки» и «Ёлки 2» — есть коллекция.
      */
-    var HITS = [
-        ['movie', 1533843], // Невероятные приключения Шурика (2025)
-        ['movie', 1228477], // Чебурашка 2 (2026)
-        ['movie', 1259232], // Горыныч (2025)
-        ['movie', 1417539], // Алиса в Стране Чудес (2025)
-        ['movie', 1419300], // Ёлки 12 (2025)
-        ['tv', 64446],      // Метод
-        ['tv', 256467],     // Ландыши (2025)
-        ['movie', 761332]   // Мажор. Фильм (2021)
+    var SOVIET_NY = [
+        43430,  // Ирония судьбы, или С лёгким паром!
+        83429,  // Вечера на хуторе близ Диканьки
+        20932,  // Морозко
+        41977,  // Чародеи
+        63258,  // Карнавальная ночь
+        65136,  // Старый Новый год
+        46588,  // Зигзаг удачи
+        66086,  // Новогодние приключения Маши и Вити
+        14493,  // Снежная королева (1966)
+        302436, // Снегурочка (1968)
+        65080,  // Эта весёлая планета
+        544375, // Снегурочку вызывали?
+        535512  // Похищение (в TMDB — «Новогоднее похищение», реж. Юрий Сааков)
     ];
 
-    var SOVIET = [
-        ['movie', 43430],   // Ирония судьбы, или С лёгким паром!
-        ['movie', 20803],   // Иван Васильевич меняет профессию
-        ['movie', 20932],   // Морозко
-        ['movie', 63258],   // Карнавальная ночь
-        ['movie', 41977],   // Чародеи
-        ['movie', 20871],   // Джентльмены удачи
-        ['movie', 31139],   // Служебный роман
-        ['movie', 20975],   // Девчата
-        ['movie', 20875],   // Операция «Ы» и другие приключения Шурика
-        ['movie', 20873],   // Бриллиантовая рука
-        ['movie', 20878],   // Кавказская пленница
-        ['movie', 21028]    // Москва слезам не верит
+    var RUSSIAN_NY = [
+        71662,   // Приходи на меня посмотреть
+        143056,  // Сирота казанская
+        465081,  // Невеста
+        57770,   // Бедная Саша
+        154662,  // Кушать подано!
+        152396,  // Железнодорожный романс
+        152155,  // Со мною вот что происходит
+        337690,  // Снежная любовь, или Сон в зимнюю ночь
+        62683,   // Мужчина в моей голове
+        50530,   // Тариф Новогодний
+        169127,  // Снежный ангел
+        133976,  // Француз
+        321345,  // Четвёртое желание
+        223205,  // Суженый-ряженый
+        614875,  // Моя мама Снегурочка
+        83456,   // О чём ещё говорят мужчины
+        65950,   // Глухарь. Приходи, Новый год!
+        434134,  // Президент и его внучка
+        523874,  // Ночь закрытых дверей
+        56549,   // Операция «С новым годом»
+        558171,  // Новогодние сваты
+        64063,   // Прощайте, доктор Фрейд
+        71348,   // Странное Рождество
+        1420601, // Кто приходит в зимний вечер
+        64061,   // С Новым годом, папа!
+        62681,   // Новогодний детектив
+        461617,  // 32 декабря
+        64057,   // Тушите свет
+        143055,  // Сверчок за очагом
+        137805,  // Ой, мороз, мороз!
+        625239   // Откройте, Дед Мороз!
     ];
+
+    // классика, которую пересматривают на праздниках (не про Новый год)
+    var SOVIET_CLASSICS = [
+        20803, // Иван Васильевич меняет профессию
+        20871, // Джентльмены удачи
+        31139, // Служебный роман
+        20975, // Девчата
+        20875, // Операция «Ы» и другие приключения Шурика
+        20873, // Бриллиантовая рука
+        20878, // Кавказская пленница
+        21028  // Москва слезам не верит
+    ];
+
+    function movies(ids) {
+        return ids.map(function (id) { return ['movie', id]; });
+    }
 
     /**
-     * Ряды страницы, сверху вниз. type:
+     * Ряды страницы (порядок перемешивается при каждом открытии). type:
      *  collection — коллекция TMDB по названию (queries — варианты названия);
-     *  list       — фильмы и сериалы по id TMDB (items — [тип, id]);
+     *  list       — фильмы по id TMDB (items — [тип, id]; limit — сколько
+     *               случайных взять за открытие, без него — все по порядку);
      *  discover   — discover/{media} с ключевыми словами (keywords — группы из KEYWORDS,
      *               объединяются через «или») и доп. параметрами.
      */
     function rows() {
         return [
             { type: 'collection', queries: ['Harry Potter'], prefix: true },
-            { type: 'list', title: 'surs_ny_hits', items: HITS },
             { type: 'collection', queries: ['Home Alone'], prefix: true },
-            { type: 'list', title: 'surs_ny_soviet', items: SOVIET },
-            { type: 'discover', title: 'surs_ny_russian', media: 'movie', keywords: ['newyear', 'christmas', 'santa'],
-              params: 'with_origin_country=RU&sort_by=vote_count.desc&vote_count.gte=5' },
+            { type: 'list', title: 'surs_ny_soviet_ny', items: movies(SOVIET_NY) },
+            { type: 'list', title: 'surs_ny_russian', items: movies(RUSSIAN_NY), limit: 20 },
+            { type: 'list', title: 'surs_ny_soviet', items: movies(SOVIET_CLASSICS) },
             { type: 'collection', queries: ['Ёлки', 'Yolki'], prefix: true },
             { type: 'discover', title: 'surs_ny_christmas', media: 'movie', keywords: ['christmas'],
               params: 'sort_by=popularity.desc&vote_count.gte=300' },
@@ -147,9 +184,6 @@
             { type: 'discover', title: 'surs_ny_family', media: 'movie', keywords: ['christmas', 'newyear'],
               params: 'with_genres=' + GENRES.family + ',' + GENRES.comedy + '&sort_by=vote_count.desc&vote_count.gte=100' },
             { type: 'collection', queries: ['Холоп'], prefix: true },
-            { type: 'collection', queries: ['The Santa Clause'], prefix: true },
-            { type: 'discover', title: 'surs_ny_series', media: 'tv', keywords: ['christmas', 'newyear', 'santa'],
-              params: 'sort_by=vote_count.desc&vote_count.gte=20' },
             { type: 'collection', queries: ['Чебурашка'], prefix: true },
             { type: 'discover', title: 'surs_ny_winter', media: 'movie', keywords: ['winter'],
               params: 'with_genres=' + GENRES.fantasy + '|' + GENRES.family + '&sort_by=vote_count.desc&vote_count.gte=100' },
@@ -163,6 +197,16 @@
             { type: 'discover', title: 'surs_ny_fresh', media: 'movie', keywords: ['christmas', 'newyear'],
               params: 'primary_release_date.gte=' + isoDate(365 * 2) + '&primary_release_date.lte=' + isoDate(0) + '&sort_by=popularity.desc&vote_count.gte=10' }
         ];
+    }
+
+    function shuffle(list) {
+        for (var i = list.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+        }
+        return list;
     }
 
     /* =====================================================================
@@ -244,11 +288,14 @@
     function listRow(owner, spec) {
         return function (call) {
             var results = [];
-            var left = spec.items.length;
+            var items = spec.limit ? shuffle(spec.items.slice()).slice(0, spec.limit) : spec.items;
+            var left = items.length;
 
-            spec.items.forEach(function (item, index) {
+            items.forEach(function (item, index) {
                 owner.get(item[0] + '/' + item[1], {}, function (json) {
                     if (json && json.id && (json.poster_path || json.backdrop_path)) {
+                        // нет русского названия — оригинальное («Тариф Новогодний»)
+                        if (!String(json.title || '').replace(/\s+/g, '') && json.original_title) json.title = json.original_title;
                         json.source = 'tmdb';
                         results[index] = json;
                     }
@@ -325,7 +372,7 @@
         source.discovery = false;
 
         source.main = function (params, oncomplite, onerror) {
-            var parts = rows().map(function (spec) {
+            var parts = shuffle(rows()).map(function (spec) {
                 if (spec.type === 'collection') return collectionRow(source, spec);
                 if (spec.type === 'list') return listRow(source, spec);
                 return discoverRow(source, spec);
